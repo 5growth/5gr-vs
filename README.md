@@ -9,11 +9,11 @@
 
 ### Required Libraries (should be manually installed)
 
-| Lib | REPOSITORY | INSTALL COMMAND |
+| Lib | REPOSITORY/FOLDER | INSTALL COMMAND |
 | ------ | ------ | ------ |
 | NFV IFA LIBS --dev_5growth-- | [README] (https://github.com/nextworks-it/nfv-ifa-libs/tree/dev_5growth) | mvn clean install |
 | SLICER IDENTITY MANAGEMENT --master-- | [README](https://github.com/nextworks-it/slicer-identity-mgmt) | mvn clean install |
-| NFVO DRIVERS --master-- | <5Growth-VS repo>/NFVO_DRIVERS | mvn clean install |
+| NFVO DRIVERS | NFVO_DRIVERS | mvn clean install |
 | SLICER CATALOGUE --5growth-release-- | [README](https://github.com/nextworks-it/slicer-catalogue/tree/5growth-release) | mvn clean install |
 
 
