@@ -15,13 +15,7 @@
 */
 package it.nextworks.nfvmano.sebastian.record.elements;
 
-import javax.persistence.ElementCollection;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -69,10 +63,8 @@ public class VerticalServiceInstance {
 	
 	private String networkSliceId;
 
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Fetch(FetchMode.SELECT)
-    @Cascade(org.hibernate.annotations.CascadeType.ALL)
+    @OneToMany
+	@MapKey(name="nssiId")
     private Map<String, NetworkSliceSubnetInstance> nssis = new HashMap<String, NetworkSliceSubnetInstance>();
 
 

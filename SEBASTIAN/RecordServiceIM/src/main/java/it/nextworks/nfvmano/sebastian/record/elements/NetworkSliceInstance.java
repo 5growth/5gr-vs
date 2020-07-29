@@ -18,6 +18,7 @@ package it.nextworks.nfvmano.sebastian.record.elements;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -78,6 +79,9 @@ public class NetworkSliceInstance {
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String nfvNsUrl;
+
+
+
 	
 	public NetworkSliceInstance() {	}
 
@@ -107,6 +111,7 @@ public class NetworkSliceInstance {
 		this.name = name;
 		this.description = description;
 		this.soManaged = soManaged;
+
 	}
 
 	public NfvNsInstantiationInfo getNsInstantiationInfo(boolean current) {
@@ -336,5 +341,6 @@ public class NetworkSliceInstance {
 		this.status = NetworkSliceStatus.FAILED;
 		this.errorMessage = errorMessage;
 	}
-	
+
+
 }

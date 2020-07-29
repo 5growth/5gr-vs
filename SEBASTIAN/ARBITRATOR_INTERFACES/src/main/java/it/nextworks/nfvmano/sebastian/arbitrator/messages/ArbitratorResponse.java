@@ -14,6 +14,7 @@
  */
 package it.nextworks.nfvmano.sebastian.arbitrator.messages;
 
+import it.nextworks.nfvmano.sebastian.arbitrator.elements.VNFAction;
 import it.nextworks.nfvmano.sebastian.common.VsAction;
 
 import java.util.HashMap;
@@ -60,8 +61,36 @@ public class ArbitratorResponse {
 	//the key indicates the vertical service instance ID and the action to be done: UPDATE or TERMINATE
 	private Map<String, VsAction> impactedVerticalServiceInstances = new HashMap<>();
 
-	
-	
+
+	//in case VNF instances need to be scaled
+	//the key indicates the VNFD ID and the action to be done: SCALE
+	private Map<String, VNFAction> impactedVnfs = new HashMap<>();
+
+
+
+	/**
+	 * @param requestId
+	 * @param acceptableRequest
+	 * @param newSliceRequired
+	 * @param existingCompositeSlice
+	 * @param existingCompositeSliceToUpdate
+	 * @param existingSliceSubnets
+	 * @param impactedVerticalServiceInstances
+	 *  @param impactedVnfs
+	 */
+	public ArbitratorResponse(String requestId, boolean acceptableRequest, boolean newSliceRequired, String existingCompositeSlice,
+			boolean existingCompositeSliceToUpdate, Map<String, Boolean> existingSliceSubnets,
+			Map<String, VsAction> impactedVerticalServiceInstances, Map<String, VNFAction> impactedVnfs) {
+		this.requestId = requestId;
+		this.acceptableRequest = acceptableRequest;
+		this.newSliceRequired = newSliceRequired;
+		this.existingCompositeSlice = existingCompositeSlice;
+		this.existingCompositeSliceToUpdate = existingCompositeSliceToUpdate;
+		if (impactedVnfs!=null) this.impactedVnfs = impactedVnfs;
+		if (existingSliceSubnets != null) this.existingSliceSubnets = existingSliceSubnets;
+		if (impactedVerticalServiceInstances != null) this.impactedVerticalServiceInstances = impactedVerticalServiceInstances;
+	}
+
 	/**
 	 * @param requestId
 	 * @param acceptableRequest
@@ -72,13 +101,14 @@ public class ArbitratorResponse {
 	 * @param impactedVerticalServiceInstances
 	 */
 	public ArbitratorResponse(String requestId, boolean acceptableRequest, boolean newSliceRequired, String existingCompositeSlice,
-			boolean existingCompositeSliceToUpdate, Map<String, Boolean> existingSliceSubnets,
-			Map<String, VsAction> impactedVerticalServiceInstances) {
+							  boolean existingCompositeSliceToUpdate, Map<String, Boolean> existingSliceSubnets,
+							  Map<String, VsAction> impactedVerticalServiceInstances) {
 		this.requestId = requestId;
 		this.acceptableRequest = acceptableRequest;
 		this.newSliceRequired = newSliceRequired;
 		this.existingCompositeSlice = existingCompositeSlice;
 		this.existingCompositeSliceToUpdate = existingCompositeSliceToUpdate;
+		if (impactedVnfs!=null) this.impactedVnfs = impactedVnfs;
 		if (existingSliceSubnets != null) this.existingSliceSubnets = existingSliceSubnets;
 		if (impactedVerticalServiceInstances != null) this.impactedVerticalServiceInstances = impactedVerticalServiceInstances;
 	}
@@ -135,7 +165,8 @@ public class ArbitratorResponse {
 	public Map<String, VsAction> getImpactedVerticalServiceInstances() {
 		return impactedVerticalServiceInstances;
 	}
-	
-	
-	
+
+	public Map<String, VNFAction> getImpactedVnfs() {
+		return impactedVnfs;
+	}
 }

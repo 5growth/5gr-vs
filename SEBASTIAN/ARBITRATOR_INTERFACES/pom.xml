@@ -41,16 +41,7 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -66,15 +57,7 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
 
-        </dependency>
         <dependency>
             <groupId>it.nextworks.nfvmano</groupId>
             <artifactId>CommonElements</artifactId>
@@ -82,13 +65,21 @@
             <scope>compile</scope>
         </dependency>
 
-	<!--
+
         <dependency>
             <groupId>it.nextworks.nfvmano</groupId>
-            <artifactId>TranslatorService</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <artifactId>TranslatorServiceInterface</artifactId>
+            <version>0.0.2-EVE-SNAPSHOT</version>
+
         </dependency>
-	-->
+
+        <!--
+            <dependency>
+                <groupId>it.nextworks.nfvmano</groupId>
+                <artifactId>TranslatorService</artifactId>
+                <version>0.0.2-SNAPSHOT</version>
+            </dependency>
+        -->
 
     </dependencies>
 

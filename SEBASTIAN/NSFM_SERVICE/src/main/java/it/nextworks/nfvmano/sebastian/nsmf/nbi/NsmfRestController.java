@@ -5,20 +5,19 @@ import java.util.List;
 import java.util.Map;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import it.nextworks.nfvmano.libs.ifa.common.elements.Filter;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
@@ -31,7 +30,8 @@ import it.nextworks.nfvmano.sebastian.nsmf.messages.InstantiateNsiRequest;
 import it.nextworks.nfvmano.sebastian.nsmf.messages.ModifyNsiRequest;
 import it.nextworks.nfvmano.sebastian.nsmf.messages.TerminateNsiRequest;
 import it.nextworks.nfvmano.sebastian.record.elements.NetworkSliceInstance;
-@Api(tags = "Network Slice Management API")
+@Api(tags = "Network Slice LCM API")
+@ConditionalOnExpression("${slicer.nbi.nslcm:true}")
 @RestController
 @CrossOrigin
 @RequestMapping("/vs/basic/nslcm")
@@ -79,7 +79,17 @@ public class NsmfRestController {
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
+
+	@ApiOperation(value = "Get the Network Slice Instance with the specified ID ")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "The Network Slice Instance.", response = NetworkSliceInstance.class),
+			//@ApiResponse(code = 400, message = "The request contains elements impossible to process", response = ResponseEntity.class),
+			//@ApiResponse(code = 409, message = "There is a conflict with the request", response = ResponseEntity.class),
+			//@ApiResponse(code = 500, message = "Status 500", response = ResponseEntity.class)
+
+	})
+	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(value = "/ns/{nsiId}", method = RequestMethod.GET)
 	public ResponseEntity<?> getNsInstance(@PathVariable String nsiId, Authentication auth) {
 		log.debug("Received query for network slice instance with ID " + nsiId);
@@ -103,7 +113,16 @@ public class NsmfRestController {
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
+	@ApiOperation(value = "Get all the Network Slice Instances")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "The list of Network Slice Instances.", response = NetworkSliceInstance.class, responseContainer = "Set"),
+			//@ApiResponse(code = 400, message = "The request contains elements impossible to process", response = ResponseEntity.class),
+			//@ApiResponse(code = 409, message = "There is a conflict with the request", response = ResponseEntity.class),
+			//@ApiResponse(code = 500, message = "Status 500", response = ResponseEntity.class)
+
+	})
+	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(value = "/ns", method = RequestMethod.GET)
 	public ResponseEntity<?> getNsInstance(Authentication auth) {
 		log.debug("Received query for all network slice instances.");

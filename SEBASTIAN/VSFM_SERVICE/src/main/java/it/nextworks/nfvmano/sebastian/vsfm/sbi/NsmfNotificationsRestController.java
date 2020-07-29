@@ -14,6 +14,7 @@
  */
 package it.nextworks.nfvmano.sebastian.vsfm.sbi;
 
+import io.swagger.annotations.Api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,8 @@ import it.nextworks.nfvmano.sebastian.vsfm.VsLcmService;
  * @author nextworks
  *
  */
+
+@Api(tags = "Network Slice Consumer notification API")
 @RestController
 @CrossOrigin
 @RequestMapping("/vs/notifications")

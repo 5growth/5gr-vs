@@ -291,7 +291,8 @@ public class VsLcmManager {
                         String nssiId = nsmfLcmProvider.createNetworkSliceIdentifier(request, nsstDomain, tenantId);
                         log.debug("Network Slice Subnet ID " + nssiId + " created for VSI " + vsiId);
 
-                        vsRecordService.addNssiInVsi(vsiId, new NetworkSliceSubnetInstance(nssiId, nsstId, nsstDomain, NetworkSliceStatus.INSTANTIATING));
+                        //TODO add VNf placement info
+                        vsRecordService.addNssiInVsi(vsiId, new NetworkSliceSubnetInstance(nssiId, nsstId, nsstDomain, NetworkSliceStatus.INSTANTIATING, null));
 
                         log.debug("Record updated with info about NSSI and VSI association.");
 
@@ -401,7 +402,8 @@ public class VsLcmManager {
                         String nssiId = nsmfLcmProvider.createNetworkSliceIdentifier(request, nsstDomain, tenantId);
                         log.debug("Network Slice Subnet ID " + nssiId + " created for VSI " + vsiId);
 
-                        vsRecordService.addNssiInVsi(vsiId, new NetworkSliceSubnetInstance(nssiId, nsstId, nsstDomain, NetworkSliceStatus.INSTANTIATING));
+                        //TODO add vnf placement info
+                        vsRecordService.addNssiInVsi(vsiId, new NetworkSliceSubnetInstance(nssiId, nsstId, nsstDomain, NetworkSliceStatus.INSTANTIATING, new HashMap<>()));
 
                         log.debug("Record updated with info about NSSI and VSI association.");
                         //In CroCo Df and Il are not considered, for getting this information here we have to add
@@ -470,6 +472,7 @@ public class VsLcmManager {
         }
     }
 
+    //TODO: modify this to throw an expection!
      void processModifyRequest(ModifyVsiRequestMessage msg){
         if (!msg.getVsiId().equals(vsiId)) {
             throw new IllegalArgumentException(String.format("Wrong VSI ID: %s", msg.getVsiId()));

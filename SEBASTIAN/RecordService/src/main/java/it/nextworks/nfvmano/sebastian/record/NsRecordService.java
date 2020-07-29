@@ -16,9 +16,11 @@
 package it.nextworks.nfvmano.sebastian.record;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.annotation.PostConstruct;
+
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,13 +51,6 @@ public class NsRecordService {
 	private NetworkSliceInstanceRepository nsInstanceRepository;
 
 
-
-
-
-
-
-
-	
 	public synchronized String createNetworkSliceInstanceEntry(
 			String nstId,
 			String nsdId,
@@ -68,6 +63,7 @@ public class NsRecordService {
 			String name,
 			String description,
 			boolean soManaged
+
 	) {
 		log.debug("Creating a new Network Slice instance");
 		NetworkSliceInstance nsi = new NetworkSliceInstance(null, nstId, nsdId, nsdVersion, dfId, ilId, nfvNsId, networkSliceSubnetInstances, tenantId, name, description, soManaged);

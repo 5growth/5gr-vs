@@ -19,7 +19,7 @@
         <module>VSFM_SERVICE</module>
         <module>NSFM_INTERFACES</module>
         <module>NSFM_SERVICE</module>
-        
+	<module>NFVO_CATALOGUE_REST</module>        
       <module>SEBASTIAN_CORE</module>
 
     </modules>
