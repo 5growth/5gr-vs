@@ -23,6 +23,7 @@ public enum NfvoCatalogueDriverType {
     DUMMY,
     LOGGING,
     SOL_005,
-    SM
+    SM,
+	DUMMY_FILE
 
 }
