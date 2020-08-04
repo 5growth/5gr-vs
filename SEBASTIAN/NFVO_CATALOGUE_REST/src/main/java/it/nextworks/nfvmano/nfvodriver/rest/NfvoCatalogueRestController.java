@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -63,7 +64,7 @@ public class NfvoCatalogueRestController {
 
 	})
 	@RequestMapping(value = "/queryNsd", method = RequestMethod.POST)
-	public ResponseEntity<?> queryNsd(@RequestBody GeneralizedQueryRequest request) {
+	public ResponseEntity<?> queryNsd( @RequestBody GeneralizedQueryRequest request, Authentication auth) {
 		log.debug("Received query NSD request");
 		try {
 			QueryNsdResponse response = nfvoCatalogueService.queryNsd(request);
@@ -93,7 +94,7 @@ public class NfvoCatalogueRestController {
 	})
 
 	@RequestMapping(value = "/queryVnfp", method = RequestMethod.POST)
-	public ResponseEntity<?> queryVnfPackage(@RequestBody GeneralizedQueryRequest request) {
+	public ResponseEntity<?> queryVnfPackage(  @RequestBody GeneralizedQueryRequest request, Authentication auth) {
 		log.debug("Received query VNF package request");
 		try {
 			request.isValid();
