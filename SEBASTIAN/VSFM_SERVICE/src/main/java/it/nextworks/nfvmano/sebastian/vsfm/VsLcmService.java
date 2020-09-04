@@ -24,18 +24,14 @@ import it.nextworks.nfvmano.catalogue.blueprint.BlueprintCatalogueUtilities;
 import it.nextworks.nfvmano.catalogue.blueprint.services.VsBlueprintCatalogueService;
 import it.nextworks.nfvmano.catalogue.blueprint.services.VsDescriptorCatalogueService;
 import it.nextworks.nfvmano.catalogue.translator.TranslatorService;
+import it.nextworks.nfvmano.libs.ifa.catalogues.interfaces.NsdManagementProviderInterface;
 import it.nextworks.nfvmano.nfvodriver.NfvoLcmService;
+import it.nextworks.nfvmano.sebastian.arbitrator.elements.VNFAction;
+import it.nextworks.nfvmano.sebastian.common.*;
 import it.nextworks.nfvmano.sebastian.record.elements.NetworkSliceSubnetInstance;
 import it.nextworks.nfvmano.sebastian.record.elements.VerticalServiceStatus;
+import it.nextworks.nfvmano.sebastian.vsfm.engine.messages.*;
 import it.nextworks.nfvmano.sebastian.vsfm.vsmanagement.VsLcmManager;
-import it.nextworks.nfvmano.sebastian.vsfm.engine.messages.CoordinateVsiRequest;
-import it.nextworks.nfvmano.sebastian.vsfm.engine.messages.VsmfEngineMessage;
-import it.nextworks.nfvmano.sebastian.vsfm.engine.messages.InstantiateVsiRequestMessage;
-import it.nextworks.nfvmano.sebastian.vsfm.engine.messages.ModifyVsiRequestMessage;
-import it.nextworks.nfvmano.sebastian.vsfm.engine.messages.NotifyNsiStatusChange;
-import it.nextworks.nfvmano.sebastian.vsfm.engine.messages.NotifyResourceGranted;
-import it.nextworks.nfvmano.sebastian.vsfm.engine.messages.TerminateVsiRequestMessage;
-import it.nextworks.nfvmano.sebastian.vsfm.engine.messages.VsiTerminationNotificationMessage;
 import it.nextworks.nfvmano.sebastian.vsfm.interfaces.VsLcmProviderInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,10 +68,6 @@ import it.nextworks.nfvmano.sebastian.arbitrator.ArbitratorService;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsBlueprint;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsDescriptor;
 import it.nextworks.nfvmano.catalogue.blueprint.messages.QueryVsBlueprintResponse;
-import it.nextworks.nfvmano.sebastian.common.ConfigurationParameters;
-import it.nextworks.nfvmano.sebastian.common.Utilities;
-import it.nextworks.nfvmano.sebastian.common.VirtualResourceCalculatorService;
-import it.nextworks.nfvmano.sebastian.common.VsAction;
 import it.nextworks.nfvmano.sebastian.nsmf.interfaces.NsmfLcmConsumerInterface;
 import it.nextworks.nfvmano.sebastian.nsmf.interfaces.NsmfLcmProviderInterface;
 import it.nextworks.nfvmano.sebastian.nsmf.messages.NetworkSliceFailureNotification;
@@ -133,6 +125,8 @@ public class VsLcmService implements VsLcmProviderInterface, NsmfLcmConsumerInte
 	private String adminTenant;
 	
 	private NsmfLcmProviderInterface nsmfLcmProvider;
+
+	private NsdManagementProviderInterface nsdManagementProvider;
 	
 	@Value("${spring.rabbitmq.host}")
     private String rabbitHost;
@@ -321,6 +315,40 @@ public class VsLcmService implements VsLcmProviderInterface, NsmfLcmConsumerInte
 			throw new MethodNotImplementedException("Received VSI query with attribute selector. Not supported at the moment.");
 		}
 	}
+
+	@Override
+	public List<VerticalServiceInstance> queryAllVsInstances(GeneralizedQueryRequest request)
+			throws MethodNotImplementedException, NotExistingEntityException, FailedOperationException, MalformattedElementException {
+		log.debug("Received request about all the IDs of Vertical Service instances.");
+		request.isValid();
+
+		Filter filter = request.getFilter();
+		List<String> attributeSelector = request.getAttributeSelector();
+		if ((attributeSelector == null) || (attributeSelector.isEmpty())) {
+			Map<String, String> fp = filter.getParameters();
+			if (fp.size() == 1 && fp.containsKey("TENANT_ID")) {
+				List<String> vsIds = new ArrayList<>();
+				String tenantId = fp.get("TENANT_ID");
+				List<VerticalServiceInstance> vsInstances = new ArrayList<>();
+				if (tenantId.equals(adminTenant)) {
+					log.debug("VSI ID query for admin: returning all the VSIs");
+					vsInstances = vsRecordService.getAllVsInstances();
+				} else {
+					log.debug("VSI ID query for tenant " + tenantId);
+					vsInstances = vsRecordService.getAllVsInstances(tenantId);
+				}
+				return vsInstances;
+			} else {
+				log.error("Received all VSI ID query with not supported filter.");
+				throw new MalformattedElementException("Received VSI query with not supported filter.");
+			}
+		} else {
+			log.error("Received VSI query with attribute selector. Not supported at the moment.");
+			throw new MethodNotImplementedException("Received VSI query with attribute selector. Not supported at the moment.");
+		}
+	}
+
+
 		
 
 	@Override
@@ -404,6 +432,28 @@ public class VsLcmService implements VsLcmProviderInterface, NsmfLcmConsumerInte
             vsRecordService.setVsFailureInfo(invokerVsiId, "Error while translating internal VS coordination message in Json format.");
         }
     }
+
+	/**
+	 *
+	 * @param invokerVsiId Is the id of the Vsi invoking the coordination. VsCoordinator uses it as Coordinator ID
+	 * @param vsNssiActions key: network slice subnet id, value: the VsNssiAction
+	 */
+    public void requestVsiNssiModification(String invokerVsiId, Map<String, VsNssiAction> vsNssiActions){
+		log.debug("Processing new VSI NSSI modification requested by" +invokerVsiId );
+		if (!vsCoordinators.containsKey(invokerVsiId))
+			initNewVsCoordinator(invokerVsiId);
+		String topic = "coordlifecycle.coordinatevs." + invokerVsiId;
+
+		//key nssid, value action
+
+		CoordinateVsiNssiRequest internalMessage = new CoordinateVsiNssiRequest(invokerVsiId, vsNssiActions);
+		try {
+			sendMessageToQueue(internalMessage, topic);
+		} catch (JsonProcessingException e) {
+			log.error("Error while translating internal VS coordination message in Json format.");
+			vsRecordService.setVsFailureInfo(invokerVsiId, "Error while translating internal VS coordination message in Json format.");
+		}
+	}
 
     private void modifyVs(String vsiId, ModifyVsRequest request) throws NotExistingEntityException{
         log.debug("Processing new VSI modification request for VSI ID " + vsiId);
@@ -542,6 +592,10 @@ public class VsLcmService implements VsLcmProviderInterface, NsmfLcmConsumerInte
 		this.arbitratorService.setNsmfLcmProvider(nsmfLcmProvider);
 	}
 
+	public void setNsdManagementProvider(NsdManagementProviderInterface nsdManagementProvider){
+    	this.nsdManagementProvider = nsdManagementProvider;
+	}
+
 	private VsBlueprint retrieveVsb(String vsbId) throws NotExistingEntityException, FailedOperationException { 
 		log.debug("Retrieving VSB with ID " + vsbId);
 		try {
@@ -579,13 +633,15 @@ public class VsLcmService implements VsLcmProviderInterface, NsmfLcmConsumerInte
         VsLcmManager vsLcmManager = new VsLcmManager(vsiId,
         		vsiName,
         		vsRecordService, 
-        		vsDescriptorCatalogueService, 
+        		vsDescriptorCatalogueService,
+        		vsBlueprintCatalogueService,
         		translatorService, 
         		arbitratorService, 
         		adminService, 
         		this, 
         		virtualResourceCalculatorService, 
         		nsmfLcmProvider,
+        		nsdManagementProvider,
         		vsmfUtils);
         createQueue(vsiId, vsLcmManager);
         vsLcmManagers.put(vsiId, vsLcmManager);

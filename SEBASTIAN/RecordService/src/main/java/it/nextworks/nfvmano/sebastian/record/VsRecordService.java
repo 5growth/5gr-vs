@@ -187,6 +187,8 @@ public class VsRecordService {
 		return vsInstanceRepository.findByNetworkSliceId(sliceId);
 	}
 
+
+
 	/**
 	 * This method adds nested VSI into parent VSI
 	 *
@@ -260,7 +262,32 @@ public class VsRecordService {
 		VerticalServiceInstance vsi = getVsInstance(vsiId);
 		return vsi.allSubnetInStatus(status);
 	}
-	
+
+	/**
+	 *
+	 * @param nssiId the network slice subnet  ID of the target VSI
+	 * @param nssiId the network slice subnet  ID of the target VSI
+	 * @return the vertical service instance owner of the network slice subnet
+	 */
+	public synchronized  VerticalServiceInstance getNssiOwner(String nssiId, String domainId) throws NotExistingEntityException {
+		log.debug("Retrieving the vertical service instance owner of:"+ nssiId+" in domain:"+domainId);
+		for(VerticalServiceInstance vsi: getAllVsInstances()){
+
+			if(vsi.getNssis()!=null && vsi.getNssis().containsKey(nssiId)&& vsi.getOwnedNssis().contains(nssiId)){
+				NetworkSliceSubnetInstance nssi = vsi.getNssis().get(nssiId);
+
+				if(domainId==null && nssi.getDomainId()==null){
+					//none of them have domains (both local)
+					return vsi;
+				}else if(domainId!=null&&nssi.getDomainId()!=null&&domainId.equals(nssi.getDomainId())){
+					//the domain ids match
+					return vsi;
+				}
+			}
+		}
+		throw new NotExistingEntityException("Could not find the vertical service instance owning the requested network slice subnet");
+	}
+
 	//Methods about network slices
 
 //	/**

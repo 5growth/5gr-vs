@@ -44,11 +44,12 @@ public class ArbitratorAlgorithmRestController {
 
 	@RequestMapping(value = "/computeArbitration", method = RequestMethod.POST)
 
-	public ResponseEntity<?> computeArbitration(@RequestBody List<ArbitratorRequest> request) {
+	public ResponseEntity<?> computeArbitration(@RequestBody ArbitratorRequest request) {
 		log.debug("Received request for Arbitration computation");
 		try {
 			Map<String, String> operationIds = algorithm.computeArbitratorSolution(request);
-
+			algorithm.sendResponse(operationIds);
+			log.debug("Continuing execution");
 			return new ResponseEntity<>(operationIds, HttpStatus.OK);
 
 		} catch (NotExistingEntityException e) {

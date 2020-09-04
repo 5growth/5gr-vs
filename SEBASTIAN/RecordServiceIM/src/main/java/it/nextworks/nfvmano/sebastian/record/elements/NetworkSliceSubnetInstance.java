@@ -46,9 +46,10 @@ public class NetworkSliceSubnetInstance {
     private String domainId;
     private NetworkSliceStatus status;
 
+
     //Indicates the High-level vnf placement information requested to the NSMF used in 5Growth
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    @ElementCollection()
+    @ElementCollection(fetch = FetchType.EAGER)
     private Map<String, NetworkSliceVnfPlacement> vnfPlacement= new HashMap<>();
 
     public NetworkSliceSubnetInstance() {

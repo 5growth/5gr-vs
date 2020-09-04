@@ -21,11 +21,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.sebastian.common.VsAction;
 import it.nextworks.nfvmano.sebastian.common.VsActionType;
+import it.nextworks.nfvmano.sebastian.common.VsNssiAction;
+import it.nextworks.nfvmano.sebastian.common.VsNssiActionType;
 import it.nextworks.nfvmano.sebastian.vsfm.VsLcmService;
-import it.nextworks.nfvmano.sebastian.vsfm.engine.messages.CoordinateVsiRequest;
-import it.nextworks.nfvmano.sebastian.vsfm.engine.messages.VsmfEngineMessage;
-import it.nextworks.nfvmano.sebastian.vsfm.engine.messages.VsmfEngineMessageType;
-import it.nextworks.nfvmano.sebastian.vsfm.engine.messages.VsiTerminationNotificationMessage;
+import it.nextworks.nfvmano.sebastian.vsfm.engine.messages.*;
 import it.nextworks.nfvmano.sebastian.vsfm.messages.TerminateVsRequest;
 
 import org.slf4j.Logger;
@@ -39,6 +38,9 @@ public class VsCoordinator {
     private String vsiCoordinatorId;
     private VsLcmService vsLcmService;
     private Map<String, VsAction> candidateVsis;
+
+    //key: network slice subnet instance id, value: actions to perform on the vs slice.
+    private Map<String, VsNssiAction> vsNssiActions;
     private VsCoordinatorStatus internalStatus;
 
     public VsCoordinator() {
@@ -70,6 +72,13 @@ public class VsCoordinator {
                     log.debug("Processing VSI coordination request.");
                     CoordinateVsiRequest coordinateVsiRequest = (CoordinateVsiRequest) em;
                     processCoordinateRequest(coordinateVsiRequest);
+                    break;
+                }
+                case COORDINATE_VSI_NSSI_REQUEST: {
+
+                    log.debug("Processing VSI coordination request.");
+                    CoordinateVsiNssiRequest coordinateVsiNssiRequest = (CoordinateVsiNssiRequest) em;
+                    processCoordinateVsiNssiRequest(coordinateVsiNssiRequest);
                     break;
                 }
                 case NOTIFY_TERMINATION:{
@@ -116,6 +125,29 @@ public class VsCoordinator {
             manageVsCoordinatorError("Error while terminating VSI by Coordinator: " + e.getMessage());
         }
     }
+
+    synchronized void processCoordinateVsiNssiRequest(CoordinateVsiNssiRequest msg){
+        if (internalStatus != VsCoordinatorStatus.READY) {
+            manageVsCoordinatorError("Received coordinate request in wrong status. Skipping message.");
+            return;
+        }
+        vsNssiActions = msg.getVsNssiActions();
+        internalStatus = VsCoordinatorStatus.COORDINATION_IN_PROGRESS;
+        try{
+            for(Map.Entry<String, VsNssiAction> nssiActionEntry: vsNssiActions.entrySet()) {
+                VsNssiAction action = nssiActionEntry.getValue();
+                if (action.getActionType() == VsNssiActionType.MODIFY) {
+                    vsLcmService.terminateVs(action.getVsiId(), new TerminateVsRequest(action.getVsiId(), "coordinator"));
+                }
+
+            }
+            internalStatus = VsCoordinatorStatus.FINISHED;
+        } catch (NotExistingEntityException e){
+            manageVsCoordinatorError("Error while terminating VSI by Coordinator: " + e.getMessage());
+        }
+    }
+
+
 
     synchronized void processTerminationNofification(VsiTerminationNotificationMessage msg) throws Exception{
         String vsiId = msg.getVsiId();

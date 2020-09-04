@@ -21,6 +21,9 @@ import javax.annotation.PostConstruct;
 
 import it.nextworks.nfvmano.catalogue.blueprint.services.VsDescriptorCatalogueService;
 import it.nextworks.nfvmano.catalogues.template.services.NsTemplateCatalogueService;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.MethodNotImplementedException;
+import it.nextworks.nfvmano.sebastian.arbitrator.external.ExternalArbitrator;
+import it.nextworks.nfvmano.sebastian.arbitrator.external.ExternalArbitratorService;
 import it.nextworks.nfvmano.sebastian.arbitrator.interfaces.ArbitratorInterface;
 import it.nextworks.nfvmano.sebastian.arbitrator.messages.ArbitratorRequest;
 import it.nextworks.nfvmano.sebastian.arbitrator.messages.ArbitratorResponse;
@@ -62,7 +65,13 @@ public class ArbitratorService implements ArbitratorInterface {
 	
 	@Autowired
 	private TranslatorService translatorService;
-	
+
+	@Autowired
+	private ExternalArbitratorService externalArbitratorService;
+
+	@Value("${arbitrator.url:http://localhost:8088}")
+	private String externalArbitratorBaseUrl;
+
 	@Autowired
 	private VsRecordService vsRecordService;
 
@@ -108,7 +117,10 @@ public class ArbitratorService implements ArbitratorInterface {
 					 virtualResourceCalculatorService,
 					 null
 			 );
-		 } else {
+		 } else if(arbitratorType.equals("EXTERNAL")){
+			 log.debug("The Vertical Slicer is configured to operate with an EXTERNAL arbitrator.");
+			 arbitrator = new ExternalArbitrator(externalArbitratorService, externalArbitratorBaseUrl);
+		 }	else {
 			 log.error("Arbitrator not configured!");
 		 }
 	 }
@@ -121,7 +133,7 @@ public class ArbitratorService implements ArbitratorInterface {
 
 	@Override
 	public List<ArbitratorResponse> arbitrateVsScaling(List<ArbitratorRequest> requests)
-			throws FailedOperationException, NotExistingEntityException {
+			throws FailedOperationException, NotExistingEntityException, MethodNotImplementedException {
 		return arbitrator.arbitrateVsScaling(requests);
 	}
 

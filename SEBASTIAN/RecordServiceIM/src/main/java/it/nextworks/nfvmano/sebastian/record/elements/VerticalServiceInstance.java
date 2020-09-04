@@ -29,6 +29,7 @@ import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,10 +64,22 @@ public class VerticalServiceInstance {
 	
 	private String networkSliceId;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
+	@LazyCollection(LazyCollectionOption.FALSE)
 	@MapKey(name="nssiId")
+	@Fetch(FetchMode.SELECT)
+	@Cascade(org.hibernate.annotations.CascadeType.ALL)
     private Map<String, NetworkSliceSubnetInstance> nssis = new HashMap<String, NetworkSliceSubnetInstance>();
 
+
+    //The list of network slice subnet ids which were instantiated for this vertical service instance
+	//this is used to determine which vertical service instance is responsible for the the network slice subnet
+	//scaling
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
+	@ElementCollection(fetch=FetchType.EAGER)
+	@Fetch(FetchMode.SELECT)
+	@Cascade(org.hibernate.annotations.CascadeType.ALL)
+	private List<String> ownedNssis = new ArrayList<>();
 
 	@OneToMany
 	@LazyCollection(LazyCollectionOption.FALSE)
@@ -89,6 +102,7 @@ public class VerticalServiceInstance {
 	 * @param userData configuration parameters provided by the vertical
 	 * @param locationConstraints constraint about the geographical coverage of the service
 	 * @param ranEndPointId ID of the end point attached to the RAN segment
+
 	 */
 	public VerticalServiceInstance(String vsiId, String vsdId, String tenantId, String name, String description,
 			String networkSliceId, Map<String, String> userData, LocationInfo locationConstraints, String ranEndPointId) {
@@ -103,9 +117,12 @@ public class VerticalServiceInstance {
 		if (locationConstraints != null) this.locationConstraints = locationConstraints;
 			else this.locationConstraints = new LocationInfo();
 		this.ranEndPointId = ranEndPointId;
+
 	}
 
-
+	public List<String> getOwnedNssis() {
+		return ownedNssis;
+	}
 
 	/**
 	 * @return the ranEndPointId
@@ -260,6 +277,14 @@ public class VerticalServiceInstance {
         return true;
     }
 
+	/**
+	 *
+	 * @param nssiId the owned nssiId
+	 */
+
+    public void addOwnedNssi(String nssiId){
+    	this.ownedNssis.add(nssiId);
+	}
    	/**
 	 *
 	 * @param nestedVsiId the nested VSI

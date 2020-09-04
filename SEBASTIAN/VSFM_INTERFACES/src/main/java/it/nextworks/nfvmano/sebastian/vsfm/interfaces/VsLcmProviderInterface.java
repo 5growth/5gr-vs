@@ -22,6 +22,7 @@ import it.nextworks.nfvmano.libs.ifa.common.exceptions.MethodNotImplementedExcep
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotPermittedOperationException;
 import it.nextworks.nfvmano.libs.ifa.common.messages.GeneralizedQueryRequest;
+import it.nextworks.nfvmano.sebastian.record.elements.VerticalServiceInstance;
 import it.nextworks.nfvmano.sebastian.vsfm.messages.InstantiateVsRequest;
 import it.nextworks.nfvmano.sebastian.vsfm.messages.ModifyVsRequest;
 import it.nextworks.nfvmano.sebastian.vsfm.messages.PurgeVsRequest;
@@ -92,6 +93,21 @@ public interface VsLcmProviderInterface {
 	 */
 	public List<String> queryAllVsIds(GeneralizedQueryRequest request)
 		throws MethodNotImplementedException, NotExistingEntityException, FailedOperationException, MalformattedElementException;
+
+
+
+	/**
+	 * This method queries the IDs of all the VSs matching the request filter
+	 *
+	 * @param request query
+	 * @return List of Instnaces matching the request filter
+	 * @throws MethodNotImplementedException if the method is not implemented
+	 * @throws NotExistingEntityException if the IDs are not found
+	 * @throws FailedOperationException if the operation fails
+	 * @throws MalformattedElementException if the request is malformatted
+	 */
+	public List<VerticalServiceInstance> queryAllVsInstances(GeneralizedQueryRequest request)
+			throws MethodNotImplementedException, NotExistingEntityException, FailedOperationException, MalformattedElementException;
 	
 	/**
 	 * This method terminates an existing Vertical Service instance.

@@ -242,8 +242,8 @@ public class VsLcmBasicRestController {
 		log.debug("Received request to retrieve all the VS instances ID.");
 		try {
 			String user = getUserFromAuth(auth);
-			//TODO
-			return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
+
+			return new ResponseEntity<>(vsLcmService.queryAllVsInstances(request), HttpStatus.OK);
 
 		} catch (Exception e) {
 			log.error("Internal exception");

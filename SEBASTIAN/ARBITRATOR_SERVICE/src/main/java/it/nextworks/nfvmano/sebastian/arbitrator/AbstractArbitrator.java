@@ -72,6 +72,10 @@ public abstract class AbstractArbitrator implements ArbitratorInterface {
         this.nsmfLcmProvider = nsmfLcmProvider;
     }
 
+    public AbstractArbitrator(){
+
+    }
+
     public VsDescriptorCatalogueService getVsDescriptorCatalogueService() {
         return vsDescriptorCatalogueService;
     }

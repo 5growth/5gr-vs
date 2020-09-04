@@ -5,6 +5,7 @@ import javax.annotation.PostConstruct;
 import it.nextworks.nfvmano.catalogue.domainLayer.*;
 import it.nextworks.nfvmano.catalogue.domainLayer.customDomainLayer.SebastianLocalNspDomainLayer;
 import it.nextworks.nfvmano.catalogues.domainLayer.services.DomainCatalogueService;
+import it.nextworks.nfvmano.nfvodriver.NfvoCatalogueService;
 import it.nextworks.nfvmano.sebastian.vsfm.sbi.NsmfInteractionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,9 @@ import org.slf4j.LoggerFactory;
 public class SlicerConfigurator {
 	private static final Logger log = LoggerFactory.getLogger(SlicerConfigurator.class);
 
+
+	@Autowired
+	private NfvoCatalogueService nfvoCatalogueService;
 
 	@Autowired
 	private DomainCatalogueService domainCatalogueService;
@@ -72,8 +76,9 @@ public class SlicerConfigurator {
 		try {
 			domainCatalogueService.onBoardDomain(localDomain);
 
-			nsmfInteractionHandler.addDriver(localDomain.getDomainId(), nsLcmService );
+			nsmfInteractionHandler.addDriver(localDomain.getName(), nsLcmService );
 			vsLcmService.setNsmfLcmProvider(nsmfInteractionHandler);
+			vsLcmService.setNsdManagementProvider(nfvoCatalogueService);
 		} catch (MalformattedElementException e) {
 			log.error("Failed to onboard domain:" , e);
 		} catch (AlreadyExistingEntityException e) {

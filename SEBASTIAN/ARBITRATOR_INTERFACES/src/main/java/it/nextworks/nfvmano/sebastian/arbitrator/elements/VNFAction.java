@@ -9,7 +9,7 @@ public class VNFAction {
     private String vnfdId;
     private VNFActionType vnfActionType;
 
-    //NSD correspondingo to the NS where the VNF should be scaled. If null the VS will search for the first NSD containing the VNFD
+    //NSD corresponding to the NS where the VNF should be scaled. If null the VS will search for the first NSD containing the VNFD
     private String nsdId;
 
     //NS DF to which the NS. If null the VS will use the first.

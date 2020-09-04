@@ -19,6 +19,8 @@ import java.util.Map;
 
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsDescriptor;
 import it.nextworks.nfvmano.catalogue.translator.NfvNsInstantiationInfo;
+import it.nextworks.nfvmano.libs.ifa.common.InterfaceMessage;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 
 /**
  * This class models a request to the arbitrator.
@@ -30,13 +32,15 @@ import it.nextworks.nfvmano.catalogue.translator.NfvNsInstantiationInfo;
  *
  * @author nextworks
  */
-public class ArbitratorRequest {
+public class ArbitratorRequest   implements InterfaceMessage {
 
     private String requestId;
     private String tenantId;
     private VsDescriptor vsd;
     private Map<String, NfvNsInstantiationInfo> instantiationNsd = new HashMap<>();
-    
+
+    public ArbitratorRequest(){}
+
     /**
     * @param tenantId
 	 *
@@ -81,5 +85,9 @@ public class ArbitratorRequest {
 	public Map<String, NfvNsInstantiationInfo> getInstantiationNsd() {
 		return instantiationNsd;
 	}
-	
+
+	@Override
+	public void isValid() throws MalformattedElementException {
+		//TODO
+	}
 }

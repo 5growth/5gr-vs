@@ -58,6 +58,8 @@ public class NsmfInteractionHandler implements NsmfLcmProviderInterface {
     private Map<String, NsmfLcmProviderInterface> drivers = new HashMap<String, NsmfLcmProviderInterface>();
 
     //this is used for single domain scenarios
+
+    @Value("${nsmf.local_domain_id:LOCAL}")
     private String defaultDriver;
 
     //private NsmfRestClient nsmfRestClient;
@@ -65,8 +67,7 @@ public class NsmfInteractionHandler implements NsmfLcmProviderInterface {
     @Autowired
     private AdminService adminService;
 
-    @Autowired
-    NsLcmService nsLcmService;
+
 
     @Autowired
     private DomainCatalogueService domainCatalogueService;

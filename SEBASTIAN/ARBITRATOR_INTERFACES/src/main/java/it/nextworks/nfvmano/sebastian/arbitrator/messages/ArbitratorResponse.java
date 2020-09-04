@@ -14,6 +14,8 @@
  */
 package it.nextworks.nfvmano.sebastian.arbitrator.messages;
 
+import it.nextworks.nfvmano.libs.ifa.common.InterfaceMessage;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
 import it.nextworks.nfvmano.sebastian.arbitrator.elements.VNFAction;
 import it.nextworks.nfvmano.sebastian.common.VsAction;
 
@@ -35,7 +37,7 @@ import java.util.Map;
  * @author nextworks
  *
  */
-public class ArbitratorResponse {
+public class ArbitratorResponse  implements InterfaceMessage {
 
 	//indicates the request matched by this response
 	private String requestId;
