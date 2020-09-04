@@ -69,6 +69,8 @@ public class ArbitratorResponse  implements InterfaceMessage {
 	private Map<String, VNFAction> impactedVnfs = new HashMap<>();
 
 
+	public ArbitratorResponse(){}
+
 
 	/**
 	 * @param requestId
@@ -170,5 +172,10 @@ public class ArbitratorResponse  implements InterfaceMessage {
 
 	public Map<String, VNFAction> getImpactedVnfs() {
 		return impactedVnfs;
+	}
+
+	@Override
+	public void isValid() throws MalformattedElementException {
+		//TODO
 	}
 }
