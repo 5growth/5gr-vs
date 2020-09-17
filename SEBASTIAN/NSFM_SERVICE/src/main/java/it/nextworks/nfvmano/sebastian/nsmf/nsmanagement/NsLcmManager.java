@@ -224,7 +224,7 @@ public class NsLcmManager {
 			Map<String, Object> sliceParameters = msg.getRequest().getSliceServiceParameters();
 
 			String sliceType =null;
-			if (sliceParameters!=null){
+			if (sliceParameters!=null && sliceParameters.containsKey("TYPE")){
 				sliceType=sliceParameters.get("TYPE").toString();
 				sliceParameters.remove("TYPE");
 			}
