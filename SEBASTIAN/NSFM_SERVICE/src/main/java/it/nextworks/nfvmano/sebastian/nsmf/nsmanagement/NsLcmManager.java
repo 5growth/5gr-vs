@@ -16,10 +16,17 @@ package it.nextworks.nfvmano.sebastian.nsmf.nsmanagement;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import it.nextworks.nfvmano.catalogue.template.messages.QueryNsTemplateResponse;
+import it.nextworks.nfvmano.catalogues.template.services.NsTemplateCatalogueService;
+import it.nextworks.nfvmano.libs.ifa.common.elements.Filter;
 import it.nextworks.nfvmano.libs.ifa.common.enums.NsScaleType;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.FailedOperationException;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.MethodNotImplementedException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.osmanfvo.nslcm.interfaces.messages.*;
 import it.nextworks.nfvmano.libs.ifa.records.nsinfo.NsInfo;
@@ -90,6 +97,8 @@ public class NsLcmManager {
 	private NST networkSliceTemplate;
 	
 	private NsmfUtils nsmfUtils;
+
+
 	
 	public NsLcmManager(String networkSliceInstanceId,
 						String name,
@@ -101,7 +110,8 @@ public class NsLcmManager {
 						NsmfLcmConsumerInterface notificationDispatcher,
 						NsLcmService nsLcmService,
 						NST networkSliceTemplate, 
-						NsmfUtils nsmfUtils) {
+						NsmfUtils nsmfUtils
+						) {
 		this.networkSliceInstanceId = networkSliceInstanceId;
 		this.name = name;
 		this.description = description;
@@ -114,6 +124,7 @@ public class NsLcmManager {
 		this.nsLcmService = nsLcmService;
 		this.networkSliceTemplate = networkSliceTemplate;
 		this.nsmfUtils = nsmfUtils;
+
 	}
 	
 	
@@ -225,6 +236,7 @@ public class NsLcmManager {
 
 			String sliceType =null;
 			if (sliceParameters!=null && sliceParameters.containsKey("TYPE")){
+
 				sliceType=sliceParameters.get("TYPE").toString();
 				sliceParameters.remove("TYPE");
 			}
@@ -348,21 +360,7 @@ public class NsLcmManager {
 
 						QueryNsResponse queryNs = nfvoLcmService.queryNs(new GeneralizedQueryRequest(Utilities.buildNfvNsiFilter(msg.getNfvNsiId()), null));
 						NsInfo nsInfo = queryNs.getQueryNsResult().get(0);
-						List<String> nfvNsIds = nsInfo.getNestedNsInfoId();
-						for (String nfvNsId : nfvNsIds){
-							try{
-								nsRecordService.getNsInstanceFromNfvNsi(nfvNsId);
-							} catch (NotExistingEntityException e){
-								String nestedNsiId = nsRecordService.createNetworkSliceInstanceEntry(null,
-										null, null, null, null, nfvNsId, null,
-										null, null, null, true);
-								soNestedNsiIds.add(nestedNsiId);
-								nsRecordService.setNsStatus(nestedNsiId, NetworkSliceStatus.INSTANTIATED);
-							}
-						}
-						if (soNestedNsiIds.size() >0 )
-							nsRecordService.addNsSubnetsInNetworkSliceInstance(networkSliceInstanceId, soNestedNsiIds);
-
+						retrieveNssiTree(nsInfo, this.networkSliceInstanceId, this.networkSliceTemplate);
 						nsRecordService.setNsStatus(networkSliceInstanceId, NetworkSliceStatus.INSTANTIATED);
 						log.debug("Sending notification to engine.");
 
@@ -427,6 +425,51 @@ public class NsLcmManager {
 			manageNsError(e.getMessage());
 		}
 		
+	}
+
+	private void retrieveNssiTree(NsInfo nsInfo, String targetNetworkSliceInstanceId, NST targetNST) throws FailedOperationException, MalformattedElementException, NotExistingEntityException, MethodNotImplementedException {
+		log.debug("Retrieving Nssi tree for NST:"+targetNST.getNstId()+" instance id:"+targetNetworkSliceInstanceId+" nestedNsIds:"+nsInfo.getNestedNsInfoId());
+		List<String> nfvNsIds = nsInfo.getNestedNsInfoId();
+		for (String nfvNsId : nfvNsIds){
+			try{
+				//Added the slice subnet to the network slice
+				String nssId = nsRecordService.getNsInstanceFromNfvNsi(nfvNsId).getNsiId();
+				soNestedNsiIds.add(nssId);
+			} catch (NotExistingEntityException e){
+
+				QueryNsResponse queryNs = nfvoLcmService.queryNs(new GeneralizedQueryRequest(Utilities.buildNfvNsiFilter(nfvNsId), null));
+				NsInfo nestedNsInfo = queryNs.getQueryNsResult().get(0);
+				NST nestedNsst = findNsstFromNsdId(targetNST, nestedNsInfo.getNsdId() );
+				String nsScaleLevelId=null;
+				if(nestedNsInfo.getNsScaleStatus()!=null && !nestedNsInfo.getNsScaleStatus().isEmpty()){
+					nsScaleLevelId= nestedNsInfo.getNsScaleStatus().get(0).getNsScaleLevelId();
+				}
+				String nestedNsiId = nsRecordService.createNetworkSliceInstanceEntry(nestedNsst.getNstId(),
+						nestedNsInfo.getNsdId(), null , nestedNsInfo.getFlavourId(), nsScaleLevelId, nfvNsId, null,
+						tenantId, null, null, true);
+				soNestedNsiIds.add(nestedNsiId);
+				nsRecordService.setNsStatus(nestedNsiId, NetworkSliceStatus.INSTANTIATED);
+			}
+		}
+		if (soNestedNsiIds.size() >0 )
+			nsRecordService.addNsSubnetsInNetworkSliceInstance(targetNetworkSliceInstanceId, soNestedNsiIds);
+
+
+
+
+	}
+
+	private NST findNsstFromNsdId(NST nst, String nsdId ) throws NotExistingEntityException, MalformattedElementException, FailedOperationException, MethodNotImplementedException {
+		log.debug("Retrieving NSST for NSD:"+nsdId+" in NST:"+nst.getNstId());
+		for(String nsstId : nst.getNsstIds()){
+			NST nestedNst = nsmfUtils.getNsTemplateInfoFromCatalogue(nsstId).getNST();
+			String currentNsdId = nestedNst.getNsdId();
+			if(currentNsdId.equals(nsdId)){
+				return nestedNst;
+			}
+		}
+		throw new NotExistingEntityException("Could not find the NSST associated with NSD NST:"+nst.getNstId()+" NSD:"+nsdId);
+
 	}
 	
 	private void manageNsError(String error) {

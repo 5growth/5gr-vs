@@ -74,13 +74,6 @@ public class VsCoordinator {
                     processCoordinateRequest(coordinateVsiRequest);
                     break;
                 }
-                case COORDINATE_VSI_NSSI_REQUEST: {
-
-                    log.debug("Processing VSI coordination request.");
-                    CoordinateVsiNssiRequest coordinateVsiNssiRequest = (CoordinateVsiNssiRequest) em;
-                    processCoordinateVsiNssiRequest(coordinateVsiNssiRequest);
-                    break;
-                }
                 case NOTIFY_TERMINATION:{
                     log.debug("Processing VSI termination notification.");
                     VsiTerminationNotificationMessage vsiTerminationNotificationMessage = (VsiTerminationNotificationMessage) em;
@@ -126,26 +119,6 @@ public class VsCoordinator {
         }
     }
 
-    synchronized void processCoordinateVsiNssiRequest(CoordinateVsiNssiRequest msg){
-        if (internalStatus != VsCoordinatorStatus.READY) {
-            manageVsCoordinatorError("Received coordinate request in wrong status. Skipping message.");
-            return;
-        }
-        vsNssiActions = msg.getVsNssiActions();
-        internalStatus = VsCoordinatorStatus.COORDINATION_IN_PROGRESS;
-        try{
-            for(Map.Entry<String, VsNssiAction> nssiActionEntry: vsNssiActions.entrySet()) {
-                VsNssiAction action = nssiActionEntry.getValue();
-                if (action.getActionType() == VsNssiActionType.MODIFY) {
-                    vsLcmService.terminateVs(action.getVsiId(), new TerminateVsRequest(action.getVsiId(), "coordinator"));
-                }
-
-            }
-            internalStatus = VsCoordinatorStatus.FINISHED;
-        } catch (NotExistingEntityException e){
-            manageVsCoordinatorError("Error while terminating VSI by Coordinator: " + e.getMessage());
-        }
-    }
 
 
 

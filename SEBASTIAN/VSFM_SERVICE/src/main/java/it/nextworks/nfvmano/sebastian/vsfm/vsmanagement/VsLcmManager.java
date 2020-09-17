@@ -27,6 +27,7 @@ import it.nextworks.nfvmano.catalogue.blueprint.elements.*;
 import it.nextworks.nfvmano.catalogue.blueprint.messages.QueryVsBlueprintResponse;
 import it.nextworks.nfvmano.catalogue.blueprint.services.VsBlueprintCatalogueService;
 import it.nextworks.nfvmano.catalogues.template.services.NsTemplateCatalogueService;
+import it.nextworks.nfvmano.libs.ifa.common.elements.Filter;
 import it.nextworks.nfvmano.libs.ifa.catalogues.interfaces.NsdManagementProviderInterface;
 import it.nextworks.nfvmano.libs.ifa.catalogues.interfaces.messages.QueryNsdResponse;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.FailedOperationException;
@@ -301,12 +302,19 @@ public class VsLcmManager {
                         String nstId = ownerVsi.getNssis().get(nssiId).getNsstId();
                         NfvNsInstantiationInfo instantiationInfo = new NfvNsInstantiationInfo(nstId, vnfAction.getNsdId(),
                                 null, vnfAction.getNsDf(),vnfAction.getNsInstantiationLevel(), null, null, null );
-                        VsNssiAction currentAction  = new VsNssiAction(ownerVsi.getVsiId(), VsNssiActionType.MODIFY, nssiId, instantiationInfo );
-                        actions.put(nssiId, currentAction );
+                        //TODO: add domain id
+                        String actionId = nssiId;
+                        VsNssiAction currentAction  = new VsNssiAction(ownerVsi.getVsiId(), VsNssiActionType.MODIFY, nssiId, instantiationInfo.getNstId(), instantiationInfo.getDeploymentFlavourId(),
+                                instantiationInfo.getInstantiationLevelId(), null);
+                        actions.put(actionId, currentAction);
+
                     }
-                    vsLcmService.requestVsiNssiModification(this.vsiId, actions);
+                    for( Entry<String, VsNssiAction> entry: actions.entrySet()){
+                        vsLcmService.requestVsNsiCoordination(this.vsiId, entry.getValue());
+                    }
+
                 }else{
-                    manageVsError("NsSliceSubnet scaling it is not supported in multidomain NS environments");
+                    manageVsError("NsSliceSubnet modification/sharing it is not supported in multidomain NS environments");
                 }
 
 
@@ -343,8 +351,9 @@ public class VsLcmManager {
                         String nssiId = nsmfLcmProvider.createNetworkSliceIdentifier(request, nsstDomain, tenantId);
                         log.debug("Network Slice Subnet ID " + nssiId + " created for VSI " + vsiId);
 
-                        //TODO add VNf placement info
-                        vsRecordService.addNssiInVsi(vsiId, new NetworkSliceSubnetInstance(nssiId, nsstId, nsstDomain, NetworkSliceStatus.INSTANTIATING, null));
+                        //TODO add VNf placement info and instantiation level/df
+                        NetworkSliceSubnetInstance nsi = new NetworkSliceSubnetInstance(nssiId, nsstId, nsstDomain,null, null, NetworkSliceStatus.INSTANTIATING, null);
+                        vsRecordService.addNssiInVsi(vsiId, nsi );
 
                         log.debug("Record updated with info about NSSI and VSI association.");
 
@@ -398,11 +407,9 @@ public class VsLcmManager {
                     Map<String, NetworkSliceVnfPlacement> nsVnfPlacements = getNetworkSliceVnfPlacements(vnfPlacement);
                     Map<String, String> userDataPlacements = getUserDataVnfPlacement(nsVnfPlacements);
                     userData.putAll(userDataPlacements);
-                    vsRecordService.addNssiInVsi(vsiId, new NetworkSliceSubnetInstance(nsiId,
-                            request.getNstId(),
-                            null,
-                            NetworkSliceStatus.INSTANTIATING,
-                            nsVnfPlacements));
+                    NetworkSliceSubnetInstance nsi = new NetworkSliceSubnetInstance(nsiId, request.getNstId(),
+                            null, nsiInfo.getDeploymentFlavourId(), nsiInfo.getInstantiationLevelId(), NetworkSliceStatus.INSTANTIATING,nsVnfPlacements );
+                    vsRecordService.addNssiInVsi(vsiId, nsi);
                     log.debug("Record updated with info about NSI and VSI association.");
                     InstantiateNsiRequest instantiateNsiReq = new InstantiateNsiRequest(nsiId,
                             nsiInfo.getNstId(),
@@ -472,8 +479,9 @@ public class VsLcmManager {
                         String nssiId = nsmfLcmProvider.createNetworkSliceIdentifier(request, nsstDomain, tenantId);
                         log.debug("Network Slice Subnet ID " + nssiId + " created for VSI " + vsiId);
 
-                        //TODO add vnf placement info
-                        vsRecordService.addNssiInVsi(vsiId, new NetworkSliceSubnetInstance(nssiId, nsstId, nsstDomain, NetworkSliceStatus.INSTANTIATING, new HashMap<>()));
+                        //TODO add vnf placement info and il/df info
+                        NetworkSliceSubnetInstance nsi = new NetworkSliceSubnetInstance(nssiId, nsstId, nsstDomain, null, null, NetworkSliceStatus.INSTANTIATING, new HashMap<>());
+                        vsRecordService.addNssiInVsi(vsiId, nsi);
 
                         log.debug("Record updated with info about NSSI and VSI association.");
                         //In CroCo Df and Il are not considered, for getting this information here we have to add
@@ -698,6 +706,7 @@ public class VsLcmManager {
                     if (status == VerticalServiceStatus.INSTANTIATED && internalStatus == VerticalServiceStatus.INSTANTIATING) {
                         //adminService.addUsedResourcesInTenant(tenantId, nssiResourceUsage);
                         vsRecordService.updateNssiStatusInVsi(vsiId, nssiId, NetworkSliceStatus.INSTANTIATED);
+
                         if (vsRecordService.allNssiStatusInVsi(vsiId, NetworkSliceStatus.INSTANTIATED)) {
                             internalStatus = status;
                             vsRecordService.setVsStatus(vsiId, status);
@@ -733,9 +742,11 @@ public class VsLcmManager {
                 log.debug("Updating Vertical service instance internal network slice subnet");
                 //In the single domain case, a NetworkSliceSubnet was added to store the information about
                 //the VNF placement
+
                 Map<String, NetworkSliceSubnetInstance> nsis = vsi.getNssis();
                 //Removed size control
                 if(nsis!=null && nsis.containsKey(nsiId)){
+                    this.retrieveNssiTree(nsiId, null);
                     vsRecordService.updateNssiStatusInVsi(vsiId, nsiId, NetworkSliceStatus.INSTANTIATED);
                 }else{
                     log.error("Invalid VSi to NSI mapping. This should not happen");
@@ -912,6 +923,32 @@ public class VsLcmManager {
             log.error("Exception while retrieving VSB:"+vsBlueprintId, e);
             throw new FailedOperationException(e);
         }
+    }
+
+    //This method is used to retrieve the NSSI tree once the NS has been instantiated
+    private void retrieveNssiTree(String nssiId, String domain) throws MalformattedElementException, FailedOperationException, MethodNotImplementedException, NotExistingEntityException {
+        log.debug("Retrieving NSSI tree for NSI:"+nssiId);
+        Map<String,String> filterParms = new HashMap<>();
+        filterParms.put("NSI_ID", nssiId);
+        Filter filter = new Filter(filterParms);
+        GeneralizedQueryRequest request = new GeneralizedQueryRequest(filter, null);
+
+        List<NetworkSliceInstance> nsis = nsmfLcmProvider.queryNetworkSliceInstance(request, domain, tenantId);
+        if(nsis!=null && ! nsis.isEmpty()){
+            NetworkSliceInstance currentNsi= nsis.get(0);
+            Map<String, NetworkSliceSubnetInstance> vsiNsi = vsRecordService.getNssiInVsi(this.vsiId);
+            if(!vsiNsi.containsKey(nssiId)){
+                NetworkSliceSubnetInstance currentNssi = new NetworkSliceSubnetInstance(nssiId, currentNsi.getNstId(), domain, currentNsi.getDfId(),
+                        currentNsi.getInstantiationLevelId(), NetworkSliceStatus.INSTANTIATED, null);
+                vsRecordService.addNssiInVsi(vsiId, currentNssi);
+            }
+            if(currentNsi.getNetworkSliceSubnetInstances()!=null) {
+                for (String subNssiId : currentNsi.getNetworkSliceSubnetInstances()){
+                    retrieveNssiTree(subNssiId, domain);
+                }
+            }
+        }else throw new FailedOperationException("Unable to retrieve NSI with id:"+nssiId);
+
     }
 
     private void manageVsError(String errorMessage) {

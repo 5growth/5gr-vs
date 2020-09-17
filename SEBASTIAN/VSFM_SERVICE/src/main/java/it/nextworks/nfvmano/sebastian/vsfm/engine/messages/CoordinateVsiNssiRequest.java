@@ -22,44 +22,43 @@ import it.nextworks.nfvmano.sebastian.common.VsNssiAction;
 import java.util.Map;
 
 public class CoordinateVsiNssiRequest extends VsmfEngineMessage{
-    @JsonProperty("vsiCoordinatorId")
-    private String vsiCoordinatorId;
+    @JsonProperty("vsiRequesterId")
+    private String vsiRequesterId;
 
-    @JsonProperty("vsiId")
-    private String vsiId;
 
-    @JsonProperty("vsNssiActions")
-    private Map<String, VsNssiAction> vsNssiActions;  //Note <vsiId, VsNssiAction>
+
+    @JsonProperty("vsNssiAction")
+    private VsNssiAction vsNssiAction;
 
 
     /**
      *
-     * @param vsiCoordinatorId
-     * @param vsNsiActions
+     * @param vsiRequesterId
+     * @param vsNsiAction
      */
     @JsonCreator
-    public CoordinateVsiNssiRequest(@JsonProperty("vsiCoordinatorId") String vsiCoordinatorId,
-                                    @JsonProperty("vsNssiActions") Map<String, VsNssiAction> vsNsiActions) {
+    public CoordinateVsiNssiRequest(@JsonProperty("vsiRequesterId") String vsiRequesterId,
+                                    @JsonProperty("vsNssiAction") VsNssiAction vsNsiAction) {
         this.type = VsmfEngineMessageType.COORDINATE_VSI_NSSI_REQUEST;
-        this.vsiCoordinatorId = vsiCoordinatorId;
-        if(vsNssiActions != null)
-            this.vsNssiActions = vsNssiActions;
+        this.vsiRequesterId = vsiRequesterId;
+        this.vsNssiAction = vsNsiAction;
+
 
     }
 
     /**
      *
-     * @return vsiCoordinatorId
+     * @return vsiRequesterId
      */
-    public String getVsiCoordinatorId() {
-        return vsiCoordinatorId;
+    public String getVsiRequesterId() {
+        return vsiRequesterId;
     }
 
     /**
      *
-     * @return vsNssiActions
+     * @return vsNssiAction
      */
-    public Map<String, VsNssiAction> getVsNssiActions() {
-        return vsNssiActions;
+    public VsNssiAction getVsNssiAction() {
+        return vsNssiAction;
     }
 }

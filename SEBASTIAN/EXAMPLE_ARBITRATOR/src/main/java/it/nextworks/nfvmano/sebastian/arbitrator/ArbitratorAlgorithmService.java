@@ -49,7 +49,7 @@ public class ArbitratorAlgorithmService {
 	public void sendResponse(Map<String, String> generatedIds){
 		log.debug("Executing in thread:"+Thread.currentThread().getName());
 		try {
-			Thread.sleep(100000L);
+			Thread.sleep(10000L);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

@@ -22,6 +22,7 @@ import it.nextworks.nfvmano.libs.ifa.common.exceptions.FailedOperationException;
 
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -44,13 +45,15 @@ public class ArbitratorAlgorithmRestController {
 
 	@RequestMapping(value = "/computeArbitration", method = RequestMethod.POST)
 
-	public ResponseEntity<?> computeArbitration(@RequestBody ArbitratorRequest request) {
+	public ResponseEntity<?> computeArbitration(@RequestBody List<ArbitratorRequest> request) {
 		log.debug("Received request for Arbitration computation");
 		try {
+
+
 			Map<String, String> operationIds = algorithm.computeArbitratorSolution(request);
 			algorithm.sendResponse(operationIds);
 			log.debug("Continuing execution");
-			return new ResponseEntity<>(operationIds, HttpStatus.OK);
+			return new ResponseEntity<>(operationIds, HttpStatus.CREATED);
 
 		} catch (NotExistingEntityException e) {
 			log.error("Error. Elements in the request not found." + e.getMessage());

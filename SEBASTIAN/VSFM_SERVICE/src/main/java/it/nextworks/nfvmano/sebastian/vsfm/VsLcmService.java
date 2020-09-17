@@ -31,6 +31,7 @@ import it.nextworks.nfvmano.sebastian.common.*;
 import it.nextworks.nfvmano.sebastian.record.elements.NetworkSliceSubnetInstance;
 import it.nextworks.nfvmano.sebastian.record.elements.VerticalServiceStatus;
 import it.nextworks.nfvmano.sebastian.vsfm.engine.messages.*;
+import it.nextworks.nfvmano.sebastian.vsfm.vscoordinator.VsiNsiCoordinator;
 import it.nextworks.nfvmano.sebastian.vsfm.vsmanagement.VsLcmManager;
 import it.nextworks.nfvmano.sebastian.vsfm.interfaces.VsLcmProviderInterface;
 import org.slf4j.Logger;
@@ -46,6 +47,7 @@ import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -131,6 +133,9 @@ public class VsLcmService implements VsLcmProviderInterface, NsmfLcmConsumerInte
 	@Value("${spring.rabbitmq.host}")
     private String rabbitHost;
 
+	@Value("${spring.rabbitmq.timout:10}")
+	private int rabbitTimeout;
+
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
@@ -144,6 +149,10 @@ public class VsLcmService implements VsLcmProviderInterface, NsmfLcmConsumerInte
     //internal map of VS LCM Managers
     //each VS LCM Manager is created when a new VSI ID is created and removed when the VSI ID is removed
     private Map<String, VsLcmManager> vsLcmManagers = new HashMap<>();
+
+    //internal map of Vs NSI Coordinators
+	//key: "nsiId_domain" or "nsiId", value coordinator
+	private Map<String, VsiNsiCoordinator> vsNsiCoordinators = new HashMap<>();
 
     //internal map of VS Coordinators
     //each VS Coordinator is created on demand, as soon as a VSI asks for resources for being instantiated
@@ -433,27 +442,32 @@ public class VsLcmService implements VsLcmProviderInterface, NsmfLcmConsumerInte
         }
     }
 
-	/**
-	 *
-	 * @param invokerVsiId Is the id of the Vsi invoking the coordination. VsCoordinator uses it as Coordinator ID
-	 * @param vsNssiActions key: network slice subnet id, value: the VsNssiAction
-	 */
-    public void requestVsiNssiModification(String invokerVsiId, Map<String, VsNssiAction> vsNssiActions){
-		log.debug("Processing new VSI NSSI modification requested by" +invokerVsiId );
-		if (!vsCoordinators.containsKey(invokerVsiId))
-			initNewVsCoordinator(invokerVsiId);
-		String topic = "coordlifecycle.coordinatevs." + invokerVsiId;
 
-		//key nssid, value action
+    public void requestVsNsiCoordination(String invokerVsiId, VsNssiAction action ){
+    	log.debug("Processing VS NSI coordination request");
+    	String topicId = action.getNssiId();
+    	if(action.getDomainId()!=null){
+    		topicId+="_"+action.getDomainId();
+		}
 
-		CoordinateVsiNssiRequest internalMessage = new CoordinateVsiNssiRequest(invokerVsiId, vsNssiActions);
+
+    	if(!vsNsiCoordinators.containsKey(topicId)){
+    		initNewVsNsiCoordinator(action.getNssiId(), action.getDomainId(), action.getNstId());
+
+		}
+		String topic = "coordlifecycle.coordinatevsnsi." + topicId;
+
+		CoordinateVsiNssiRequest internalMessage = new CoordinateVsiNssiRequest(invokerVsiId, action);
 		try {
 			sendMessageToQueue(internalMessage, topic);
 		} catch (JsonProcessingException e) {
 			log.error("Error while translating internal VS coordination message in Json format.");
 			vsRecordService.setVsFailureInfo(invokerVsiId, "Error while translating internal VS coordination message in Json format.");
 		}
+
 	}
+
+
 
     private void modifyVs(String vsiId, ModifyVsRequest request) throws NotExistingEntityException{
         log.debug("Processing new VSI modification request for VSI ID " + vsiId);
@@ -612,15 +626,40 @@ public class VsLcmService implements VsLcmProviderInterface, NsmfLcmConsumerInte
 	
     /**
      * This method initializes a new VS Coordinator that will be in charge of Terminate or Update VSIs
-     * @param vsCoordinatorId Id of VS Coordinator instance. It will be the id of the VsLcm invoking it
+     * @param nsiId network slice instance id to be coordinated
+	 * @param domain the domain of the network slice
+	 * @param nstId the network slice template id
+	 *
      */
-    private void initNewVsCoordinator(String vsCoordinatorId) {
-        log.debug("Initializing new VS Coordinator with id " + vsCoordinatorId);
-        VsCoordinator vsCoordinator = new VsCoordinator(vsCoordinatorId, this);
-        createQueue(vsCoordinatorId, vsCoordinator);
-        vsCoordinators.put(vsCoordinatorId, vsCoordinator);
-        log.debug("VS Coordinator with id " + vsCoordinatorId + " initialized and added to the engine.");
+    private void initNewVsNsiCoordinator(String nsiId, String domain, String nstId ) {
+        String coordinatorId= nsiId;
+        if(domain!=null)
+        	coordinatorId+="_"+domain;
+    	log.debug("Initializing new VS Nsi Coordinator with id " + coordinatorId);
+        VsiNsiCoordinator vsNsiCoordinator = new VsiNsiCoordinator(nsiId, nstId, domain, nsmfLcmProvider, this);
+        createVsNsiCoordinationQueue(coordinatorId, vsNsiCoordinator);
+        String topicId = nsiId;
+        if(domain!=null)
+        	topicId+="_"+domain;
+
+
+        vsNsiCoordinators.put(topicId, vsNsiCoordinator);
+        log.debug("VS NSI Coordinator with id " + coordinatorId + " initialized and added to the engine.");
     }
+
+
+
+	/**
+	 * This method initializes a new VS NSI Coordinator that will be in charge of NS sharing coordination
+	 * @param vsCoordinatorId Id of VS Coordinator instance. It will be the id of the VsLcm invoking it
+	 */
+	private void initNewVsCoordinator(String vsCoordinatorId) {
+		log.debug("Initializing new VS Coordinator with id " + vsCoordinatorId);
+		VsCoordinator vsCoordinator = new VsCoordinator(vsCoordinatorId, this);
+		createQueue(vsCoordinatorId, vsCoordinator);
+		vsCoordinators.put(vsCoordinatorId, vsCoordinator);
+		log.debug("VS Coordinator with id " + vsCoordinatorId + " initialized and added to the engine.");
+	}
 
     /**
      * This method initializes a new VS LCM manager that will be in charge
@@ -671,7 +710,7 @@ public class VsLcmService implements VsLcmProviderInterface, NsmfLcmConsumerInte
         log.debug("Creating new Queue " + queueName + " in rabbit host " + rabbitHost);
         CachingConnectionFactory cf = new CachingConnectionFactory();
         cf.setAddresses(rabbitHost);
-        cf.setConnectionTimeout(5);
+        cf.setConnectionTimeout(rabbitTimeout);
         RabbitAdmin rabbitAdmin = new RabbitAdmin(cf);
         Queue queue = new Queue(queueName, false, false, true);
         rabbitAdmin.declareQueue(queue);
@@ -685,6 +724,31 @@ public class VsLcmService implements VsLcmProviderInterface, NsmfLcmConsumerInte
         log.debug("Queue created");
     }
 
+	/**
+	 *
+	 * @param vsNsiCoordinatorId Id of the VsCoordinator (tentantId as candidate)
+	 * @param vsCoordinator VSI coordinator in charge of processing messages
+	 */
+	private void createVsNsiCoordinationQueue(String vsNsiCoordinatorId, VsiNsiCoordinator vsCoordinator) {
+		String queueName = ConfigurationParameters.engineQueueNamePrefix +"coordvsnsi"+ vsNsiCoordinatorId;
+		log.debug("Creating new Queue " + queueName + " in rabbit host " + rabbitHost);
+		CachingConnectionFactory cf = new CachingConnectionFactory();
+		cf.setAddresses(rabbitHost);
+		cf.setConnectionTimeout(rabbitTimeout);
+		RabbitAdmin rabbitAdmin = new RabbitAdmin(cf);
+		Queue queue = new Queue(queueName, false, false, true);
+		rabbitAdmin.declareQueue(queue);
+		rabbitAdmin.declareExchange(messageExchange);
+		rabbitAdmin.declareBinding(BindingBuilder.bind(queue).to(messageExchange).with("coordvsnsilifecycle.*." + vsNsiCoordinatorId));
+		SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(cf);
+		MessageListenerAdapter adapter = new MessageListenerAdapter(vsCoordinator, "receiveMessage");
+		container.setMessageListener(adapter);
+		container.setQueueNames(queueName);
+		container.start();
+		log.debug("Queue created");
+	}
+
+
     /**
      * This internal method creates a queue for the exchange of asynchronous messages
      * related to a given VSI.
@@ -697,7 +761,7 @@ public class VsLcmService implements VsLcmProviderInterface, NsmfLcmConsumerInte
         log.debug("Creating new Queue " + queueName + " in rabbit host " + rabbitHost);
         CachingConnectionFactory cf = new CachingConnectionFactory();
         cf.setAddresses(rabbitHost);
-        cf.setConnectionTimeout(5);
+        cf.setConnectionTimeout(rabbitTimeout);
         RabbitAdmin rabbitAdmin = new RabbitAdmin(cf);
         Queue queue = new Queue(queueName, false, false, true);
         rabbitAdmin.declareQueue(queue);

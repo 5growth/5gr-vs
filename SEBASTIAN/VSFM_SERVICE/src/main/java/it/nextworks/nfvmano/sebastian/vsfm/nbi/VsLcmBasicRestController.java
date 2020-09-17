@@ -80,16 +80,16 @@ public class VsLcmBasicRestController {
 			String vsId = vsLcmService.instantiateVs(request);
 			return new ResponseEntity<>(vsId, HttpStatus.CREATED);
 		} catch (NotExistingEntityException e) {
-			log.error("VS instantiation failed due to missing elements in DB.");
+			log.error("VS instantiation failed due to missing elements in DB.",e);
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
 		} catch (NotPermittedOperationException e) {
-			log.error("VS instantiation failed due to missing permission.");
+			log.error("VS instantiation failed due to missing permission.",e);
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
 		} catch (MalformattedElementException e) {
-			log.error("VS instantiation failed due to bad-formatted request.");
+			log.error("VS instantiation failed due to bad-formatted request.",e);
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
-			log.error("VS instantiation failed due to internal errors.");
+			log.error("VS instantiation failed due to internal errors.",e);
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -115,10 +115,10 @@ public class VsLcmBasicRestController {
 			log.error("Malformatted request");
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		} catch (NotExistingEntityException e) {
-			log.error("VS instance not found");
+			log.error("VS instance not found",e);
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
 		} catch (NotPermittedOperationException e) {
-			log.error("VS instance not visible for the given tenant.");
+			log.error("VS instance not visible for the given tenant.",e);
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
 		} catch (Exception e) {
 			log.error("Internal exception: {}", e.getClass().getSimpleName());
@@ -145,13 +145,13 @@ public class VsLcmBasicRestController {
 			List<String> response = vsLcmService.queryAllVsIds(new GeneralizedQueryRequest(MgmtCatalogueUtilities.buildTenantFilter(user), null));
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (MalformattedElementException e) {
-			log.error("Malformatted request");
+			log.error("Malformatted request",e);
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 		} catch (NotExistingEntityException e) {
-			log.error("VS instance not found");
+			log.error("VS instance not found",e);
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
 		} catch (Exception e) {
-			log.error("Internal exception");
+			log.error("Internal exception",e);
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}

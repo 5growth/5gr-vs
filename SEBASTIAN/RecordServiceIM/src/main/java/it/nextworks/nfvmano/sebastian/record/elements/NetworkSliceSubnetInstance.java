@@ -55,12 +55,14 @@ public class NetworkSliceSubnetInstance {
     public NetworkSliceSubnetInstance() {
     }
 
-    public NetworkSliceSubnetInstance(String nssiId, String nsstId, String domainId, NetworkSliceStatus status, Map<String, NetworkSliceVnfPlacement> vnfPlacement) {
+    public NetworkSliceSubnetInstance(String nssiId, String nsstId, String domainId, String nsDeploymentFlavorId, String nsInstantiationLevelId, NetworkSliceStatus status, Map<String, NetworkSliceVnfPlacement> vnfPlacement) {
         this.nssiId = nssiId;
         this.nsstId = nsstId;
         this.domainId = domainId;
         this.status = status;
         if(vnfPlacement!=null) this.vnfPlacement=vnfPlacement;
+        this.nsDeploymentFlavorId=nsDeploymentFlavorId;
+        this.nsInstantiationLevelId = nsInstantiationLevelId;
     }
 
     /**

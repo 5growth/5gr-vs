@@ -1,5 +1,7 @@
 package it.nextworks.nfvmano.sebastian.arbitrator.external;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.FailedOperationException;
 import it.nextworks.nfvmano.sebastian.arbitrator.messages.ArbitratorRequest;
 import org.slf4j.Logger;
@@ -65,13 +67,19 @@ public class ExternalArbitratorRestClient {
     }
 
     public Map<String,String> requestArbitration(List<ArbitratorRequest> request) throws FailedOperationException {
+        log.debug("Received request to compute arbitration");
         String url = arbitratorBaseUrl + "/arbitrator/computeArbitration";
         try{
+            ObjectMapper objectMapper = new ObjectMapper();
+            log.debug("Received request:"+objectMapper.writeValueAsString(request.get(0)));
             ResponseEntity<Map<String, String>> httpResponse = performHTTPRequest(request, url, HttpMethod.POST);
             return manageHTTPResponse(httpResponse, "Error while requesting external arbitration", "External arbitration correctly requested", HttpStatus.CREATED);
         }catch(RestClientException e){
             throw new FailedOperationException("failed to send arbitration request", e);
 
+        } catch (JsonProcessingException e) {
+            log.error("Error processing arbitrator request:",e);
+            throw new FailedOperationException("failed to send arbitration request", e);
         }
 
     }

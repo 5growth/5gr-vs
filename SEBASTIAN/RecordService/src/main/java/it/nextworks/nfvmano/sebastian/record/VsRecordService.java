@@ -233,6 +233,13 @@ public class VsRecordService {
 		log.debug("Added NSSI with ID " + nssi.getNssiId() + " into VSI with ID ");
 	}
 
+	public synchronized  Map<String, NetworkSliceSubnetInstance> getNssiInVsi(String vsiId) throws NotExistingEntityException {
+		log.debug("Retrieving NSSI in VSI" + vsiId);
+		VerticalServiceInstance vsi = getVsInstance(vsiId);
+		return vsi.getNssis();
+
+	}
+
 	/**
 	 * This method updates the NSSI status in a VSI in DB
 	 *

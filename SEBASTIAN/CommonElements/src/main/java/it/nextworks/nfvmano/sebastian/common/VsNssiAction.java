@@ -27,9 +27,12 @@ public class VsNssiAction {
 
     //NetworkSliceSubnet instance id
     private String nssiId;
+    private String nstId;
+    private String dfId;
+    private String ilId;
+    private String domainId;
 
 
-    private NfvNsInstantiationInfo nsInstantiationInfo;
 
     public VsNssiAction() {
     }
@@ -38,13 +41,18 @@ public class VsNssiAction {
      *
      * @param vsiId ID of Vsi the action belongs to
      * @param actionType type of action
-     * @param nsInstantiationInfo Information about the associated NS
+     * @param nstId nstId
+     * @param dfId deployment flavor id
+     * @param ilId instantiation level id
      */
-    public VsNssiAction(String vsiId, VsNssiActionType actionType, String nssiId, NfvNsInstantiationInfo nsInstantiationInfo) {
+    public VsNssiAction(String vsiId, VsNssiActionType actionType, String nssiId, String nstId, String dfId, String ilId, String domainId) {
         this.vsiId = vsiId;
         this.actionType = actionType;
-        this.nsInstantiationInfo = nsInstantiationInfo;
+        this.nstId = nstId;
+        this.ilId= ilId;
+        this.dfId= dfId;
         this.nssiId= nssiId;
+        this.domainId= domainId;
     }
 
 
@@ -69,11 +77,19 @@ public class VsNssiAction {
         return actionType;
     }
 
-    /**
-     *
-     * @return nsInstantiationInfo
-     */
-    public NfvNsInstantiationInfo getNsInstantiationInfo() {
-        return nsInstantiationInfo;
+    public String getNstId() {
+        return nstId;
+    }
+
+    public String getDfId() {
+        return dfId;
+    }
+
+    public String getIlId() {
+        return ilId;
+    }
+
+    public String getDomainId() {
+        return domainId;
     }
 }
