@@ -113,5 +113,7 @@ public class NetworkSliceSubnetInstance {
         return vnfPlacement;
     }
 
-
+    public void setVnfPlacement(Map<String, NetworkSliceVnfPlacement> vnfPlacement){
+        this.vnfPlacement= vnfPlacement;
+    }
 }

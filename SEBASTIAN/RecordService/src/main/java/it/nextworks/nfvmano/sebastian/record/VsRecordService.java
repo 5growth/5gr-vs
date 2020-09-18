@@ -19,8 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import it.nextworks.nfvmano.sebastian.record.elements.NetworkSliceStatus;
-import it.nextworks.nfvmano.sebastian.record.elements.NetworkSliceSubnetInstance;
+import it.nextworks.nfvmano.sebastian.record.elements.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +30,6 @@ import org.springframework.stereotype.Service;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotPermittedOperationException;
 import it.nextworks.nfvmano.libs.ifa.osmanfvo.nslcm.interfaces.elements.LocationInfo;
-import it.nextworks.nfvmano.sebastian.record.elements.VerticalServiceInstance;
-import it.nextworks.nfvmano.sebastian.record.elements.VerticalServiceStatus;
 import it.nextworks.nfvmano.sebastian.record.repo.VerticalServiceInstanceRepository;
 
 
@@ -231,6 +228,27 @@ public class VsRecordService {
 		vsi.addNetworkSliceSubnetInstance(nssi);
 		vsInstanceRepository.saveAndFlush(vsi);
 		log.debug("Added NSSI with ID " + nssi.getNssiId() + " into VSI with ID ");
+	}
+
+	/**
+	 * This method updates the VSI in DB, adding an associated network slice subnet instance
+	 *
+	 * @param vsiId ID of the VSI to be updated
+	 * @param nssiId  ID of the NSSI to be added into the VSI
+	 *                @param vnfPlacement  the vnf placement map of slice
+	 * @throws NotExistingEntityException if the VSI does not exist
+	 */
+	public synchronized void updateVsiNsiVnfPlacement(String vsiId, String nssiId, Map<String, NetworkSliceVnfPlacement> vnfPlacement) throws NotExistingEntityException {
+		log.debug("Updating VSI Network Slice Subnet VNF placement " + nssiId + " into Vertical Service Instance " + vsiId+ " "+vnfPlacement);
+		VerticalServiceInstance vsi = getVsInstance(vsiId);
+		if(vsi.getNssis().containsKey(nssiId)){
+			NetworkSliceSubnetInstance nssi = vsi.getNssis().get(nssiId);
+			nssi.setVnfPlacement(vnfPlacement);
+			vsi.getNssis().put(nssiId, nssi);
+			vsInstanceRepository.saveAndFlush(vsi);
+
+		}else throw new NotExistingEntityException("Network slice with id:"+nssiId+" not found in VSI:"+vsiId);
+
 	}
 
 	public synchronized  Map<String, NetworkSliceSubnetInstance> getNssiInVsi(String vsiId) throws NotExistingEntityException {

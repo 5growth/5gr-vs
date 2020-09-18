@@ -371,6 +371,7 @@ public class VsLcmManager {
                         nsmfLcmProvider.instantiateNetworkSlice(instantiateNssiReq, nsstDomain, tenantId);
                     }
                 } else {
+                    log.debug("Using VSMF single domain functionality");
                     //it means it is not multidomain
 
                     request = new CreateNsiIdRequest(nsiInfo.getNstId(),
@@ -397,18 +398,14 @@ public class VsLcmManager {
 
 
                     Map<String, String> userData = msg.getRequest().getUserData();
-                    log.debug("Retrieving NSD to get the VNFs");
-                    List<String> vnfsInInstantiationLevel = getNsdVnfdsInInstantiationLevel(nsiInfo.getNfvNsdId(),
-                            nsiInfo.getNsdVersion(),
-                            nsiInfo.getDeploymentFlavourId(),
-                            nsiInfo.getInstantiationLevelId());
+
                     log.debug("Retrieving VSB atomic component placement");
-                    Map<String, VsComponentPlacement> vnfPlacement = retrieveVsBlueprintVnfPlacement(vsd.getVsBlueprintId(), vnfsInInstantiationLevel);
+                    Map<String, VsComponentPlacement> vnfPlacement = retrieveVsBlueprintVnfPlacement(vsd.getVsBlueprintId());
                     Map<String, NetworkSliceVnfPlacement> nsVnfPlacements = getNetworkSliceVnfPlacements(vnfPlacement);
                     Map<String, String> userDataPlacements = getUserDataVnfPlacement(nsVnfPlacements);
                     userData.putAll(userDataPlacements);
                     NetworkSliceSubnetInstance nsi = new NetworkSliceSubnetInstance(nsiId, request.getNstId(),
-                            null, nsiInfo.getDeploymentFlavourId(), nsiInfo.getInstantiationLevelId(), NetworkSliceStatus.INSTANTIATING,nsVnfPlacements );
+                            null, nsiInfo.getDeploymentFlavourId(), nsiInfo.getInstantiationLevelId(), NetworkSliceStatus.INSTANTIATING,null );
                     vsRecordService.addNssiInVsi(vsiId, nsi);
                     log.debug("Record updated with info about NSI and VSI association.");
                     InstantiateNsiRequest instantiateNsiReq = new InstantiateNsiRequest(nsiId,
@@ -828,49 +825,21 @@ public class VsLcmManager {
         }
     }
 
-    private List<String> getNsdVnfdsInInstantiationLevel(String nsdId, String nsdVersion,  String nsdDfId, String nsIlId ) throws NotExistingEntityException, FailedOperationException {
-        log.debug("Retrieving NSD to obtain the used VNFDs:"+nsdId +" "+nsdDfId+ " "+nsIlId);
-        QueryNsdResponse nsdResponse = null;
-        try {
-            nsdResponse = nsdManagementProviderInterface.queryNsd(new GeneralizedQueryRequest(
-                    BlueprintCatalogueUtilities.buildNsdFilter(nsdId, nsdVersion), null));
-            Nsd nsd = nsdResponse.getQueryResult().get(0).getNsd();
-            NsDf nsDf = nsd.getNsDeploymentFlavour(nsdDfId);
-            NsLevel nsLevel = nsDf.getNsLevel(nsIlId);
-            List<String> levelVnfProfiles = nsLevel.getVnfToLevelMapping().stream()
-                    .map(vnfMapping -> vnfMapping.getVnfProfileId())
-                    .collect(Collectors.toList());
-            return nsDf.getVnfProfile().stream()
-                    .filter(vnfProfile -> levelVnfProfiles.contains(vnfProfile.getVnfProfileId()))
-                    .map(vnfProfile -> vnfProfile.getVnfdId())
-                    .collect(Collectors.toList());
-
-        } catch (MethodNotImplementedException e) {
-            log.debug("Exception while retrieving NSD:",e);
-            throw  new FailedOperationException(e);
-        } catch (MalformattedElementException e) {
-            log.debug("Exception while retrieving NSD:",e);
-            throw  new FailedOperationException(e);
-        }
-
-
-
-
-    }
-
-    private Map<String, String> getUserDataVnfPlacement(Map<String, NetworkSliceVnfPlacement> nsVnfPlacements){
+        private Map<String, String> getUserDataVnfPlacement(Map<String, NetworkSliceVnfPlacement> nsVnfPlacements){
+        log.debug("Mapping NS VNF placement to userData parameters");
         Map<String, String> userData = new HashMap<>();
         if(nsVnfPlacements!=null){
             for(Entry<String, NetworkSliceVnfPlacement> placementEntry : nsVnfPlacements.entrySet()){
                 userData.put("vnf.placement."+placementEntry.getKey(), placementEntry.getValue().toString());
             }
         }
+        log.debug(userData.toString());
         return userData;
 
     }
 
     private Map<String, NetworkSliceVnfPlacement> getNetworkSliceVnfPlacements(Map<String, VsComponentPlacement> vnfPlacement) throws FailedOperationException {
-
+        log.debug("Retrieving VS desired VNF placement in NS");
         Map<String, NetworkSliceVnfPlacement> nsVnfPlacement = new HashMap<>();
         for(Entry<String, VsComponentPlacement> placementEntry: vnfPlacement.entrySet()){
 
@@ -883,13 +852,14 @@ public class VsLcmManager {
 
             nsVnfPlacement.put(placementEntry.getKey(), nsEntryPlacement);
         }
+        log.debug(nsVnfPlacement.toString());
         return nsVnfPlacement;
     }
 
 
     //key vnfdId, value the correspondent VsComponentPlacement
 
-    private Map<String, VsComponentPlacement> retrieveVsBlueprintVnfPlacement(String vsBlueprintId, List<String> vnfdIds) throws FailedOperationException, NotExistingEntityException {
+    private Map<String, VsComponentPlacement> retrieveVsBlueprintVnfPlacement(String vsBlueprintId) throws FailedOperationException, NotExistingEntityException {
         log.debug("Retrieving VSB Component Placement info for vsb:"+vsBlueprintId);
 
         try {
@@ -898,11 +868,11 @@ public class VsLcmManager {
                             new GeneralizedQueryRequest(BlueprintCatalogueUtilities.buildVsBlueprintFilter(vsBlueprintId), null));
             log.debug("Assuming one VSB");
             List<VsComponent> atomicComponents = response.getVsBlueprintInfo().get(0).getVsBlueprint().getAtomicComponents();
-            if(atomicComponents!=null && vnfdIds!=null){
+            if(atomicComponents!=null){
                 Map<String,VsComponentPlacement> componentPlacement = new HashMap<>();
                 for (VsComponent currentComponent: atomicComponents){
                     if(currentComponent.getType()== VsComponentType.VNF ){
-                        if(currentComponent.getPlacement()!=null && vnfdIds.contains(currentComponent.getComponentId())) {
+                        if(currentComponent.getPlacement()!=null) {
                             String key = currentComponent.getComponentId();
                             log.debug("Adding component placement:" + key + " - " + currentComponent.getPlacement());
                             componentPlacement.put(key, currentComponent.getPlacement());
@@ -942,6 +912,7 @@ public class VsLcmManager {
                         currentNsi.getInstantiationLevelId(), NetworkSliceStatus.INSTANTIATED, null);
                 vsRecordService.addNssiInVsi(vsiId, currentNssi);
             }
+            vsRecordService.updateVsiNsiVnfPlacement(this.vsiId, nssiId,currentNsi.getVnfPlacement() );
             if(currentNsi.getNetworkSliceSubnetInstances()!=null) {
                 for (String subNssiId : currentNsi.getNetworkSliceSubnetInstances()){
                     retrieveNssiTree(subNssiId, domain);

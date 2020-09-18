@@ -22,6 +22,7 @@ import java.util.Optional;
 import javax.annotation.PostConstruct;
 
 
+import it.nextworks.nfvmano.sebastian.record.elements.NetworkSliceVnfPlacement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +67,7 @@ public class NsRecordService {
 
 	) {
 		log.debug("Creating a new Network Slice instance");
-		NetworkSliceInstance nsi = new NetworkSliceInstance(null, nstId, nsdId, nsdVersion, dfId, ilId, nfvNsId, networkSliceSubnetInstances, tenantId, name, description, soManaged);
+		NetworkSliceInstance nsi = new NetworkSliceInstance(null, nstId, nsdId, nsdVersion, dfId, ilId, nfvNsId, networkSliceSubnetInstances, tenantId, name, description, soManaged, null);
 		nsInstanceRepository.saveAndFlush(nsi);
 		String nsiId = nsi.getId().toString();
 		log.debug("Created Network Slice instance with ID " + nsiId);
@@ -283,5 +284,11 @@ public class NsRecordService {
 		return nsInstanceRepository.findAll();
 	}
 
-	
+
+
+	public void updateNsiVnfPlacement(String nsiId, Map<String, NetworkSliceVnfPlacement> vnfPlacement) throws NotExistingEntityException {
+		NetworkSliceInstance nsi = getNsInstance(nsiId);
+		nsi.setVnfPlacement(vnfPlacement);
+		nsInstanceRepository.saveAndFlush(nsi);
+	}
 }
