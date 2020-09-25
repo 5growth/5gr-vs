@@ -68,7 +68,7 @@ public class EvsTestNfvoLcmDriver extends NfvoLcmAbstractDriver {
 		String nsEVSInfoId = generateNsdInfo("nsEVS", request.getTenantId(), vnfPlacement );
         List<String> nestedIds = new ArrayList<>();
         nestedIds.add(nsEVSInfoId);
-		if(request.getNsdId().equals("nestedEVS")){
+		if(request.getNsName().contains("shared")){
 
 
 
