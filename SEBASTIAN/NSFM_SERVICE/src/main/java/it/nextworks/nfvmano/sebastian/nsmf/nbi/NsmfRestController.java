@@ -150,7 +150,7 @@ public class NsmfRestController {
 
 	})
 	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping(value = "/ns/nsinstanceids", method = RequestMethod.GET)
+	@RequestMapping(value = "/networksliceids", method = RequestMethod.GET)
 	public ResponseEntity<?> getNsInstanceIds(Authentication auth) {
 		log.debug("Received query for all network slice instances.");
 		try {
