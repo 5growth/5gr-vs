@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" output="target/classes" path="src/main/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry excluding="**" kind="src" output="target/classes" path="src/main/resources">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="target/test-classes" path="src/test/java">
+		<attributes>
+			<attribute name="test" value="true"/>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry excluding="**" kind="src" output="target/test-classes" path="src/test/resources">
+		<attributes>
+			<attribute name="test" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+		<attributes>
+			<attribute name="module" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry combineaccessrules="false" kind="src" path="/NfvManoLibsCataloguesIf"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/NfvManoLibsCommon"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/NfvManoLibsDescriptors"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/NfvManoLibsIfa05VrMgtIf"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/NfvManoLibsIfa07GrantIf"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/NfvManoLibsIfa07VnfLcmIf"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/NfvManoLibsIfa13NsLcmIf"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/NfvManoLibsMonitIf"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/NfvManoLibsPolicyMgtIf"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/NfvManoLibsSwImagesIf"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/NfvManoLibsVnfConfigIf"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/NfvManoLibsVnfIndicatorIf"/>
+	<classpathentry kind="lib" path="C:/Users/mesquita/.m2/repository/org/springframework/spring-web/4.3.13.RELEASE/spring-web-4.3.13.RELEASE.jar" sourcepath="C:/Users/mesquita/.m2/repository/org/springframework/spring-web/4.3.13.RELEASE/spring-web-4.3.13.RELEASE-sources.jar">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="maven.groupId" value="org.springframework"/>
+			<attribute name="maven.artifactId" value="spring-web"/>
+			<attribute name="maven.version" value="4.3.13.RELEASE"/>
+			<attribute name="maven.scope" value="compile"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/mesquita/.m2/repository/org/hibernate/common/hibernate-commons-annotations/5.0.1.Final/hibernate-commons-annotations-5.0.1.Final.jar" sourcepath="C:/Users/mesquita/.m2/repository/org/hibernate/common/hibernate-commons-annotations/5.0.1.Final/hibernate-commons-annotations-5.0.1.Final-sources.jar">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="maven.groupId" value="org.hibernate.common"/>
+			<attribute name="maven.artifactId" value="hibernate-commons-annotations"/>
+			<attribute name="maven.version" value="5.0.1.Final"/>
+			<attribute name="maven.scope" value="compile"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/mesquita/.m2/repository/org/slf4j/slf4j-api/1.7.25/slf4j-api-1.7.25.jar" sourcepath="C:/Users/mesquita/.m2/repository/org/slf4j/slf4j-api/1.7.25/slf4j-api-1.7.25-sources.jar">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="maven.groupId" value="org.slf4j"/>
+			<attribute name="maven.artifactId" value="slf4j-api"/>
+			<attribute name="maven.version" value="1.7.25"/>
+			<attribute name="maven.scope" value="compile"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/mesquita/.m2/repository/org/springframework/spring-core/4.3.13.RELEASE/spring-core-4.3.13.RELEASE.jar" sourcepath="C:/Users/mesquita/.m2/repository/org/springframework/spring-core/4.3.13.RELEASE/spring-core-4.3.13.RELEASE-sources.jar">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="maven.groupId" value="org.springframework"/>
+			<attribute name="maven.artifactId" value="spring-core"/>
+			<attribute name="maven.version" value="4.3.13.RELEASE"/>
+			<attribute name="maven.scope" value="compile"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" path="/NSFM_INTERFACES"/>
+	<classpathentry kind="src" path="/RecordServiceIM"/>
+	<classpathentry kind="output" path="target/classes"/>
+</classpath>
