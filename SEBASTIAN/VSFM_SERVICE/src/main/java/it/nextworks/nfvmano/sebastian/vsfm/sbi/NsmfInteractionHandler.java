@@ -96,6 +96,8 @@ public class NsmfInteractionHandler implements NsmfLcmProviderInterface {
             throws NotExistingEntityException, MethodNotImplementedException, FailedOperationException,
             MalformattedElementException, NotPermittedOperationException {
         if (domainId == null) domainId = defaultDriver;
+        log.debug("CreateNetworkSliceIdentifier for domain"+domainId);
+
         return drivers.get(domainId).createNetworkSliceIdentifier(request, domainId, tenantId);
     }
 
@@ -104,6 +106,9 @@ public class NsmfInteractionHandler implements NsmfLcmProviderInterface {
             throws NotExistingEntityException, MethodNotImplementedException, FailedOperationException,
             MalformattedElementException, NotPermittedOperationException {
         if (domainId == null) domainId = defaultDriver;
+
+        log.debug("InstantiateNetworkSlice for domain"+domainId);
+
         drivers.get(domainId).instantiateNetworkSlice(request, domainId, tenantId);
     }
 
@@ -112,6 +117,8 @@ public class NsmfInteractionHandler implements NsmfLcmProviderInterface {
             throws NotExistingEntityException, MethodNotImplementedException, FailedOperationException,
             MalformattedElementException, NotPermittedOperationException {
         if (domainId == null) domainId = defaultDriver;
+        log.debug("ModifyNetworkSlice for domain"+domainId);
+
         drivers.get(domainId).modifyNetworkSlice(request, domainId, tenantId);
     }
 
@@ -120,6 +127,8 @@ public class NsmfInteractionHandler implements NsmfLcmProviderInterface {
             throws NotExistingEntityException, MethodNotImplementedException, FailedOperationException,
             MalformattedElementException, NotPermittedOperationException {
         if (domainId == null) domainId = defaultDriver;
+        log.debug("TerminteNetworkSliceInstance for domain"+domainId);
+        
         drivers.get(domainId).terminateNetworkSliceInstance(request, domainId, tenantId);
     }
 
@@ -127,7 +136,12 @@ public class NsmfInteractionHandler implements NsmfLcmProviderInterface {
     public List<NetworkSliceInstance> queryNetworkSliceInstance(GeneralizedQueryRequest request, String domainId, String tenantId)
             throws MethodNotImplementedException, FailedOperationException, MalformattedElementException {
         if (domainId == null) domainId = defaultDriver;
+        log.debug("QueryNetworkSliceInstance for domain"+domainId);
+
         return drivers.get(domainId).queryNetworkSliceInstance(request, domainId, tenantId);
     }
 
+    public void setDefaultDriver(String defaultDriver) {
+        this.defaultDriver = defaultDriver;
+    }
 }

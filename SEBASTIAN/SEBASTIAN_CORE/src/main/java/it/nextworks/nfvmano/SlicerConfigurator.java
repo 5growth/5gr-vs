@@ -73,6 +73,7 @@ public class SlicerConfigurator {
 			domainCatalogueService.onBoardDomain(localDomain);
 
 			nsmfInteractionHandler.addDriver(localDomain.getDomainId(), nsLcmService );
+			nsmfInteractionHandler.setDefaultDriver(localDomain.getDomainId());
 			vsLcmService.setNsmfLcmProvider(nsmfInteractionHandler);
 		} catch (MalformattedElementException e) {
 			log.error("Failed to onboard domain:" , e);
