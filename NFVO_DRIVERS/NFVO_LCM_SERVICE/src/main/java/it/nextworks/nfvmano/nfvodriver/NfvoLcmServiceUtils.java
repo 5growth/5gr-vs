@@ -68,7 +68,7 @@ public class NfvoLcmServiceUtils {
             log.debug("Configured for type:" + nfvoLcmType);
             nfvoLcmService.setNfvoLcmDriver(new DummyNfvoLcmDriver(nfvoLcmAddress, null, nfvoLcmOperationPollingManager));
 
-        }else if (nfvoLcmService.equals("SM")){
+        }else if (nfvoLcmType.equals("SM")){
             nfvoLcmService.setNfvoLcmDriver(new SMLCMDriver(nfvoLcmAddress, nfvoLcmOperationPollingManager));
         } else {
             log.error("NFVO not configured!");
