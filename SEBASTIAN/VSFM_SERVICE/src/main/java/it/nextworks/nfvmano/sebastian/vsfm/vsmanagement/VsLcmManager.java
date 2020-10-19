@@ -262,18 +262,26 @@ public class VsLcmManager {
             }
             if (arbitratorResponse.isNewSliceRequired()) {
                 log.debug("A new network slice should be instantiated for the Vertical Service instance " + vsiId);
-
+                log.debug("Arbitrator response:"+arbitratorResponse);
 
                 NfvNsInstantiationInfo nsiInfo = nsInfo.get(vsdId);
                 log.debug("NfvInstantiationInfo for VSI " + vsiId + ": " + mapper.writerWithDefaultPrettyPrinter().writeValueAsString(nsiInfo));
                 //TODO: to be extended for composite VSDs
-                Map<String, Object> sliceParameters = nsiInfo.getSliceServiceParameters().getSliceServiceParameters();
+                Map<String, Object> sliceParameters =  new HashMap<>();
+                 if(nsiInfo.getSliceServiceParameters()!=null){
+                     log.debug("Using slice service parameters");
+
+                     sliceParameters = nsiInfo.getSliceServiceParameters().getSliceServiceParameters();
+                     log.debug(sliceParameters.toString());
+                 }else{
+                     log.debug("No slice service parameters");
+                 }
                 List<String> nsSubnetInstanceIds;
                 if (arbitratorResponse.getExistingSliceSubnets().isEmpty())
                     nsSubnetInstanceIds = new ArrayList<>();
                 else
                     nsSubnetInstanceIds = new ArrayList<>(arbitratorResponse.getExistingSliceSubnets().keySet());
-
+                log.debug("Preparing NSI instantiation");
                 CreateNsiIdRequest request;
                 if (!nsiInfo.getNsstDomain().isEmpty()) {
                     log.debug("NSSTs map not empty >> MULTI-DOMAIN");
