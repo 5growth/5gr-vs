@@ -311,9 +311,14 @@ public class VsLcmManager {
                 } else {
                     //it means it is not multidomain
                     isMultidomain = false;
+                    log.debug("Single domain NSMF");
+                    log.debug("NsiInfo:"+nsiInfo);
+
                     request = new CreateNsiIdRequest(nsiInfo.getNstId(),
                             "NS - " + vsiName,
                             "Network slice for VS " + vsiName);
+                    log.debug("Created Request"+request.getName());
+                    log.debug("NsmfLcmProvider:"+nsmfLcmProvider);
                     String nsiId = nsmfLcmProvider.createNetworkSliceIdentifier(request, null, tenantId);
 
 
