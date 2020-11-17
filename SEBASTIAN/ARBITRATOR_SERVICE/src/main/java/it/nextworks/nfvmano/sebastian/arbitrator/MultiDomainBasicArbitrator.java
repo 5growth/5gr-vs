@@ -156,7 +156,7 @@ public class MultiDomainBasicArbitrator extends AbstractArbitrator {
                     // TODO: arbitrate NST request, to be understood how requested resources have to be considered (cumulative?)
                     requiredRes.addResources(tempRes);*/
                 }
-            } else {
+            } /*else {
                 //TODO: handle the case of an end-to-end NSD modelling (with nested NSDs)
                 if (nsInitInfo.getNfvNsdId() != null) {
                     String nfvNsdId = nsInitInfo.getNfvNsdId();
@@ -186,7 +186,7 @@ public class MultiDomainBasicArbitrator extends AbstractArbitrator {
                 } else {
                     throw new FailedOperationException("Invalid computation request: no associated NSD/NSSTs for computing resources");
                 }
-            }
+            }*/
 
             /*log.debug("The total amount of required resources for the service is the following: " + requiredRes.toString());
 

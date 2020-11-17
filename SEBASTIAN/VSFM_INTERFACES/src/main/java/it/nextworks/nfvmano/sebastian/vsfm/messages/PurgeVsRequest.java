@@ -15,7 +15,7 @@ public class PurgeVsRequest implements InterfaceMessage {
 	private String tenantId;
 	
 	public PurgeVsRequest() { }
-	
+
 	/**
 	 * Constructor
 	 * 

@@ -93,33 +93,37 @@
             <version>0.0.2-SNAPSHOT</version>
 
         </dependency>
-        <dependency>
-            <groupId>it.nextworks.nfvmano</groupId>
-            <artifactId>NfvoLcmService</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+        <!--
+       <dependency>
+           <groupId>it.nextworks.nfvmano</groupId>
+           <artifactId>NfvoLcmService</artifactId>
+           <version>0.0.2-SNAPSHOT</version>
 
-        </dependency>
-        <dependency>
-            <groupId>it.nextworks.nfvmano</groupId>
-            <artifactId>NSFM_SERVICE</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
-
-        </dependency>
-        <dependency>
-            <groupId>it.nextworks.nfvmano</groupId>
-            <artifactId>CommonElements</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
-
-        </dependency>
-
-        <!-- 
-        <dependency>
-            <groupId>it.nextworks.nfvmano</groupId>
-            <artifactId>VNComService</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
+       </dependency>
         -->
+       <!--
+      <dependency>
+          <groupId>it.nextworks.nfvmano</groupId>
+          <artifactId>NSFM_SERVICE</artifactId>
+          <version>0.0.2-SNAPSHOT</version>
+
+      </dependency>
+       -->
+       <dependency>
+           <groupId>it.nextworks.nfvmano</groupId>
+           <artifactId>CommonElements</artifactId>
+           <version>0.0.2-SNAPSHOT</version>
+
+       </dependency>
+
+       <!--
+       <dependency>
+           <groupId>it.nextworks.nfvmano</groupId>
+           <artifactId>VNComService</artifactId>
+           <version>0.0.2-SNAPSHOT</version>
+           <scope>compile</scope>
+       </dependency>
+       -->
         <dependency>
             <groupId>it.nextworks.nfvmano</groupId>
             <artifactId>ARBITRATOR_SERVICE</artifactId>
@@ -132,6 +136,22 @@
             <version>0.0.2-EVE-SNAPSHOT</version>
 
         </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>eve-rbac-minimal-client</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>eve-experiment-lcm-rest-client</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>eve-portal-catalogue-rest-client</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
 
     </dependencies>
 

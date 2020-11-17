@@ -2,6 +2,8 @@ package it.nextworks.nfvmano.sebastian.common;
 
 
 import it.nextworks.nfvmano.catalogues.template.services.NsTemplateCatalogueService;
+import it.nextworks.nfvmano.libs.ifa.catalogues.interfaces.NsdManagementProviderInterface;
+import it.nextworks.nfvmano.libs.ifa.catalogues.interfaces.VnfPackageManagementProviderInterface;
 import it.nextworks.nfvmano.libs.ifa.catalogues.interfaces.messages.QueryNsdResponse;
 import it.nextworks.nfvmano.libs.ifa.catalogues.interfaces.messages.QueryOnBoardedVnfPkgInfoResponse;
 import it.nextworks.nfvmano.libs.ifa.common.elements.Filter;
@@ -33,8 +35,11 @@ public class VirtualResourceCalculatorService {
     private static final Logger log = LoggerFactory.getLogger(VirtualResourceCalculatorService.class);
 
 
-    @Autowired
-    private NfvoCatalogueService nfvoCatalogueService;
+
+    private NsdManagementProviderInterface nfvoCatalogueService=null;
+
+
+    private VnfPackageManagementProviderInterface vnfPackageManagementProviderInterface=null;
 
     @Autowired
     private NsTemplateCatalogueService nsTemplateCatalogueService;
@@ -59,6 +64,10 @@ public class VirtualResourceCalculatorService {
     public VirtualResourceUsage computeVirtualResourceUsage(NfvNsInstantiationInfo nsInstantiationInfo) throws Exception {
         log.debug("Computing the amount of resources associated to a NS instantiation.");
 
+        if(nfvoCatalogueService== null || vnfPackageManagementProviderInterface==null){
+            log.debug("No nfvo catalogue  or vnf catalogue service set. returning 0 virtual resources ");
+            return new VirtualResourceUsage(0,0,0);
+        }
         //TODO: parse the MEC app data when available
 
         String nsdId = nsInstantiationInfo.getNfvNsdId();
@@ -87,7 +96,7 @@ public class VirtualResourceCalculatorService {
             int vnfVCpu = 0;
             int vnfDisk = 0;
 
-            QueryOnBoardedVnfPkgInfoResponse vnfPkg = nfvoCatalogueService.queryVnfPackageInfo(new GeneralizedQueryRequest(BlueprintCatalogueUtilities.buildVnfPackageInfoFilterFromVnfdId(vnfdId), null));
+            QueryOnBoardedVnfPkgInfoResponse vnfPkg = vnfPackageManagementProviderInterface.queryVnfPackageInfo(new GeneralizedQueryRequest(BlueprintCatalogueUtilities.buildVnfPackageInfoFilterFromVnfdId(vnfdId), null));
             Vnfd vnfd = vnfPkg.getQueryResult().get(0).getVnfd();
 
             VnfDf df = vnfd.getVnfDf(vnfDfId);
@@ -150,7 +159,8 @@ public class VirtualResourceCalculatorService {
 
         // TODO: for the time being in 5GCroCo nested NSD are not considered
         // TODO: we are assuming only one InstantiationLevel and only one DeploymentFlavour
-        Nsd nsd = nfvoCatalogueService.queryNsdAssumingOne(BlueprintCatalogueUtilities.buildNsdFilter(nsst_nfvNsdId, nsst_nsdVersion));
+        QueryNsdResponse response = nfvoCatalogueService.queryNsd(new GeneralizedQueryRequest(BlueprintCatalogueUtilities.buildNsdFilter(nsst_nfvNsdId, nsst_nsdVersion),null));
+        Nsd nsd = response.getQueryResult().get(0).getNsd();
         String nsst_nsdInstantiationLevel = nsd.getNsDf().get(0).getDefaultNsInstantiationLevelId();
         String nsst_nsdDeploymentFlavour = nsd.getNsDf().get(0).getNsDfId();
 
@@ -174,7 +184,7 @@ public class VirtualResourceCalculatorService {
             int vnfVCpu = 0;
             int vnfDisk = 0;
 
-            QueryOnBoardedVnfPkgInfoResponse vnfPkg = nfvoCatalogueService.queryVnfPackageInfo(new GeneralizedQueryRequest(BlueprintCatalogueUtilities.buildVnfPackageInfoFilterFromVnfdId(vnfdId), null));
+            QueryOnBoardedVnfPkgInfoResponse vnfPkg = vnfPackageManagementProviderInterface.queryVnfPackageInfo(new GeneralizedQueryRequest(BlueprintCatalogueUtilities.buildVnfPackageInfoFilterFromVnfdId(vnfdId), null));
             Vnfd vnfd = vnfPkg.getQueryResult().get(0).getVnfd();
 
             VnfDf df = vnfd.getVnfDf(vnfDfId);
@@ -222,4 +232,12 @@ public class VirtualResourceCalculatorService {
         return new VirtualResourceUsage(disk, vCPU, ram);
     }
 
+
+    public void setNfvoCatalogueService(NsdManagementProviderInterface nfvoCatalogueService) {
+        this.nfvoCatalogueService = nfvoCatalogueService;
+    }
+
+    public void setVnfPackageManagementProviderInterface(VnfPackageManagementProviderInterface vnfPackageManagementProviderInterface) {
+        this.vnfPackageManagementProviderInterface = vnfPackageManagementProviderInterface;
+    }
 }

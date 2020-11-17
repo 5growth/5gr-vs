@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.nextworks.nfvmano.sebastian.vsfm.sbi;
+package it.nextworks.nfvmano.sebastian.vsfm.sbi.nsmf;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,35 +32,34 @@ import it.nextworks.nfvmano.sebastian.vsfm.VsLcmService;
 /**
  * This class implements a REST controller to receive notifications from
  * the NSMF about failures or LCM changes of network slice instances
- * 
- * 
- * @author nextworks
  *
+ * @author nextworks
  */
 @RestController
 @CrossOrigin
 @RequestMapping("/vs/notifications")
 public class NsmfNotificationsRestController {
 
-	private static final Logger log = LoggerFactory.getLogger(NsmfNotificationsRestController.class);
-	
-	@Autowired
-	private VsLcmService vsLcmService;
-	
-	public NsmfNotificationsRestController() { }
+    private static final Logger log = LoggerFactory.getLogger(NsmfNotificationsRestController.class);
 
-	@RequestMapping(value = "/nsilcmchange", method = RequestMethod.POST)
-	public ResponseEntity<?> notifyNsiLcmChange(@RequestBody NetworkSliceStatusChangeNotification notification) {
-		log.debug("Received notification about network slice instance LCM change");
-		vsLcmService.notifyNetworkSliceStatusChange(notification);
-		return new ResponseEntity<>(HttpStatus.OK);
-	}
-	
-	@RequestMapping(value = "/nsifailure", method = RequestMethod.POST)
-	public ResponseEntity<?> notifyNsiFailure(@RequestBody NetworkSliceFailureNotification notification) {
-		log.debug("Received notification about network slice instance failure");
-		vsLcmService.notifyNetworkSliceFailure(notification);
-		return new ResponseEntity<>(HttpStatus.OK);
-	}
-	
+    @Autowired
+    private VsLcmService vsLcmService;
+
+    public NsmfNotificationsRestController() {
+    }
+
+    @RequestMapping(value = "/nsilcmchange", method = RequestMethod.POST)
+    public ResponseEntity<?> notifyNsiLcmChange(@RequestBody NetworkSliceStatusChangeNotification notification) {
+        log.debug("Received notification about network slice instance LCM change");
+        vsLcmService.notifyNetworkSliceStatusChange(notification);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/nsifailure", method = RequestMethod.POST)
+    public ResponseEntity<?> notifyNsiFailure(@RequestBody NetworkSliceFailureNotification notification) {
+        log.debug("Received notification about network slice instance failure");
+        vsLcmService.notifyNetworkSliceFailure(notification);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 }

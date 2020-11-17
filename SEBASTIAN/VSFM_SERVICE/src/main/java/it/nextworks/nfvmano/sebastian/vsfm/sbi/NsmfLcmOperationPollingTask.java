@@ -26,10 +26,7 @@ import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityExceptio
 import it.nextworks.nfvmano.libs.ifa.common.messages.GeneralizedQueryRequest;
 import it.nextworks.nfvmano.libs.ifa.osmanfvo.nslcm.interfaces.NsLcmProviderInterface;
 import it.nextworks.nfvmano.libs.ifa.osmanfvo.nslcm.interfaces.messages.NsLifecycleChangeNotification;
-import it.nextworks.nfvmano.nfvodriver.NfvoLcmNotificationInterface;
-import it.nextworks.nfvmano.nfvodriver.NfvoLcmOperationPollingManager;
-import it.nextworks.nfvmano.nfvodriver.NfvoLcmOperationPollingTask;
-import it.nextworks.nfvmano.nfvodriver.PolledNfvoLcmOperation;
+
 import it.nextworks.nfvmano.sebastian.nsmf.interfaces.NsmfLcmProviderInterface;
 import it.nextworks.nfvmano.sebastian.nsmf.messages.NetworkSliceStatusChange;
 import it.nextworks.nfvmano.sebastian.nsmf.messages.NetworkSliceStatusChangeNotification;
@@ -112,6 +109,7 @@ public class NsmfLcmOperationPollingTask implements Runnable {
             NetworkSliceStatusChangeNotification notification;
             if (operation.getOperationType().equals("NSI_CREATION")) {
                 parameters.put("NSI_ID", operation.getNsiId());
+                parameters.put("REQUEST_TYPE",  "NSI_CREATION");
                 filter = new Filter(parameters);
                 request = new GeneralizedQueryRequest(filter, new ArrayList<>());
                 nsiInstances = nsmfLcmProvider.queryNetworkSliceInstance(request, operation.getDomainId(), null);
@@ -139,6 +137,7 @@ public class NsmfLcmOperationPollingTask implements Runnable {
                     }//TODO failed?
                 } else {
                     parameters.put("NSI_ID", operation.getNsiId());
+                    parameters.put("REQUEST_TYPE",  "NSI_TERMINATION");
                     filter = new Filter(parameters);
                     request = new GeneralizedQueryRequest(filter, new ArrayList<>());
                     nsiInstances = nsmfLcmProvider.queryNetworkSliceInstance(request, operation.getDomainId(), null);

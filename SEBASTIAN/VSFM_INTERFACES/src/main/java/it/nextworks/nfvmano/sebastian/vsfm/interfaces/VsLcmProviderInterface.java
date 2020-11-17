@@ -22,6 +22,7 @@ import it.nextworks.nfvmano.libs.ifa.common.exceptions.MethodNotImplementedExcep
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotPermittedOperationException;
 import it.nextworks.nfvmano.libs.ifa.common.messages.GeneralizedQueryRequest;
+import it.nextworks.nfvmano.sebastian.record.elements.VerticalServiceInstance;
 import it.nextworks.nfvmano.sebastian.vsfm.messages.InstantiateVsRequest;
 import it.nextworks.nfvmano.sebastian.vsfm.messages.ModifyVsRequest;
 import it.nextworks.nfvmano.sebastian.vsfm.messages.PurgeVsRequest;
@@ -55,6 +56,7 @@ public interface VsLcmProviderInterface {
 	 *
      *
 	 * @param request request to instantiate a new VS instance.
+	 * @param domainId the id of the target domain of the request.
 	 * @return The identifier of the VS instance.
 	 * @throws MethodNotImplementedException if the method is not implemented.
 	 * @throws NotExistingEntityException if the VSD does not exist.
@@ -62,7 +64,7 @@ public interface VsLcmProviderInterface {
 	 * @throws MalformattedElementException if the request is malformatted.
 	 * @throws NotPermittedOperationException if the operation is not permitted for the given tenant.
 	 */
-	public String instantiateVs(InstantiateVsRequest request) 
+	public String instantiateVs(InstantiateVsRequest request, String domainId)
 			throws MethodNotImplementedException, NotExistingEntityException, FailedOperationException, MalformattedElementException, NotPermittedOperationException;
 	
 	/**
@@ -70,6 +72,7 @@ public interface VsLcmProviderInterface {
 	 * 
 	 * 
 	 * @param request query
+	 * @param domainId the id of the target domain of the request.
 	 * @return query response
 	 * @throws MethodNotImplementedException if the method is not implemented
 	 * @throws NotExistingEntityException if the VS instance does not exist
@@ -77,21 +80,36 @@ public interface VsLcmProviderInterface {
 	 * @throws MalformattedElementException if the request is malformatted
 	 * @throws NotPermittedOperationException if the operation is not permitted for the given tenant.
 	 */
-	public QueryVsResponse queryVs(GeneralizedQueryRequest request)
+	public QueryVsResponse queryVs(GeneralizedQueryRequest request, String domainId)
 			throws MethodNotImplementedException, NotExistingEntityException, FailedOperationException, MalformattedElementException, NotPermittedOperationException;
 	
 	/**
 	 * This method queries the IDs of all the VSs matching the request filter
 	 * 
 	 * @param request query
+	 * @param domainId the id of the target domain of the request.
 	 * @return List of IDs matching the request filter
 	 * @throws MethodNotImplementedException if the method is not implemented
 	 * @throws NotExistingEntityException if the IDs are not found
 	 * @throws FailedOperationException if the operation fails
 	 * @throws MalformattedElementException if the request is malformatted
 	 */
-	public List<String> queryAllVsIds(GeneralizedQueryRequest request)
+	public List<String> queryAllVsIds(GeneralizedQueryRequest request, String domainId)
 		throws MethodNotImplementedException, NotExistingEntityException, FailedOperationException, MalformattedElementException;
+
+	/**
+	 * This method queries the IDs of all the VSs matching the request filter
+	 *
+	 * @param request query
+	 * @param domainId the id of the target domain of the request.
+	 * @return List of Instnaces matching the request filter
+	 * @throws MethodNotImplementedException if the method is not implemented
+	 * @throws NotExistingEntityException if the IDs are not found
+	 * @throws FailedOperationException if the operation fails
+	 * @throws MalformattedElementException if the request is malformatted
+	 */
+	public List<VerticalServiceInstance> queryAllVsInstances(GeneralizedQueryRequest request, String domainId)
+			throws MethodNotImplementedException, NotExistingEntityException, FailedOperationException, MalformattedElementException;
 	
 	/**
 	 * This method terminates an existing Vertical Service instance.
@@ -99,13 +117,14 @@ public interface VsLcmProviderInterface {
 	 * In order to retrieve the actual status of the vertical service instance, the query method must be used.
 	 * 
 	 * @param request request to terminate an existing VS instance
+	 * @param domainId the id of the target domain of the request.
 	 * @throws MethodNotImplementedException if the method is not implemented
 	 * @throws NotExistingEntityException if the VS instance does not exist
 	 * @throws FailedOperationException if the operation fails
 	 * @throws MalformattedElementException if the request is malformatted
 	 * @throws NotPermittedOperationException if the operation is not permitted for the given tenant.
 	 */
-	public void terminateVs(TerminateVsRequest request)
+	public void terminateVs(TerminateVsRequest request, String domainId)
 			throws MethodNotImplementedException, NotExistingEntityException, FailedOperationException, MalformattedElementException, NotPermittedOperationException;
 	
 	/**
@@ -114,13 +133,14 @@ public interface VsLcmProviderInterface {
 	 * In order to retrieve the actual status of the vertical service instance, the query method must be used.
 	 * 
 	 * @param request request to modify an existing VS instance
+	 * @param domainId the id of the target domain of the request.
 	 * @throws MethodNotImplementedException if the method is not implemented
 	 * @throws NotExistingEntityException if the VS instance or the new VSD do not exist
 	 * @throws FailedOperationException if the operation fails
 	 * @throws MalformattedElementException if the request is malformatted
 	 * @throws NotPermittedOperationException if the operation is not permitted for the given tenant.
 	 */
-	public void modifyVs(ModifyVsRequest request)
+	public void modifyVs(ModifyVsRequest request, String domainId)
 			throws MethodNotImplementedException, NotExistingEntityException, FailedOperationException, MalformattedElementException, NotPermittedOperationException;
 	
 	/**
@@ -128,13 +148,14 @@ public interface VsLcmProviderInterface {
 	 * This method operates in synchronous manner.
 	 * 
 	 * @param request request to purge a terminated VS instance
+	 * @param domainId the id of the target domain of the request.
 	 * @throws MethodNotImplementedException if the method is not implemented
 	 * @throws NotExistingEntityException if the VS instance does not exist
 	 * @throws FailedOperationException if the operation fails
 	 * @throws MalformattedElementException if the request is malformatted
 	 * @throws NotPermittedOperationException if the operation is not permitted for the given tenant or the VS instance is not terminated
 	 */
-	public void purgeVs(PurgeVsRequest request)
+	public void purgeVs(PurgeVsRequest request, String domainId)
 			throws MethodNotImplementedException, NotExistingEntityException, FailedOperationException, MalformattedElementException, NotPermittedOperationException;
 	
 }

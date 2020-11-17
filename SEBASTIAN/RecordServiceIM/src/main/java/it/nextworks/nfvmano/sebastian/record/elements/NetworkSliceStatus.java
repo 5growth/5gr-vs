@@ -17,12 +17,13 @@ package it.nextworks.nfvmano.sebastian.record.elements;
 
 public enum NetworkSliceStatus {
 
-	NOT_INSTANTIATED,
-	INSTANTIATING,
-	INSTANTIATED,
-	UNDER_MODIFICATION,
-	TERMINATING,
-	TERMINATED,
-	FAILED
-	
+    NOT_INSTANTIATED,
+    INSTANTIATING,
+    INSTANTIATED,
+    UNDER_MODIFICATION,
+    TERMINATING,
+    TERMINATED,
+    FAILED,
+    UNKNOWN
+
 }

@@ -15,13 +15,7 @@
 */
 package it.nextworks.nfvmano.sebastian.record.elements;
 
-import javax.persistence.ElementCollection;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -35,6 +29,7 @@ import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +47,10 @@ public class VerticalServiceInstance {
 	private String tenantId;
 	private String name;
 	private String description;
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private String domainId;
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private String mappedInstanceId;
 	private VerticalServiceStatus status;
 	
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -69,13 +68,24 @@ public class VerticalServiceInstance {
 	
 	private String networkSliceId;
 
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Fetch(FetchMode.SELECT)
-    @Cascade(org.hibernate.annotations.CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER)
+	@LazyCollection(LazyCollectionOption.FALSE)
+	@MapKey(name="nssiId")
+	@Fetch(FetchMode.SELECT)
+	@Cascade(org.hibernate.annotations.CascadeType.ALL)
     private Map<String, NetworkSliceSubnetInstance> nssis = new HashMap<String, NetworkSliceSubnetInstance>();
 
 
+
+	@OneToMany(fetch = FetchType.EAGER)
+	@LazyCollection(LazyCollectionOption.FALSE)
+	@MapKey(name="instanceId")
+	@Fetch(FetchMode.SELECT)
+	@Cascade(org.hibernate.annotations.CascadeType.ALL)
+	private Map<String, VerticalSubserviceInstance> vssis = new HashMap<String, VerticalSubserviceInstance>();
+
+
+	//This doesnot seem to be used, and I prefer another approach
 	@OneToMany
 	@LazyCollection(LazyCollectionOption.FALSE)
 	private List<VerticalServiceInstance> nestedVsi;
@@ -84,7 +94,10 @@ public class VerticalServiceInstance {
 	
 	public VerticalServiceInstance() {}
 
-	
+	public Map<String, VerticalSubserviceInstance> getVssis() {
+		return vssis;
+	}
+
 	/**
 	 * Constructor
 	 * 
@@ -97,9 +110,10 @@ public class VerticalServiceInstance {
 	 * @param userData configuration parameters provided by the vertical
 	 * @param locationConstraints constraint about the geographical coverage of the service
 	 * @param ranEndPointId ID of the end point attached to the RAN segment
+
 	 */
 	public VerticalServiceInstance(String vsiId, String vsdId, String tenantId, String name, String description,
-			String networkSliceId, Map<String, String> userData, LocationInfo locationConstraints, String ranEndPointId) {
+			String networkSliceId, Map<String, String> userData, LocationInfo locationConstraints, String ranEndPointId, String domainId, String mappedInstanceId) {
 		this.vsiId = vsiId;
 		this.vsdId = vsdId;
 		this.tenantId = tenantId;
@@ -111,9 +125,19 @@ public class VerticalServiceInstance {
 		if (locationConstraints != null) this.locationConstraints = locationConstraints;
 			else this.locationConstraints = new LocationInfo();
 		this.ranEndPointId = ranEndPointId;
+		this.domainId=domainId;
+		this.mappedInstanceId=mappedInstanceId;
+
 	}
 
 
+	public String getDomainId() {
+		return domainId;
+	}
+
+	public String getMappedInstanceId() {
+		return mappedInstanceId;
+	}
 
 	/**
 	 * @return the ranEndPointId
@@ -122,6 +146,12 @@ public class VerticalServiceInstance {
 		return ranEndPointId;
 	}
 
+	/**
+	 * @return the userData
+	 */
+	public Map<String, String> getUserData() {
+		return userData;
+	}
 
 	/**
 	 * @return the locationConstraints
@@ -130,15 +160,6 @@ public class VerticalServiceInstance {
 		return locationConstraints;
 	}
 
-
-	/**
-	 * @return the userData
-	 */
-	public Map<String, String> getUserData() {
-		return userData;
-	}
-
-
 	/**
 	 * @return the nestedVsi
 	 */
@@ -146,15 +167,12 @@ public class VerticalServiceInstance {
 		return nestedVsi;
 	}
 
-
 	/**
 	 * @return the id
 	 */
 	public Long getId() {
 		return id;
 	}
-
-
 
 	/**
 	 * @return the vsiId
@@ -191,6 +209,7 @@ public class VerticalServiceInstance {
 		return description;
 	}
 
+	
 	/**
 	 * @return the networkSliceId
 	 */
@@ -198,6 +217,7 @@ public class VerticalServiceInstance {
 		return networkSliceId;
 	}
 
+ 	
 
 	/**
 	 * @return the status
@@ -255,11 +275,21 @@ public class VerticalServiceInstance {
         this.nssis.put(nssi.getNssiId(), nssi);
     }
 
+    public void addVerticalSubserviceInstance(VerticalSubserviceInstance vssi){
+    	this.vssis.put(vssi.getInstanceId(), vssi);
+	}
+
     public void setNetworkSliceSubnetStatus(String nssiId, NetworkSliceStatus status) throws NotExistingEntityException {
         NetworkSliceSubnetInstance nssi = nssis.get(nssiId);
         nssi.setStatus(status);
         nssis.put(nssiId, nssi);
     }
+
+	public void setVerticalSubserviceStatus(String vssiId, VerticalServiceStatus status) throws NotExistingEntityException {
+		VerticalSubserviceInstance vssi = vssis.get(vssiId);
+		vssi.setVerticalServiceStatus(status);
+		vssis.put(vssiId, vssi);
+	}
 
     public boolean allSubnetInStatus(NetworkSliceStatus status) {
         for (Map.Entry<String, NetworkSliceSubnetInstance> e : nssis.entrySet()) {
@@ -268,7 +298,14 @@ public class VerticalServiceInstance {
         return true;
     }
 
-   	/**
+	public boolean allVerticalSubserviceInStatus(VerticalServiceStatus status) {
+		for (Map.Entry<String, VerticalSubserviceInstance> e : vssis.entrySet()) {
+			if (e.getValue().getVerticalServiceStatus() != status) return false;
+		}
+		return true;
+	}
+
+	/**
 	 *
 	 * @param nestedVsiId the nested VSI
 	 */
@@ -282,7 +319,6 @@ public class VerticalServiceInstance {
 	public String getErrorMessage() {
 		return errorMessage;
 	}
-
 
 	/**
 	 * This method fills the failure related fields

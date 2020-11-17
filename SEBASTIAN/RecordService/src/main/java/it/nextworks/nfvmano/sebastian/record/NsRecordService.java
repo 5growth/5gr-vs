@@ -16,10 +16,13 @@
 package it.nextworks.nfvmano.sebastian.record;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 
+
+import it.nextworks.nfvmano.sebastian.record.elements.NetworkSliceVnfPlacement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,13 +52,6 @@ public class NsRecordService {
 	private NetworkSliceInstanceRepository nsInstanceRepository;
 
 
-
-
-
-
-
-
-	
 	public synchronized String createNetworkSliceInstanceEntry(
 			String nstId,
 			String nsdId,
@@ -68,9 +64,10 @@ public class NsRecordService {
 			String name,
 			String description,
 			boolean soManaged
+
 	) {
 		log.debug("Creating a new Network Slice instance");
-		NetworkSliceInstance nsi = new NetworkSliceInstance(null, nstId, nsdId, nsdVersion, dfId, ilId, nfvNsId, networkSliceSubnetInstances, tenantId, name, description, soManaged);
+		NetworkSliceInstance nsi = new NetworkSliceInstance(null, nstId, nsdId, nsdVersion, dfId, ilId, nfvNsId, networkSliceSubnetInstances, tenantId, name, description, soManaged, null);
 		nsInstanceRepository.saveAndFlush(nsi);
 		String nsiId = nsi.getId().toString();
 		log.debug("Created Network Slice instance with ID " + nsiId);
@@ -129,7 +126,6 @@ public class NsRecordService {
 			nsi.setFailureState(errorMessage);
 			nsInstanceRepository.saveAndFlush(nsi);
 			log.debug("Set failure info in DB for NSI " + nsiId);
-			
 		} catch (NotExistingEntityException e) {
 			log.error("NSI or VSI not present in DB. Impossible to complete the failure info setting.");
 		}
@@ -287,5 +283,11 @@ public class NsRecordService {
 		return nsInstanceRepository.findAll();
 	}
 
-	
+
+
+	public void updateNsiVnfPlacement(String nsiId, Map<String, NetworkSliceVnfPlacement> vnfPlacement) throws NotExistingEntityException {
+		NetworkSliceInstance nsi = getNsInstance(nsiId);
+		nsi.setVnfPlacement(vnfPlacement);
+		nsInstanceRepository.saveAndFlush(nsi);
+	}
 }

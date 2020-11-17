@@ -38,13 +38,14 @@ public class InstantiateVsRequest implements InterfaceMessage {
 	private String tenantId;
 	private String notificationUrl;
 	private Map<String, String> userData = new HashMap<>();
-	
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private LocationInfo locationConstraints;
-	
-	public InstantiateVsRequest() {	}
-	
-	
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private LocationInfo locationConstraints;
+
+    public InstantiateVsRequest() {
+    }
+
+
 	/**
 	 * Constructor
 	 * 
@@ -55,6 +56,7 @@ public class InstantiateVsRequest implements InterfaceMessage {
 	 * @param notificationUrl URL where the tenant wants to receive notifications about the status of or events related to the Vertical Service instance.
 	 * @param userData Additional data, like config parameters provided by the vertical
 	 * @param locationConstraints constraint about the geographical coverage of the service
+	 * 
 	 */
 	public InstantiateVsRequest(String name, String description, String vsdId, String tenantId, String notificationUrl,
 			Map<String, String> userData, LocationInfo locationConstraints) {
@@ -65,9 +67,9 @@ public class InstantiateVsRequest implements InterfaceMessage {
 		this.notificationUrl = notificationUrl;
 		if (userData != null) this.userData = userData;
 		this.locationConstraints = locationConstraints;
+
 	}
 
-	
 	/**
 	 * @return the name
 	 */
@@ -116,7 +118,7 @@ public class InstantiateVsRequest implements InterfaceMessage {
 		return userData;
 	}
 
-	
+
 	/**
 	 * @return the locationConstraints
 	 */

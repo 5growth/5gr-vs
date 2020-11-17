@@ -15,11 +15,15 @@
         <module>CommonElements</module>
         <module>RecordService</module>
         <module>RecordServiceIM</module>
+<!--        <module>TranslatorService</module> -->
+<!--        <module>SecurityService</module> -->
+<!--        <module>VNComService</module>    -->
         <module>VSFM_INTERFACES</module>
         <module>VSFM_SERVICE</module>
         <module>NSFM_INTERFACES</module>
         <module>NSFM_SERVICE</module>
-        
+	<module>VSMF_APP</module>
+	 <module>NFVO_CATALOGUE_REST</module>
       <module>SEBASTIAN_CORE</module>
 
     </modules>

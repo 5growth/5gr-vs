@@ -14,6 +14,9 @@
  */
 package it.nextworks.nfvmano.sebastian.arbitrator.messages;
 
+import it.nextworks.nfvmano.libs.ifa.common.InterfaceMessage;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
+import it.nextworks.nfvmano.sebastian.arbitrator.elements.NetworkSliceInstanceAction;
 import it.nextworks.nfvmano.sebastian.common.VsAction;
 
 import java.util.HashMap;
@@ -34,7 +37,7 @@ import java.util.Map;
  * @author nextworks
  *
  */
-public class ArbitratorResponse {
+public class ArbitratorResponse  implements InterfaceMessage {
 
 	//indicates the request matched by this response
 	private String requestId;
@@ -60,8 +63,38 @@ public class ArbitratorResponse {
 	//the key indicates the vertical service instance ID and the action to be done: UPDATE or TERMINATE
 	private Map<String, VsAction> impactedVerticalServiceInstances = new HashMap<>();
 
-	
-	
+
+	//in case Network slice  instances need to be scaled
+	//the key indicates the network slice instance ID and the action to be done: SCALE
+	private Map<String, NetworkSliceInstanceAction> impactedNetworkSliceInstances = new HashMap<>();
+
+
+	public ArbitratorResponse(){}
+
+
+	/**
+	 * @param requestId
+	 * @param acceptableRequest
+	 * @param newSliceRequired
+	 * @param existingCompositeSlice
+	 * @param existingCompositeSliceToUpdate
+	 * @param existingSliceSubnets
+	 * @param impactedVerticalServiceInstances
+	 *  @param impactedNetworkSliceInstances
+	 */
+	public ArbitratorResponse(String requestId, boolean acceptableRequest, boolean newSliceRequired, String existingCompositeSlice,
+			boolean existingCompositeSliceToUpdate, Map<String, Boolean> existingSliceSubnets,
+			Map<String, VsAction> impactedVerticalServiceInstances, Map<String, NetworkSliceInstanceAction> impactedNetworkSliceInstances) {
+		this.requestId = requestId;
+		this.acceptableRequest = acceptableRequest;
+		this.newSliceRequired = newSliceRequired;
+		this.existingCompositeSlice = existingCompositeSlice;
+		this.existingCompositeSliceToUpdate = existingCompositeSliceToUpdate;
+		if (impactedNetworkSliceInstances !=null) this.impactedNetworkSliceInstances = impactedNetworkSliceInstances;
+		if (existingSliceSubnets != null) this.existingSliceSubnets = existingSliceSubnets;
+		if (impactedVerticalServiceInstances != null) this.impactedVerticalServiceInstances = impactedVerticalServiceInstances;
+	}
+
 	/**
 	 * @param requestId
 	 * @param acceptableRequest
@@ -72,13 +105,14 @@ public class ArbitratorResponse {
 	 * @param impactedVerticalServiceInstances
 	 */
 	public ArbitratorResponse(String requestId, boolean acceptableRequest, boolean newSliceRequired, String existingCompositeSlice,
-			boolean existingCompositeSliceToUpdate, Map<String, Boolean> existingSliceSubnets,
-			Map<String, VsAction> impactedVerticalServiceInstances) {
+							  boolean existingCompositeSliceToUpdate, Map<String, Boolean> existingSliceSubnets,
+							  Map<String, VsAction> impactedVerticalServiceInstances) {
 		this.requestId = requestId;
 		this.acceptableRequest = acceptableRequest;
 		this.newSliceRequired = newSliceRequired;
 		this.existingCompositeSlice = existingCompositeSlice;
 		this.existingCompositeSliceToUpdate = existingCompositeSliceToUpdate;
+		if (impactedNetworkSliceInstances !=null) this.impactedNetworkSliceInstances = impactedNetworkSliceInstances;
 		if (existingSliceSubnets != null) this.existingSliceSubnets = existingSliceSubnets;
 		if (impactedVerticalServiceInstances != null) this.impactedVerticalServiceInstances = impactedVerticalServiceInstances;
 	}
@@ -135,7 +169,17 @@ public class ArbitratorResponse {
 	public Map<String, VsAction> getImpactedVerticalServiceInstances() {
 		return impactedVerticalServiceInstances;
 	}
-	
-	
-	
+
+	public Map<String, NetworkSliceInstanceAction> getImpactedNetworkSliceInstances() {
+		return impactedNetworkSliceInstances;
+	}
+
+	@Override
+	public void isValid() throws MalformattedElementException {
+		if(impactedNetworkSliceInstances!=null){
+			for(NetworkSliceInstanceAction action: impactedNetworkSliceInstances.values()){
+				action.isValid();
+			}
+		}
+	}
 }

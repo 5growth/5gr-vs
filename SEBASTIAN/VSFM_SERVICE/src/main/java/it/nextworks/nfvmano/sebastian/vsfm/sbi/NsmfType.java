@@ -20,5 +20,6 @@ public enum NsmfType {
     NSMF_3GPP_LIKE,
     SONATA,
     NEUTRAL_HOSTING,
-    DUMMY
+    DUMMY,
+    OSM
 }

@@ -18,5 +18,6 @@ package it.nextworks.nfvmano.sebastian.vsfm.vscoordinator;
 public enum VsCoordinatorStatus {
     READY,
     COORDINATION_IN_PROGRESS,
-    FINISHED
+    FINISHED,
+    ERROR
 }

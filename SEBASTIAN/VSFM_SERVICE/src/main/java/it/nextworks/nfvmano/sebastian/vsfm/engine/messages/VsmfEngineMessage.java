@@ -32,9 +32,13 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 	@Type(value = ModifyVsiRequestMessage.class, name = "MODIFY_VSI_REQUEST"),
 	@Type(value = TerminateVsiRequestMessage.class, 	name = "TERMINATE_VSI_REQUEST"),
 	@Type(value = NotifyNsiStatusChange.class, 	name = "NOTIFY_NSI_STATUS_CHANGE"),
+		@Type(value = NotifyVsiStatusChange.class, 	name = "NOTIFY_VSI_STATUS_CHANGE"),
 	@Type(value = CoordinateVsiRequest.class, 	name = "COORDINATE_VSI_REQUEST"),
 	@Type(value = VsiTerminationNotificationMessage.class, 	name = "NOTIFY_TERMINATION"),
 	@Type(value = NotifyResourceGranted.class, 	name = "RESOURCES_GRANTED"),
+	@Type(value = CoordinateVsiNssiRequest.class, 	name = "COORDINATE_VSI_NSSI_REQUEST"),
+	@Type(value = NotifyVsiNssiCoordinationStart.class, 	name = "NOTIFY_VSI_NSSI_COORDINATION_START"),
+	@Type(value = NotifyVsiNssiCoordinationEnd.class, 	name = "NOTIFY_VSI_NSSI_COORDINATION_END")
 })
 public abstract class VsmfEngineMessage {
 

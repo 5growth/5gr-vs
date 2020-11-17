@@ -22,10 +22,7 @@ import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityExceptio
 import it.nextworks.nfvmano.sebastian.common.VsAction;
 import it.nextworks.nfvmano.sebastian.common.VsActionType;
 import it.nextworks.nfvmano.sebastian.vsfm.VsLcmService;
-import it.nextworks.nfvmano.sebastian.vsfm.engine.messages.CoordinateVsiRequest;
-import it.nextworks.nfvmano.sebastian.vsfm.engine.messages.VsmfEngineMessage;
-import it.nextworks.nfvmano.sebastian.vsfm.engine.messages.VsmfEngineMessageType;
-import it.nextworks.nfvmano.sebastian.vsfm.engine.messages.VsiTerminationNotificationMessage;
+import it.nextworks.nfvmano.sebastian.vsfm.engine.messages.*;
 import it.nextworks.nfvmano.sebastian.vsfm.messages.TerminateVsRequest;
 
 import org.slf4j.Logger;
@@ -39,13 +36,13 @@ public class VsCoordinator {
     private String vsiCoordinatorId;
     private VsLcmService vsLcmService;
     private Map<String, VsAction> candidateVsis;
-    private VsCoordinatorStatus internalStatus;
+	private VsCoordinatorStatus internalStatus;
 
     public VsCoordinator() {
 
     }
 
-    public VsCoordinator(String vsiCoordinatorId, VsLcmService vsLcmService){
+    public VsCoordinator(String vsiCoordinatorId, VsLcmService vsLcmService) {
         this.vsiCoordinatorId = vsiCoordinatorId;
         this.vsLcmService = vsLcmService;
         this.internalStatus = VsCoordinatorStatus.READY;
@@ -72,7 +69,7 @@ public class VsCoordinator {
                     processCoordinateRequest(coordinateVsiRequest);
                     break;
                 }
-                case NOTIFY_TERMINATION:{
+                case NOTIFY_TERMINATION: {
                     log.debug("Processing VSI termination notification.");
                     VsiTerminationNotificationMessage vsiTerminationNotificationMessage = (VsiTerminationNotificationMessage) em;
                     processTerminationNofification(vsiTerminationNotificationMessage);
@@ -90,39 +87,39 @@ public class VsCoordinator {
             manageVsCoordinatorError("Error in Json mapping: " + e.getMessage());
         } catch (IOException e) {
             manageVsCoordinatorError("IO error when receiving json message: " + e.getMessage());
-        } catch (Exception e){
+        } catch (Exception e) {
             manageVsCoordinatorError("Generic exception occurred: " + e.getMessage());
         }
 
     }
 
-    synchronized void processCoordinateRequest(CoordinateVsiRequest msg){
+    synchronized void processCoordinateRequest(CoordinateVsiRequest msg) {
         if (internalStatus != VsCoordinatorStatus.READY) {
             manageVsCoordinatorError("Received coordinate request in wrong status. Skipping message.");
             return;
         }
         candidateVsis = msg.getCandidateVsis();
         internalStatus = VsCoordinatorStatus.COORDINATION_IN_PROGRESS;
-        try{
-            for(Map.Entry<String, VsAction> candidateVsi: candidateVsis.entrySet()) {
+        try {
+            for (Map.Entry<String, VsAction> candidateVsi : candidateVsis.entrySet()) {
                 VsAction action = candidateVsi.getValue();
                 if (action.getActionType() == VsActionType.TERMINATE) {
-                	vsLcmService.terminateVs(action.getVsiId(), new TerminateVsRequest(action.getVsiId(), "coordinator"));
+                    vsLcmService.terminateVs(action.getVsiId(), new TerminateVsRequest(action.getVsiId(), "coordinator"));
                 }
 
             }
             internalStatus = VsCoordinatorStatus.FINISHED;
-        } catch (NotExistingEntityException e){
+        } catch (NotExistingEntityException e) {
             manageVsCoordinatorError("Error while terminating VSI by Coordinator: " + e.getMessage());
         }
     }
 
-    synchronized void processTerminationNofification(VsiTerminationNotificationMessage msg) throws Exception{
+    synchronized void processTerminationNofification(VsiTerminationNotificationMessage msg) throws Exception {
         String vsiId = msg.getVsiId();
-        if(candidateVsis.containsKey(vsiId)) {
+        if (candidateVsis.containsKey(vsiId)) {
             candidateVsis.remove(vsiId);
             if (candidateVsis.isEmpty()) {
-            	vsLcmService.notifyVsCoordinationEnd(vsiCoordinatorId);
+                vsLcmService.notifyVsCoordinationEnd(vsiCoordinatorId);
             }
         }
     }

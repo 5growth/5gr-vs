@@ -15,24 +15,54 @@
  */
 package it.nextworks.nfvmano.sebastian.record.elements;
 
-import javax.persistence.Embeddable;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
-@Embeddable
+import javax.persistence.*;
+import java.util.HashMap;
+import java.util.Map;
+
+@Entity
 public class NetworkSliceSubnetInstance {
+
+    @Id
+    @GeneratedValue
+    @JsonIgnore
+    private Long id;
+
+
+    @ManyToOne
+    @JsonIgnore
+    private VerticalServiceInstance verticalServiceInstance;
+
 
     private String nssiId;
     private String nsstId;
+    private String nsDeploymentFlavorId;
+    private String nsInstantiationLevelId;
     private String domainId;
     private NetworkSliceStatus status;
+
+
+    //Indicates the High-level vnf placement information requested to the NSMF used in 5Growth
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @ElementCollection(fetch = FetchType.EAGER)
+    private Map<String, NetworkSliceVnfPlacement> vnfPlacement= new HashMap<>();
 
     public NetworkSliceSubnetInstance() {
     }
 
-    public NetworkSliceSubnetInstance(String nssiId, String nsstId, String domainId, NetworkSliceStatus status) {
+    public NetworkSliceSubnetInstance(String nssiId, String nsstId, String domainId, String nsDeploymentFlavorId, String nsInstantiationLevelId, NetworkSliceStatus status, Map<String, NetworkSliceVnfPlacement> vnfPlacement) {
         this.nssiId = nssiId;
         this.nsstId = nsstId;
         this.domainId = domainId;
         this.status = status;
+        if(vnfPlacement!=null) this.vnfPlacement=vnfPlacement;
+        this.nsDeploymentFlavorId=nsDeploymentFlavorId;
+        this.nsInstantiationLevelId = nsInstantiationLevelId;
     }
 
     /**
@@ -40,6 +70,14 @@ public class NetworkSliceSubnetInstance {
      */
     public String getNssiId() {
         return nssiId;
+    }
+
+    public String getNsDeploymentFlavorId() {
+        return nsDeploymentFlavorId;
+    }
+
+    public String getNsInstantiationLevelId() {
+        return nsInstantiationLevelId;
     }
 
     /**
@@ -71,4 +109,19 @@ public class NetworkSliceSubnetInstance {
     }
 
 
+    public Map<String, NetworkSliceVnfPlacement> getVnfPlacement(){
+        return vnfPlacement;
+    }
+
+    public void setVnfPlacement(Map<String, NetworkSliceVnfPlacement> vnfPlacement){
+        this.vnfPlacement= vnfPlacement;
+    }
+
+    public void setNsDeploymentFlavorId(String nsDeploymentFlavorId) {
+        this.nsDeploymentFlavorId = nsDeploymentFlavorId;
+    }
+
+    public void setNsInstantiationLevelId(String nsInstantiationLevelId) {
+        this.nsInstantiationLevelId = nsInstantiationLevelId;
+    }
 }

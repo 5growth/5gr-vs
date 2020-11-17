@@ -18,6 +18,7 @@ package it.nextworks.nfvmano.sebastian.record.elements;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -42,43 +43,49 @@ public class NetworkSliceInstance {
     private Long id;
 	
 	private String name;
-	
+
 	private String description;
-	
+
 	private String nsiId;	//ID of the network slice
-	
+
 	private String nstId;	//ID of the network slice template
-	
+
 	private String nsdId;	//ID of the descriptor of the NFV network service that implements the network slice
-	
+
 	private String nsdVersion;	//version of the descriptor of the NFV network service that implements the network slice
-	
+
 	private String dfId; 	//ID of the deployment flavour in the NFV network service
-	
+
 	private String instantiationLevelId;	//ID of the instantiation level in the NFV network service
-	
+
 	@JsonIgnore
 	private String oldInstantiationLevelId; //ID of the previous instantiation level when the NFV network service is scaled
-	
+
 	private String nfvNsId;	//ID of the NFV network service that implements the network slice
 
 	private boolean soManaged;
-	
+
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	@ElementCollection(fetch=FetchType.EAGER)
 	@Fetch(FetchMode.SELECT)
 	@Cascade(org.hibernate.annotations.CascadeType.ALL)
 	private List<String> networkSliceSubnetInstances = new ArrayList<>();
-	
+
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
+	@ElementCollection(fetch=FetchType.EAGER)
+	@Fetch(FetchMode.SELECT)
+	@Cascade(org.hibernate.annotations.CascadeType.ALL)
+	private Map<String, NetworkSliceVnfPlacement> vnfPlacement = new HashMap<>();
+
 	private String tenantId;	//owner of the slice
-	
+
 	private NetworkSliceStatus status;
-	
+
 	private String errorMessage; //this field gets a value only in case of failure
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String nfvNsUrl;
-	
+
 	public NetworkSliceInstance() {	}
 
 	/**
@@ -91,9 +98,10 @@ public class NetworkSliceInstance {
 	 * @param nfvNsId ID of the NFV network service that implements the network slice
 	 * @param networkSliceSubnetInstances in case of composite network slice, the ID of its network slice subnets
 	 * @param tenantId owner of the slice
+	 * @param vnfPlacement requested vnf placement key: vnfdId, value: EDGE/CLOUD
 	 */
 	public NetworkSliceInstance(String nsiId, String nstId, String nsdId, String nsdVersion, String dfId, String instantiationLevelId, String nfvNsId,
-			List<String> networkSliceSubnetInstances, String tenantId, String name, String description, boolean soManaged) {
+			List<String> networkSliceSubnetInstances, String tenantId, String name, String description, boolean soManaged, Map<String, NetworkSliceVnfPlacement> vnfPlacement) {
 		this.nsiId = nsiId;
 		this.nstId = nstId;
 		this.nsdId = nsdId;
@@ -107,6 +115,8 @@ public class NetworkSliceInstance {
 		this.name = name;
 		this.description = description;
 		this.soManaged = soManaged;
+		if(vnfPlacement!=null) this.vnfPlacement= vnfPlacement;
+
 	}
 
 	public NfvNsInstantiationInfo getNsInstantiationInfo(boolean current) {
@@ -120,12 +130,12 @@ public class NetworkSliceInstance {
 				new HashMap<String, String>(),
 				null);
 		else return new NfvNsInstantiationInfo(
-				nsdId,
-				nsdVersion,
-				dfId,
-				oldInstantiationLevelId,
-				new ArrayList<String>(),
-				new HashMap<String, String>(), null);
+			nsdId,
+			nsdVersion,
+			dfId,
+			oldInstantiationLevelId,
+			new ArrayList<String>(),
+			new HashMap<String, String>(), null);
 	}
 	
 	
@@ -165,8 +175,6 @@ public class NetworkSliceInstance {
 		return id;
 	}
 	
-	
-
 	public void setDfId(String dfId) {
 		this.dfId = dfId;
 	}
@@ -297,8 +305,6 @@ public class NetworkSliceInstance {
 		this.nfvNsUrl = nfvNsUrl;
 	}
 	
-	
-	
 	public String getNstId() {
 		return nstId;
 	}
@@ -327,6 +333,15 @@ public class NetworkSliceInstance {
 		this.oldInstantiationLevelId = oldInstantiationLevelId;
 	}
 
+	public Map<String, NetworkSliceVnfPlacement> getVnfPlacement() {
+		return vnfPlacement;
+	}
+
+
+
+	public void setVnfPlacement(Map<String, NetworkSliceVnfPlacement> vnfPlacement){
+		this.vnfPlacement= vnfPlacement;
+	}
 	/**
 	 * This method fills the failure related fields
 	 * 
@@ -336,5 +351,6 @@ public class NetworkSliceInstance {
 		this.status = NetworkSliceStatus.FAILED;
 		this.errorMessage = errorMessage;
 	}
-	
+
+
 }

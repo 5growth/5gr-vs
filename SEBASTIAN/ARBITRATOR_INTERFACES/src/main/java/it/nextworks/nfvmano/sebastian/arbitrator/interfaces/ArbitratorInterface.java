@@ -17,6 +17,7 @@ package it.nextworks.nfvmano.sebastian.arbitrator.interfaces;
 import java.util.List;
 
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.FailedOperationException;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.MethodNotImplementedException;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.sebastian.arbitrator.messages.ArbitratorRequest;
 import it.nextworks.nfvmano.sebastian.arbitrator.messages.ArbitratorResponse;
@@ -52,6 +53,6 @@ public interface ArbitratorInterface {
             throws FailedOperationException, NotExistingEntityException;
 
     List<ArbitratorResponse> arbitrateVsScaling(List<ArbitratorRequest> requests)
-            throws FailedOperationException, NotExistingEntityException;
+            throws FailedOperationException, NotExistingEntityException, MethodNotImplementedException;
 
 }

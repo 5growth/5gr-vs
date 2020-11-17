@@ -2,10 +2,23 @@ package it.nextworks.nfvmano;
 
 import javax.annotation.PostConstruct;
 
+
+import it.nextworks.nfvmano.catalogue.blueprint.services.VsBlueprintCatalogueService;
+import it.nextworks.nfvmano.catalogue.blueprint.services.VsDescriptorCatalogueService;
 import it.nextworks.nfvmano.catalogue.domainLayer.*;
-import it.nextworks.nfvmano.catalogue.domainLayer.customDomainLayer.SebastianLocalNspDomainLayer;
+
+import it.nextworks.nfvmano.catalogue.template.interfaces.NsTemplateCatalogueInterface;
 import it.nextworks.nfvmano.catalogues.domainLayer.services.DomainCatalogueService;
+import it.nextworks.nfvmano.catalogues.template.services.NsTemplateCatalogueService;
+import it.nextworks.nfvmano.nfvodriver.NfvoCatalogueService;
+import it.nextworks.nfvmano.sebastian.admin.AdminService;
+import it.nextworks.nfvmano.sebastian.common.VirtualResourceCalculatorService;
 import it.nextworks.nfvmano.sebastian.vsfm.sbi.NsmfInteractionHandler;
+import it.nextworks.nfvmano.sebastian.vsfm.sbi.vsmf.CsmfType;
+import it.nextworks.nfvmano.sebastian.vsfm.sbi.vsmf.VsmfInteractionHandler;
+import it.nextworks.nfvmano.sebastian.vsfm.sbi.vsmf.drivers.EveVsmfDriver;
+import it.nextworks.nfvmano.sebastian.vsfm.sbi.vsmf.drivers.VsmfLevelLoggingDriver;
+import it.nextworks.nfvmano.sebastian.vsfm.sbi.vsmf.polling.VsmfLcmOperationPollingManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,10 +44,30 @@ public class SlicerConfigurator {
 
 
 	@Autowired
+	private VirtualResourceCalculatorService virtualResourceCalculatorService;
+
+	@Autowired
+	private AdminService adminService;
+	@Autowired
+	private VsBlueprintCatalogueService vsBlueprintCatalogueService;
+
+	@Autowired
+	private NfvoCatalogueService nfvoCatalogueService;
+
+	@Autowired
+	private NsTemplateCatalogueService nsTemplateCatalogueService;
+
+	@Autowired
 	private DomainCatalogueService domainCatalogueService;
 
 	@Autowired
 	private NsmfInteractionHandler nsmfInteractionHandler;
+
+	@Autowired
+	private VsmfInteractionHandler vsmfInteractionHandler;
+
+	@Autowired
+	private VsmfLcmOperationPollingManager vsmfLcmOperationPollingManager;
 
 	@Autowired
 	private NsLcmService nsLcmService;
@@ -45,8 +78,13 @@ public class SlicerConfigurator {
 	@Autowired
     private VsmfUtils vsmfUtils;
 
+	@Autowired
+	private VsDescriptorCatalogueService vsDescriptorCatalogueService;
+	
 	@Value("${nsmf.local_domain_id:LOCAL}")
 	private String localDomainId;
+
+
 	
 	@PostConstruct
 	public void init() {
@@ -54,33 +92,21 @@ public class SlicerConfigurator {
 		nsLcmService.setNotificationDispatcher(vsLcmService);
 		//vsLcmService.setNsmfLcmProvider(nsLcmService);
 		vsmfUtils.setNsmfLcmProvider(nsLcmService);
-
-
+		vsBlueprintCatalogueService.setNsTemplateCatalogueService(nsTemplateCatalogueService);
+		nsmfInteractionHandler.init();
+		vsmfInteractionHandler.init();
+		virtualResourceCalculatorService.setNfvoCatalogueService(nfvoCatalogueService);
+		virtualResourceCalculatorService.setVnfPackageManagementProviderInterface(nfvoCatalogueService);
 		log.debug("Adding local Sebastian NSP domain");
 		//HERE we should configure the available domains. For the moment only the local domain is configures
-		Domain localDomain = new Domain(localDomainId);
-		localDomain.setName(localDomainId);
-		localDomain.setOwner(localDomainId);
-		localDomain.setAdmin(localDomainId);
-		localDomain.setDomainStatus(DomainStatus.ACTIVE);
-		localDomain.setDomainInterface(new DomainInterface("",Integer.MIN_VALUE, false, InterfaceType.LOCAL));
-		DomainLayer localDomainLayer = new SebastianLocalNspDomainLayer(localDomainId);
-		ArrayList<DomainLayer> ownedDomainLayers = new ArrayList();
-		ownedDomainLayers.add(localDomainLayer);
-		localDomain.setOwnedLayers(ownedDomainLayers);
-		localDomainLayer.setDomainLayerType(DomainLayerType.NETWORK_SLICE_PROVIDER);
-		try {
-			domainCatalogueService.onBoardDomain(localDomain);
+		
+		
+			
 
-			nsmfInteractionHandler.addDriver(localDomain.getDomainId(), nsLcmService );
-			nsmfInteractionHandler.setDefaultDriver(localDomain.getDomainId());
+			nsmfInteractionHandler.addDriver("LOCAL", nsLcmService );
+			nsmfInteractionHandler.setDefaultDriver("LOCAL");
 			vsLcmService.setNsmfLcmProvider(nsmfInteractionHandler);
-		} catch (MalformattedElementException e) {
-			log.error("Failed to onboard domain:" , e);
-		} catch (AlreadyExistingEntityException e) {
-			log.error("Failed to onboard domain:" , e);
-		}
-
+		
 	}
 
 

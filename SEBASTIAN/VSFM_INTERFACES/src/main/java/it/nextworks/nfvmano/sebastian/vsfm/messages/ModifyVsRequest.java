@@ -29,7 +29,7 @@ public class ModifyVsRequest implements InterfaceMessage {
 	private String vsiId;
 	private String tenantId;
 	private String vsdId;
-	
+
 	public ModifyVsRequest() { }
 	
 	/**
@@ -46,9 +46,7 @@ public class ModifyVsRequest implements InterfaceMessage {
 		this.vsdId = vsdId;
 		this.tenantId = tenantId;
 	}
-	
-	
-	
+
 	/**
 	 * @return the vsiId
 	 */

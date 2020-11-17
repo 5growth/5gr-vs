@@ -17,11 +17,7 @@ package it.nextworks.nfvmano.sebastian.vsfm.sbi;
 
 import it.nextworks.nfvmano.catalogue.domainLayer.NspNbiType;
 import it.nextworks.nfvmano.libs.ifa.common.enums.OperationStatus;
-import it.nextworks.nfvmano.libs.ifa.osmanfvo.nslcm.interfaces.NsLcmProviderInterface;
-import it.nextworks.nfvmano.nfvodriver.NfvoLcmNotificationInterface;
-import it.nextworks.nfvmano.nfvodriver.NfvoLcmOperationPollingManager;
-import it.nextworks.nfvmano.nfvodriver.NfvoLcmOperationPollingTask;
-import it.nextworks.nfvmano.nfvodriver.PolledNfvoLcmOperation;
+
 import it.nextworks.nfvmano.sebastian.nsmf.interfaces.NsmfLcmProviderInterface;
 import it.nextworks.nfvmano.sebastian.vsfm.VsLcmService;
 import org.slf4j.Logger;
