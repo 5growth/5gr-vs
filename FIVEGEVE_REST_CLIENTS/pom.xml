@@ -10,9 +10,9 @@
     <modules>
       
       
-        <module>5GEVE_EXPERIMENT_LCM_REST_CLIENT</module>
-	<module>5GEVE_PORTAL_CATALOGUE_REST_CLIENT</module>
-	<module>5GEVE_RBAC_LOGIN_REST_CLIENT</module>
+        <module>FIVEGEVE_EXPERIMENT_LCM_REST_CLIENT</module>
+	<module>FIVEGEVE_PORTAL_CATALOGUE_REST_CLIENT</module>
+	<module>FIVEGEVE_RBAC_LOGIN_REST_CLIENT</module>
 
     </modules>
 </project>
