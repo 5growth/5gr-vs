@@ -65,6 +65,7 @@ public class EveVsmfDriver extends AbstractVsmfDriver {
     @Override
     public String instantiateVs(InstantiateVsRequest request, String domainId) throws MethodNotImplementedException, NotExistingEntityException, FailedOperationException, MalformattedElementException, NotPermittedOperationException {
         log.debug("instantiateVs");
+        log.info("PROFILING\tINSTANTIATE_VS_REQ\t"+request.getName()+"\t"+System.currentTimeMillis());
         //RemoteTenantInfo remoteTenantInfo = super.getRemoteTenantInfoTest(request.getTenantId(), elcmBaseUrl);
         AuthenticationApi authenticationApi = getRbacApiClient();
         UserLogin userLogin = new UserLogin();
@@ -111,9 +112,11 @@ public class EveVsmfDriver extends AbstractVsmfDriver {
                     vsbId,
                     vsbParams, tcbParams);
             log.debug("Finished translating EXPD/VSD");
+            log.info("PROFILING\tFINISHED_TRANSLATING\t"+request.getName()+"\t"+System.currentTimeMillis());
             log.debug("Onboarding EXPD/VSD");
             ExperimentDescriptorCatalogueApiApi expdApi = getExpDescriptorApiClient();
             String expdId = expdApi.createExpDescriptorUsingPOST(expDescriptor, true, "");
+            log.info("PROFILING\tFINISHED_ONBOARDING\t"+request.getName()+"\t"+System.currentTimeMillis());
             log.debug("Received ID:"+expdId);
             log.debug("Creating experiment");
             ElmRestControllerApi elmRestControllerApi = getElmApiClient();
@@ -124,6 +127,7 @@ public class EveVsmfDriver extends AbstractVsmfDriver {
             ExperimentRegister register = new ExperimentRegister(expRequest.getExperimentName(), expdId, expId, Experiment.StatusEnum.SCHEDULING, null, request.getUserData());
             experimentRegisterMap.put(expId, register);
             this.getPollingManager().addOperation(expId, OperationStatus.SUCCESSFULLY_DONE, expId, "VSI_CREATION", domainId);
+            log.info("PROFILING\tWAITING_EXPERIMENT_ACCEPTED\t"+expId+"\t"+System.currentTimeMillis());
             return  expId;
 
 
@@ -165,17 +169,24 @@ public class EveVsmfDriver extends AbstractVsmfDriver {
             if(experiments.isEmpty())
                 throw new FailedOperationException("Failed to retrieve experiment");
             VerticalServiceStatus mappedStatus;
-            Experiment experiment =experiments.get(0);
+            Experiment experiment =experiments.stream()
+                    .filter(e -> e.getExperimentId().equals(expId))
+                    .findFirst()
+                    .get();
+            if(experiment==null)
+                throw new FailedOperationException("Failed to retrieve experiment");
             if(experiment.getStatus()== Experiment.StatusEnum.ACCEPTED||experiment.getStatus()== Experiment.StatusEnum.SCHEDULING){
                 register.setExperimentStatus(Experiment.StatusEnum.ACCEPTED);
                 log.debug("Experiment has been accepted, waiting for ready");
                 mappedStatus=VerticalServiceStatus.INSTANTIATING;
+                log.info("PROFILING\tWAITING_EXPERIMENT_READY\t"+expId+"\t"+System.currentTimeMillis());
             }else if(experiment.getStatus()== Experiment.StatusEnum.READY){
                 register.setExperimentStatus(Experiment.StatusEnum.READY);
                 log.debug("Experiment is ready, triggering deployment");
                 ExecuteExperimentRequest executeRequest = EveTranslator.translateExperimentDeploy(register.getUserData(), expId);
                 elmRestControllerApi.requestExperimentActionUsingPOST("deploy", expId, true, "", executeRequest );
                 mappedStatus=VerticalServiceStatus.INSTANTIATING;
+                log.info("PROFILING\tWAITING_EXPERIMENT_INSTANTIATED\t"+expId+"\t"+System.currentTimeMillis());
             }else if(experiment.getStatus()== Experiment.StatusEnum.INSTANTIATING){
                 register.setExperimentStatus(Experiment.StatusEnum.INSTANTIATING);
                 log.debug("Experiment is instantiating, waiting for instantiation to complete");
@@ -186,17 +197,21 @@ public class EveVsmfDriver extends AbstractVsmfDriver {
                 ExecuteExperimentRequest executeRequest = EveTranslator.translateExperimentExecution(register.getUserData(), expId);
                 elmRestControllerApi.requestExperimentActionUsingPOST("execute", expId, true, "", executeRequest);
                 mappedStatus = VerticalServiceStatus.INSTANTIATING;
+                log.info("PROFILING\tWAITING_EXPERIMENT_EXECUTION\t"+expId+"\t"+System.currentTimeMillis());
             }else if(experiment.getStatus()== Experiment.StatusEnum.RUNNING_EXECUTION) {
                 log.debug("Experiment is running!!");
                 mappedStatus= VerticalServiceStatus.INSTANTIATED;
+                log.info("PROFILING\tVS_INSTANTIATED\t"+expId+"\t"+System.currentTimeMillis());
             }else if(experiment.getStatus()== Experiment.StatusEnum.TERMINATING) {
                 log.debug("Experiment is terminating");
                 register.setExperimentStatus(Experiment.StatusEnum.TERMINATING);
                 mappedStatus= VerticalServiceStatus.TERMINATING;
+                log.info("PROFILING\tWAITING_EXPERIMENT_TERMINATION\t"+expId+"\t"+System.currentTimeMillis());
             }else if(experiment.getStatus()== Experiment.StatusEnum.TERMINATED) {
                 log.debug("Experiment is terminated");
                 register.setExperimentStatus(Experiment.StatusEnum.TERMINATED);
                 mappedStatus = VerticalServiceStatus.TERMINATED;
+                log.info("PROFILING\tVS_TERMINATED\t"+expId+"\t"+System.currentTimeMillis());
             }else if(experiment.getStatus()== Experiment.StatusEnum.ABORTED||
                     experiment.getStatus()== Experiment.StatusEnum.FAILED ||
                     experiment.getStatus()== Experiment.StatusEnum.REFUSED) {
@@ -255,7 +270,7 @@ public class EveVsmfDriver extends AbstractVsmfDriver {
     @Override
     public void terminateVs(TerminateVsRequest request, String domainId) throws MethodNotImplementedException, NotExistingEntityException, FailedOperationException, MalformattedElementException, NotPermittedOperationException {
         log.debug("terminating VS");
-
+        log.info("PROFILING\tVS_TERMINATE_REQ\t"+request.getVsiId()+"\t"+System.currentTimeMillis());
 
         String expId = request.getVsiId();
         if(!experimentRegisterMap.containsKey(expId))
