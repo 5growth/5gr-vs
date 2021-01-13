@@ -419,7 +419,9 @@ public class VsLcmService implements VsLcmProviderInterface, NsmfLcmConsumerInte
 			    terminateVs(vsiId, request);
             }else{
 			    vsRecordService.setVsStatus(vsiId, VerticalServiceStatus.TERMINATING);
-			    vsmfInteractionHandler.terminateVs(request, domainId);
+			    String mappedId = vsRecordService.getVsInstance(vsiId).getMappedInstanceId();
+				TerminateVsRequest translatedReq = new TerminateVsRequest(mappedId, tenantId);
+			    vsmfInteractionHandler.terminateVs(translatedReq, domainId);
             }
 		} else {
 			log.debug("Tenant " + tenantId + " is not allowed to terminate VS instance " + vsiId);
