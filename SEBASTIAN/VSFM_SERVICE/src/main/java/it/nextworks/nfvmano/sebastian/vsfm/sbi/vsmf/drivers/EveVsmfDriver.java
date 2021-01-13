@@ -3,6 +3,7 @@ package it.nextworks.nfvmano.sebastian.vsfm.sbi.vsmf.drivers;
 import io.swagger.elcm.client.api.ElmRestControllerApi;
 import io.swagger.elcm.client.model.ExecuteExperimentRequest;
 import io.swagger.elcm.client.model.Experiment;
+import io.swagger.elcm.client.model.ExperimentExecution;
 import io.swagger.elcm.client.model.ExperimentSchedulingRequest;
 import io.swagger.eveportal.client.api.ExperimentBlueprintCatalogueApiApi;
 import io.swagger.eveportal.client.api.ExperimentDescriptorCatalogueApiApi;
@@ -284,9 +285,12 @@ public class EveVsmfDriver extends AbstractVsmfDriver {
         try {
             ElmRestControllerApi elmRestControllerApi = getElmApiClient();
             List<Experiment> experiments = elmRestControllerApi.getAllExperimentsUsingGET(true, "", "", expId);
-            if (experiments.isEmpty())
+            Experiment experiment =experiments.stream()
+                    .filter(e -> e.getExperimentId().equals(expId))
+                    .findAny()
+                    .get();
+            if(experiment==null)
                 throw new FailedOperationException("Failed to retrieve experiment");
-            Experiment experiment = experiments.get(0);
             if(experiment.getStatus()== Experiment.StatusEnum.INSTANTIATED){
                 ExecuteExperimentRequest executeRequest = EveTranslator.translateExperimentTerminate(register.getUserData(), expId);
 
