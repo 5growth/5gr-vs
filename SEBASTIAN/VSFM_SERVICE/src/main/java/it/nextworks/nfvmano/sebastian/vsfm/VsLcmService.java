@@ -908,12 +908,28 @@ public class VsLcmService implements VsLcmProviderInterface, NsmfLcmConsumerInte
             }
 
         } else {
+
     	    nestedVsi= vsRecordService.getVsInstanceFromMappedInstanceId(vssiId, domain);
-            if(nestedVsi==null){
-                log.error("Unable to find nested Vertical Service Instance");
-                return;
-            }
-        }
+			if(nestedVsi==null){
+				log.error("Unable to find nested Vertical Service Instance");
+				return;
+			}
+            try{
+
+				VerticalServiceStatus nestedStatus = VerticalServiceStatus.INSTANTIATED;
+				if(notification.getVsStatusChange().equals(VerticalServiceStatusChange.VSI_CREATED)){
+					nestedStatus=VerticalServiceStatus.INSTANTIATED;
+				}else if(notification.getVsStatusChange().equals(VerticalServiceStatusChange.VSI_TERMINATED)){
+					nestedStatus=VerticalServiceStatus.TERMINATED;
+				}
+				vsRecordService.setVsStatus(nestedVsi.getVsiId(), nestedStatus );
+
+			}catch(Exception e){
+                log.error("error updating nested VSI status",e);
+			}
+
+
+		}
 
     	List<VerticalServiceInstance> vsis = vsRecordService.getVsInstancesFromVerticalSubService(nestedVsi.getVsiId());
 		for (VerticalServiceInstance vsi : vsis) {
