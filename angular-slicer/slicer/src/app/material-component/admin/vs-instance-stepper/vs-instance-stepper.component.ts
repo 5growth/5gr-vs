@@ -90,7 +90,6 @@ createOnBoardVsInstanceRequest() {
     onBoardVsInstRequest['userData'] = JSON.parse('{}');
     onBoardVsInstRequest['userData']=onBoardcpRequest;
 
-  console.log("aaaaaaaaaaaaaaaaaaaaaaaa",onBoardVsInstRequest);
     this.vsInstancesService.postVsInstanceData(onBoardVsInstRequest)
       .subscribe(
         res => {

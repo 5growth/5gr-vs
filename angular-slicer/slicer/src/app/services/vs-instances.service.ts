@@ -21,11 +21,11 @@ getVsInstancesData() {
     );
 }
 
-getVsInstanceByIdData(Id): Observable<VsInstanceInfo[]> {
-  return this.http.get<VsInstanceInfo[]>(environment.baseUrl+"vs/basic/vslcm/vs/"+Id, { withCredentials: true })
+getVsInstanceByIdData(Id): Observable<any> {
+  return this.http.get<any>(environment.baseUrl+"vs/basic/vslcm/vs/"+Id, { withCredentials: true })
   .pipe(
     tap(_ => console.log('fetched VsInstanceInfo - SUCCESS')),
-    catchError(this.authService.handleError<VsInstanceInfo[]>('getVsInstanceByIdData', []))
+    catchError(this.authService.handleError<any>('getVsInstanceByIdData'))
     );
 }
 

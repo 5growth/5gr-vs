@@ -39,8 +39,8 @@ export class VsInstanceComponent implements OnInit {
   }
   deleteVsi(vsiId){
     this.vsInstancesService.deleteVsInstance(vsiId).subscribe();
-    alert(vsiId+" is deleted");
-    window.location.reload();
+   // alert(vsiId+" is deleted");
+    //window.location.reload();
   
   }
   terminateVsi(vsiId){
@@ -51,6 +51,7 @@ export class VsInstanceComponent implements OnInit {
   getVsInstances() {
     let vsElements=[]
     this.vsInstancesService.getVsInstancesData().subscribe((vsInstancesInfos )=> {
+      console.log("vsInstancesInfos",vsInstancesInfos)
       for(var i=0;i<Object.keys(vsInstancesInfos).length;i++){
  
           this.vsInstancesService.getVsInstanceByIdData(vsInstancesInfos[i]).subscribe((vsInstanceInffos : VsInstanceInfo[] )=> {
