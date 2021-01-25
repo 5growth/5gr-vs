@@ -1,6 +1,5 @@
 import { AdminComponent } from './material-component/admin/admin.component';
 import { GroupComponent } from './material-component/admin/group/group.component';
-import { TenantComponent } from './material-component/tenant/tenant.component';
 //import { StorageServiceModule } from 'ngx-webstorage-service';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
@@ -32,7 +31,6 @@ import { LoginComponent } from './login/login.component';
     AppHeaderComponent,
     SpinnerComponent,
     AppSidebarComponent,
-    TenantComponent,
     GroupComponent,
     LoginComponent,
     //StorageServiceModule

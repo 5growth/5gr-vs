@@ -4,7 +4,6 @@ import { DomainsDetailsComponent } from './domains-details/domains-details.compo
 import { DomainsComponent } from './domains/domains.component';
 import { VsBlueprintComponent } from './admin/vs-blueprint/vs-blueprint.component';
 import { NSlicesComponent } from './admin/n-slices/n-slices.component';
-import { VsdDetailsComponent } from './tenant/vsd-details/vsd-details.component';
 import { VsInstanceComponent } from './admin/vs-instance/vs-instance.component';
 import { VsDescriptorComponent } from './admin/vs-descriptor/vs-descriptor.component';
 import { VsDescriptorStepperComponent } from './admin/vs-descriptor-stepper/vs-descriptor-stepper.component';
@@ -51,10 +50,6 @@ export const MaterialRoutes: Routes = [
   {
     path: 'vsinstance-add',
     component: VsInstanceStepperComponent
-  },
-  {
-    path: 'vsdetails',
-    component: VsdDetailsComponent
   },
   {
     path: 'nslices',

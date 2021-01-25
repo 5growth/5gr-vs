@@ -36,7 +36,7 @@ onSubmit() {
   if (username && password) {
     loginInfo['username'] = username;
     loginInfo['password'] = password;
-
+    localStorage.setItem('username',username);
   this.authService.login(loginInfo).subscribe(
     (res: HttpResponse<any>) => {
       this.authService.checkUser().subscribe(res=> {

@@ -86,16 +86,16 @@ createOnBoardVsInstanceRequest() {
     onBoardVsInstRequest['name'] = this.firstFormGroup.get('name').value;
     onBoardVsInstRequest['description'] = this.firstFormGroup.get('description').value;
     onBoardVsInstRequest['vsdId'] = this.firstFormGroup.get('vsdId').value;
-    onBoardVsInstRequest['tenantId'] = 'NXW';
+    onBoardVsInstRequest['tenantId'] = localStorage.getItem('username');
     onBoardVsInstRequest['userData'] = JSON.parse('{}');
     onBoardVsInstRequest['userData']=onBoardcpRequest;
 
-  console.log(onBoardVsInstRequest)
+  console.log("aaaaaaaaaaaaaaaaaaaaaaaa",onBoardVsInstRequest);
     this.vsInstancesService.postVsInstanceData(onBoardVsInstRequest)
       .subscribe(
         res => {
         //console.log("Successfully uploaded new vs Descriptor with id " + vsDescriptortId);
-    //    this.router.navigate(['/vsinstance']);
+       this.router.navigate(['/vsinstance']);
       });
        
       
