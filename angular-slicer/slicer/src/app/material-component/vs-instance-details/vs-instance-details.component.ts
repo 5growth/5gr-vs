@@ -1,19 +1,18 @@
-import { VsInstanceInfo } from './../admin/vs-instance/vs-instance-info';
-
+import { VsInstanceInfo } from '../vs-instance/vs-instance-info';
 import { VsInstancesService } from './../../services/vs-instances.service';
 import { Component, OnInit,ViewChild } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTable } from '@angular/material/table';
-import{VsInstanceDataSource} from './../admin/vs-instance/vs-instance-datasource';
+import{VsInstanceDataSource} from '../vs-instance/vs-instance-datasource';
 import { ActivatedRoute } from "@angular/router";
-
 
 @Component({
   selector: 'app-vs-instance-details',
   templateUrl: './vs-instance-details.component.html',
-  styleUrls: ['./vs-instance-details.component.css']
+  styleUrls: ['./vs-instance-details.component.scss']
 })
+
 export class VsInstanceDetailsComponent implements OnInit {
   @ViewChild(MatPaginator, {static: false}) paginator: MatPaginator;
   @ViewChild(MatSort, {static: false}) sort: MatSort;
@@ -23,18 +22,16 @@ export class VsInstanceDetailsComponent implements OnInit {
   vsInstanceInfos: VsInstanceInfo[] = [];
   displayedColumns = ['vsdId','status','errorMessage'];
 
-
   constructor(private vsInstancesService:VsInstancesService,private route: ActivatedRoute) { }
   vsiId : string;
 
   ngOnInit(): void {
     this.vsiId = localStorage.getItem('vsiId');
-    this.getVsiDetails(this.vsiId);
-    
+    this.getVsiDetails(this.vsiId); 
   }
 
   getVsiDetails(vsiId) {
-    var vsiInfsArr=[]
+    var vsiInfsArr=[];
     this.vsInstancesService.getVsInstanceByIdData(vsiId).subscribe((vsInstanceInfos : VsInstanceInfo[] )=> {
     vsiInfsArr.push(vsInstanceInfos);
     this.vsInstanceInfos = vsiInfsArr;

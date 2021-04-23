@@ -9,7 +9,7 @@ import { ActivatedRoute } from "@angular/router";
 @Component({
   selector: 'app-domains-details',
   templateUrl: './domains-details.component.html',
-  styleUrls: ['./domains-details.component.css']
+  styleUrls: ['./domains-details.component.scss']
 })
 export class DomainsDetailsComponent implements OnInit {
   @ViewChild(MatPaginator, {static: false}) paginator: MatPaginator;

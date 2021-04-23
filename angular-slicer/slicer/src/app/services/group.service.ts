@@ -2,7 +2,7 @@ import { environment } from '../environments/environments';
 import { Injectable } from '@angular/core';
 import { Observable, } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-import { GroupInfo } from '../material-component/admin/group/group-info';
+import { GroupInfo } from '../material-component/group/group-info';
 import { HttpClient,HttpHeaders,HttpParams } from '@angular/common/http';
 import { AuthService } from './auth.service';
 

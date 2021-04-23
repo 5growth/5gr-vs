@@ -179,7 +179,10 @@ const httpOptions = {
   withCredentials: true,
   observe: 'response' as 'response'
 };
-
+const httpOptionsS = {
+ //headers: new HttpHeaders().set('Access-Control-Allow-Origin','*'),
+  withCredentials: true,
+};
 @Injectable({
   providedIn: 'root'
 })
@@ -195,7 +198,7 @@ export class AuthService {
 
 
 checkUser(): Observable<any> {
-  return this.http.get<any>(AUTH_API + 'vs/whoami', {withCredentials: true})
+  return this.http.get<any>(AUTH_API + 'vs/whoami', httpOptionsS)
 }
 
 login(loginInfo: any): Observable<any> {
@@ -271,42 +274,37 @@ refresh(refreshInfo: Object) {
 
 handleError<T> (operation = 'operation', result?: T) {
   return (error: any): Observable<T> => {
-    if (error.status == 401) {
+    if (error.status == 401 || error.status == 400) {
       if (operation.indexOf('refresh') >= 0 || operation.indexOf('login') >= 0) {
-        this.log(`${operation} failed: ${error.message}`, 'FAILED', false);
+        this.log(`${error.error}`, 'FAILED', false);
         localStorage.clear();
-        this.router.navigate(['/login']).then(() => {
-          //window.location.reload();
+        this.router.navigate(['login']).then(() => {
+          window.location.reload();
         });
       } else {
-        this.log(`${operation} failed: ${error.message}`, 'FAILED', false);
+        this.log(`${error.error}`, 'FAILED', false);
       }
 
     } 
-    else if (error.status == 201) {
-      console.log("status code 201");
+    else if( error.status == 201){
+      console.log(error.error)
 
     } 
     else if( error.status == 409){
       this.log("Duplicate : continue or add new one", 'CONTINUE', true);
     } 
+    else if( error.status == 404 && (operation=="terminateVsInstance" || operation=="deleteVsInstance")){
+      console.log("Not Found")
+
+    }   
     else if( error.status == 404){
       console.log("Not Found")
+
+    }   
+    else{
+      this.log(error.error, 'FAILED', false);
     } 
-    else {
-      if (error.status == 400) {
-        if (operation.indexOf('refresh') >= 0 || operation.indexOf('login') >= 0) {
-          this.log(`${operation} failed: ${error.message}`, 'FAILED', false);
-          localStorage.clear();
-          this.router.navigate(['/login']).then(() => {
-            window.location.reload();
-          });
-        }
-      } else {
-        console.log(error.status + " after " + operation);
-        this.log("Account not yet activated", 'FAILED', true);
-      }
-    }
+ 
     return of(result as T);
   };
 }

@@ -6,7 +6,7 @@ import { FormArray,FormGroup,FormBuilder,Validators } from '@angular/forms';
 @Component({
   selector: 'app-dialog-tenant-sla-mec',
   templateUrl: './dialog-tenant-sla-mec.component.html',
-  styleUrls: ['./dialog-tenant-sla-mec.component.css']
+  styleUrls: ['./dialog-tenant-sla-mec.component.scss']
 })
 export class DialogTenantSlaMecComponent implements OnInit {
   constructor(public dialogRef: MatDialogRef<DialogTenantSlaMecComponent>,
@@ -21,14 +21,12 @@ export class DialogTenantSlaMecComponent implements OnInit {
   tenant =this.data['dialUsername']
 
   ngOnInit() {
-    this.dialogRef.updatePosition({ top: `5%`,
-    right: `40%`});
     this.formGroup = this._formBuilder.group({
-      slaStatus: ['', Validators.required],
-      memoryRAM: ['', Validators.required],
-      vCPU: ['', Validators.required],
-      diskStorage: ['', Validators.required],
-      location :['', Validators.required],
+      slaStatus: '',
+      memoryRAM: '',
+      vCPU: '',
+      diskStorage: '',
+      location : '',
       items: this._formBuilder.array([this.createItem()])
     });
     this.items = this.formGroup.get('items') as FormArray;
@@ -36,7 +34,6 @@ export class DialogTenantSlaMecComponent implements OnInit {
   addMecSla(slaStatus){
     var meclatRequest = JSON.parse('{}');
     var status =(<HTMLInputElement>document.getElementById(slaStatus)).value;
-    //var scp =(<HTMLInputElement>document.getElementById(scope)).value;
     meclatRequest['tenant']=this.data['dialUsername'];
     meclatRequest['slaStatus']=status;
     meclatRequest['slaConstraints']=[];

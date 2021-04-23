@@ -1,20 +1,20 @@
-<div class="user-profile" style="background-color: #64b5f6">
+<div class="user-profile menu-background">
     <div class="profile-img">
          <div>
              <img src="assets/images/user_icon.png" alt="user">
-            </div>
-        <div style="width:100%;float: right;margin-top: -56px;margin-right: -90px">
+         </div>
+        <div class="welcome-box">
             <a style="color: black;"> 
-            <b>Welcome {{userName}}</b>  
+            Welcome {{userName}}
          </a>
         </div>
     </div>    
 </div>
 <mat-nav-list appAccordion>
     <mat-list-item appAccordionLink *ngFor="let menuitem of menuItems.getMenuitem()" routerLinkActive="selected" group="{{menuitem.state}}">
-        <a appAccordionToggle [routerLink]="['/', menuitem.state]" *ngIf="menuitem.type === 'link'" style="padding-left:10px;padding-right: 3px;width: 220px;">
+        <a appAccordionToggle [routerLink]="['/', menuitem.state]" *ngIf="menuitem.type === 'link'" class="app-toggle">
             <mat-icon style="margin-left: -8px">{{ menuitem.icon }}</mat-icon> 
-            <span style="font-size: 14px;margin-left: -3px">{{ menuitem.name }}</span> 
+            <span class="menu-name">{{ menuitem.name }}</span> 
             <span fxFlex></span> 
             <span class="label label-{{ badge.type }}" *ngFor="let badge of menuitem.badge">{{ badge.value }}</span> 
         </a>
@@ -32,7 +32,7 @@
                     <span>VS Blueprint onboarding</span>
                 </button>
             </a>
-            <a class="" appAccordionToggle [routerLink]="['/vsblueprint']" >
+            <a appAccordionToggle [routerLink]="['/vsblueprint']" >
                 <button mat-menu-item>
                     <mat-icon>voicemail</mat-icon>
                     <span>VS Blueprints</span>

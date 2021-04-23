@@ -44,27 +44,30 @@ const menuVsmfAdmin = [
   { state: 'domains', type: 'link', name: 'Domains', icon: 'domain' },
   { state: 'vsblueprint', type: 'link', name: 'Vertical Service Blueprints', icon: 'apps' },
   { state: 'vsdescriptor', type: 'link', name: 'Vertical Service Descriptors', icon: 'description' },
-  { state: 'nslices', type: 'link', name: 'Network Slice Templates', icon: 'share' },
-  { state: 'vsinstance', type: 'link', name: 'Vertical Service Instances', icon: 'widgets' }
+  { state: 'ns-template', type: 'link', name: 'Network Slice Templates', icon: 'share' },
+  { state: 'ns-instances', type: 'link', name: 'Network Slice Instances', icon: 'horizontal_split' },
+  { state: 'vsinstance', type: 'link', name: 'Vertical Service Instances', icon: 'widgets' },
+
 ];
 const menuVsmfTenant = [
   { state: 'dashboard', name: 'Home', type: 'link', icon: 'home' },
   { state: 'vsblueprint', type: 'link', name: 'Vertical Service Blueprints', icon: 'apps' },
   { state: 'vsdescriptor', type: 'link', name: 'Vertical Service Descriptors', icon: 'description' },
-  { state: 'vsinstance', type: 'link', name: 'Vertical Service Instances', icon: 'widgets' }
+  { state: 'vsinstance', type: 'link', name: 'Vertical Service Instances', icon: 'widgets' },
+
 ];
 
 const menuNsmfAdmin = [
   { state: 'dashboard', name: 'Home', type: 'link', icon: 'home' },
   { state: 'tenant', type: 'link', name: 'Tenants', icon: 'person' },
   { state: 'group', type: 'link', name: 'Groups', icon: 'group' },
-  { state: 'nslices', type: 'link', name: 'Network Slice Templates', icon: 'share' },
-  { state: '', type: 'link', name: 'Network Slice Instances', icon: 'horizontal_split' }
+  { state: 'ns-template', type: 'link', name: 'Network Slice Templates', icon: 'share' },
+  { state: 'ns-instances', type: 'link', name: 'Network Slice Instances', icon: 'horizontal_split' }
 ];
 
 const menuNsmfTenant = [
   { state: 'dashboard', name: 'Home', type: 'link', icon: 'home' },
-  { state: 'nslices', type: 'link', name: 'Network Slice Templates', icon: 'share' },
+  { state: 'ns-template', type: 'link', name: 'Network Slice Templates', icon: 'share' },
   { state: 'ns-instances', type: 'link', name: 'Network Slice Instances', icon: 'horizontal_split' }
 ];
 
@@ -75,7 +78,7 @@ const menuVsmfNsmfAdmin = [
   { state: 'domains', type: 'link', name: 'Domains', icon: 'domain' },
   { state: 'vsblueprint', type: 'link', name: 'Vertical Service Blueprints', icon: 'apps' },
   { state: 'vsdescriptor', type: 'link', name: 'Vertical Service Descriptors', icon: 'description' },
-  { state: 'nslices', type: 'link', name: 'Network Slice Templates', icon: 'share' },
+  { state: 'ns-template', type: 'link', name: 'Network Slice Templates', icon: 'share' },
   { state: 'vsinstance', type: 'link', name: 'Vertical Service Instances', icon: 'widgets' },
   { state: 'ns-instances', type: 'link', name: 'Network Slice Instances', icon: 'horizontal_split' }
 

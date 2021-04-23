@@ -1,21 +1,14 @@
 import { Component, OnInit ,Inject} from '@angular/core';
 import { MatDialogRef,MAT_DIALOG_DATA } from '@angular/material';
-import { GroupService } from '../../services/group.service';
 import { TenantService } from '../../services/tenant.service';
-import { Router } from '@angular/router';
-import { report } from 'process';
 
 @Component({
   selector: 'app-dialog-tenant-sla-global',
   templateUrl: './dialog-tenant-sla-global.component.html',
-  styleUrls: ['./dialog-tenant-sla-global.component.css']
+  styleUrls: ['./dialog-tenant-sla-global.component.scss']
 })
 export class DialogTenantSlaGlobalComponent implements OnInit {
-
-
   constructor(public dialogRef: MatDialogRef<DialogTenantSlaGlobalComponent>,
-    private groupService:GroupService,
-    private router: Router,
     private tenantService:TenantService,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) { }
@@ -23,18 +16,14 @@ export class DialogTenantSlaGlobalComponent implements OnInit {
   selected: 'admin';
   tenant =this.data['dialUsername']
   ngOnInit() {
-    this.dialogRef.updatePosition({ top: `5%`,
-    right: `40%`});
   }
-  addGlobalSla(slaStatus,scope,location,memoryRAM,vCPU,diskStorage){
+  addGlobalSla(slaStatus,location,memoryRAM,vCPU,diskStorage){
     var globalSlatRequest = JSON.parse('{}');
     var status =(<HTMLInputElement>document.getElementById(slaStatus)).value;
-    //var scp =(<HTMLInputElement>document.getElementById(scope)).value;
     var loc =(<HTMLInputElement>document.getElementById(location)).value;
     var dStorage =(<HTMLInputElement>document.getElementById(diskStorage)).value;
     var mRAM =(<HTMLInputElement>document.getElementById(memoryRAM)).value;
     var vcPU =(<HTMLInputElement>document.getElementById(vCPU)).value;
-    
     globalSlatRequest['tenant']=this.data['dialUsername'];
     globalSlatRequest['slaStatus']=status;
     globalSlatRequest['slaConstraints']=[];

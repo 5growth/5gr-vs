@@ -1,12 +1,7 @@
 import {
   ChangeDetectorRef,
   Component,
-  NgZone,
   OnDestroy,
-  ViewChild,
-  HostListener,
-  Directive,
-  AfterViewInit,
   OnInit
 } from '@angular/core';
 import { MediaMatcher } from '@angular/cdk/layout';

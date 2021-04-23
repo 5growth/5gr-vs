@@ -1,0 +1,18 @@
+<div style="width: 100%;">
+  <h2 mat-dialog-title>Add Group</h2>
+  <mat-dialog-content class="text">
+    <table>
+      <tr>
+        <td>	
+          <mat-form-field appearance="outline"  >		
+            <mat-label>Name</mat-label>						
+            <input  id="createGroup-name" matInput placeholder="Name" class="group-input" >
+          </mat-form-field>		
+        </td>
+      </tr>
+    </table>
+  </mat-dialog-content>
+  <mat-dialog-actions style="text-align: center;">
+    <button mat-raised-button (click)="addGroup('createGroup-name')" [mat-dialog-close]="true" color="primary">Submit</button>
+  </mat-dialog-actions>
+</div>

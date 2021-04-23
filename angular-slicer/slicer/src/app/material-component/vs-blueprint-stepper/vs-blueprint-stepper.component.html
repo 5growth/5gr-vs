@@ -1,0 +1,287 @@
+<mat-horizontal-stepper [linear]="isLinear" #stepper >
+    <mat-step [stepControl]="firstFormGroup">
+        <form [formGroup]="firstFormGroup">
+            <ng-template matStepLabel>Upload VSB</ng-template>
+            <input #vsbFiles type="file" formControlName="vsb" (change)="onUploadedVsb(vsbFiles.files)"  required/>
+            <div class="button-row" style="margin-top: 3%;">
+                <button mat-raised-button color="primary" matStepperNext [disabled]="!firstFormGroup.valid" >Next</button>
+            </div>
+        </form>
+    </mat-step>
+    <mat-step *ngIf="showNst" [stepControl]="secondFormGroup" >
+        <form [formGroup]="secondFormGroup">
+            <ng-template matStepLabel>Upload NST</ng-template>
+            <input #nstFiles type="file" formControlName="nst" (change)="onUploadedNst(nstFiles.files)"  required/>
+            <div class="button-row" style="margin-top: 3%;">                
+                <button mat-raised-button color="primary" matStepperPrevious>Back</button>
+                <button mat-raised-button color="primary" matStepperNext (click)="createOnBoardNstRequest()" [disabled]="!secondFormGroup.valid" >Next</button>
+           </div>
+        </form>
+    </mat-step>
+    <mat-step *ngIf="envCondition()" [stepControl]="thirdFormGroup" >   
+        <form [formGroup]="thirdFormGroup">
+            <ng-template matStepLabel>Upload NSDs</ng-template>
+            <input #nsdFiles type="file" formControlName="nsd" multiple (change)="onUploadedNsds(nsdFiles.files)"  required/>
+            <div style="margin-top: 20px;" *ngIf="this.nsdInfoArr.length > 1">
+                <label *ngIf="this.nsdInfoArr.length > 1"><b>NSDs Name - ID :</b></label>
+                <mat-nav-list>
+                    <a mat-list-item  *ngFor="let nsdInf of this.nsdInfoArr"> {{ nsdInf.nsdName }} - {{ nsdInf.nsdId }} </a>
+                 </mat-nav-list>
+            </div>
+            <div style="margin-top: 20px;" *ngIf="this.nsdInfoArr.length == 1">
+                <label><b>NSD Name - ID :</b></label>
+                <mat-nav-list>
+                    <a mat-list-item *ngFor="let nsdInf of this.nsdInfoArr"> {{ nsdInf.nsdName }} - {{ nsdInf.nsdId }} </a>
+                 </mat-nav-list>
+            </div>
+            <div class="button-row" style="margin-top: 3%;">
+                <button mat-raised-button color="primary" matStepperPrevious>Back</button>
+                <button mat-raised-button color="primary" matStepperNext [disabled]="!thirdFormGroup.valid">Next</button>
+           </div>
+        </form>
+    </mat-step>
+    <mat-step [stepControl]="fourthFormGroup">
+        <form [formGroup]="fourthFormGroup">
+            <ng-template matStepLabel>VNF Packages</ng-template>
+            <table fxFlex="100%"  fxLayout.xs="column" fxLayout="column" >
+                    <div formArrayName="vnfItems" *ngFor="let item of fourthFormGroup.get('vnfItems')['controls']; let k=index" fxFlex="100%"  fxLayout.xs="column" fxLayout="column" fxLayoutAlign="center center" >
+
+                        <div [formGroupName]="k">                        
+                            <tr fxFlex="100%"   fxLayout.xs="column" fxLayout.sm="row"  fxLayout="row" fxLayoutAlign="left left" >
+
+                            <td >
+                                <mat-form-field appearance="outline" color=primary >
+                                    <mat-label>Name</mat-label>
+									<input matInput placeholder="name" formControlName="name" style="width: 100%;">
+                                </mat-form-field>
+                            </td>
+                            <td>
+                                <mat-form-field appearance="outline" color=primary>
+                                    <mat-label>Provider</mat-label>
+									<input matInput placeholder="provider" formControlName="provider">
+                                </mat-form-field>
+                            </td>
+                            <td>
+                                <mat-form-field appearance="outline" color=primary >
+                                    <mat-label>Version</mat-label>
+									<input matInput placeholder="version" formControlName="version">
+                                </mat-form-field>
+                            </td>
+          
+                            <td>
+                                <mat-form-field appearance="outline" color=primary >
+                                    <mat-label>Checksum</mat-label>
+									<input matInput placeholder="checksum" formControlName="checksum">
+                                </mat-form-field>
+                            </td>
+                            <td>
+                                <mat-form-field appearance="outline" color=primary >
+                                    <mat-label>Vnf Package Path</mat-label>
+									<input matInput placeholder="Vnf Package Path" formControlName="vnfPackagePath">
+                                </mat-form-field>
+                            </td>
+                        </tr>
+                        </div>
+                
+                    </div>
+                <tr>
+                    <td class="margin-top"  fxFlex="100%"  fxLayout.xs="row" fxLayout="row" fxLayoutAlign="center center" style="margin-bottom: 2%;">
+                        <div >
+                           <button mat-fab (click)="removeVnfItem();" *ngIf="vnfItems?.length > 1" color="primary"><mat-icon>remove</mat-icon></button>
+						</div>
+						<div >
+                           <button mat-fab (click)="addVnfItem();" color="primary"><mat-icon>add</mat-icon></button>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+						<div class="button-row" style="margin-top: 3%;">
+							<button mat-raised-button color="primary" matStepperPrevious>Back</button>
+							<button mat-raised-button color="primary" matStepperNext [disabled]="!fourthFormGroup.valid"  >Next</button>
+						</div>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    
+    </mat-step>
+<mat-step  [stepControl]="sixthFormGroup" >   
+    <form [formGroup]="sixthFormGroup">
+        <ng-template matStepLabel>Upload PNFDs</ng-template>
+        <input #pnfdFiles type="file" multiple formControlName="pnfd" (change)="onUploadedPnfds(pnfdFiles.files)"  required/>
+        <div style="margin-top: 20px;" *ngIf="this.pndfIds.length > 1">
+            <label *ngIf="this.pndfIds.length > 1"><b>PNFD IDs :</b></label>
+            <mat-nav-list>
+                <a mat-list-item  *ngFor="let pndfId of this.pndfIds"> {{ pndfId }} </a>
+             </mat-nav-list>
+        </div>
+        <div style="margin-top: 20px;" *ngIf="this.pndfIds.length == 1">
+            <label><b>PNFD ID :</b></label>
+            <mat-nav-list>
+                <a mat-list-item  *ngFor="let pndfId of this.pndfIds"> {{ pndfId }} </a>
+             </mat-nav-list>
+        </div>
+        <div class="button-row" style="margin-top: 3%;">
+            <button mat-raised-button color="primary" matStepperPrevious>Back</button>
+            <button mat-raised-button color="primary" matStepperNext>Next</button>
+       </div>
+    </form>
+</mat-step>
+<mat-step  [stepControl]="seventhFormGroup" >   
+    <form [formGroup]="seventhFormGroup">
+        <ng-template matStepLabel>Upload NST Configuration Rules</ng-template>
+        <input #confRuleFiles type="file" multiple formControlName="configurationRules" (change)="onUploadeConfRules(confRuleFiles.files)"  required/>
+        <div style="margin-top: 20px;" *ngIf="this.confNames.length > 1">
+            <label *ngIf="this.confNames.length > 1"><b>  NST Configuration Rule Names :</b></label>
+            <mat-nav-list>
+                <a mat-list-item  *ngFor="let cName of this.confNames"> {{ cName }} </a>
+             </mat-nav-list>
+        </div>
+        <div style="margin-top: 20px;" *ngIf="this.confNames.length == 1">
+            <label><b>  NST Configuration Rule Name :</b></label>
+            <mat-nav-list>
+                <a mat-list-item  *ngFor="let cName of this.confNames"> {{ cName }} </a>
+             </mat-nav-list>
+        </div>
+        <div class="button-row" style="margin-top: 3%;">
+            <button mat-raised-button color="primary" matStepperPrevious>Back</button>
+            <button mat-raised-button color="primary" matStepperNext>Next</button>
+       </div>
+    </form>
+</mat-step>
+<mat-step [stepControl]="fifthFormGroup">
+    <form [formGroup]="fifthFormGroup" class="rules-form" >
+        <ng-template matStepLabel>Create Translation Rules</ng-template>
+        <table fxFlex="100%"  fxLayout.xs="column" fxLayout="column" >
+                <div class="address-container" *ngFor="let group of nstArray.controls; let i = index;" formArrayName="nstGroup">
+                    <div [formGroupName]='i' fxFlex="100%" fxLayout.xs="column" fxLayout="row"  style="width: 100%;">
+                        <tr fxFlex="100%" fxLayout.xs="column" fxLayout="column" fxLayoutAlign="left left" style="width: 100%;">
+                            <td *ngIf="envCondition()">
+                                <mat-form-field appearance="outline" class="rules-full-width">
+                                    <mat-label>NSD Id</mat-label>
+                                    <mat-select formControlName="nsdId" name="nsdId" (selectionChange)="onNsdIdSelected($event)">
+                                        <mat-option *ngFor="let nsdId of nsdIds" [value]="nsdId" >
+                                            {{nsdId}}
+                                        </mat-option>
+                                    </mat-select>                               
+                                </mat-form-field>
+                            </td>
+                         
+                            <td *ngIf="envCondition()">
+                                <mat-form-field appearance="outline" color=primary class="rules-full-width">
+                                    <mat-label>NSD Version</mat-label>
+                                    <input matInput id="nsdVersion" placeholder="NSD Version"  formControlName="nsdVersion" [ngModel]="this.nsdVersion">
+                                </mat-form-field>
+                            </td>
+                            <td>
+                                <mat-form-field appearance="outline" color=primary >
+                                    <mat-label>Nst Id</mat-label>
+                                    <input matInput id="NstId" placeholder="Nst Id"  formControlName="nstId" [ngModel]="this.nstId">
+                                </mat-form-field>
+                            </td>
+                        </tr>
+                        <tr fxFlex="100%" fxLayout.xs="column" fxLayout="column" fxLayoutAlign="left left" style="width: 100%;">
+                            <td *ngIf="envCondition()">
+                                <mat-form-field appearance="outline" class="rules-full-width">
+                                    <mat-label>NS Flavour Id</mat-label>
+                                    <mat-select formControlName="nsFlavourId" name="nsFlavourId" (selectionChange)="onNsDfSelected($event);">
+                                        <mat-option *ngFor="let df of dfs" [value]="df.nsDfId">
+                                            {{df.nsDfId}}
+                                        </mat-option>
+                                    </mat-select>                               
+                                </mat-form-field>
+                            </td> 
+                            <td *ngIf="envCondition()">
+                                <mat-form-field appearance="outline" class="rules-full-width">
+                                    <mat-label>NS InstantiationLevel Id</mat-label>
+                                    <mat-select formControlName="nsInstantiationLevelId" placeholder="NS InstantiationLevel Id" name="nsInstantiationLevelId">
+                                        <mat-option *ngFor="let instLevel of instLevels" [value]="instLevel.nsLevelId">
+                                            {{instLevel.nsLevelId}}
+        
+                                        </mat-option>
+                                    </mat-select>                                
+                                </mat-form-field>
+                            </td>
+                            <td fxFlex="100%" fxLayout.xs="column" fxLayout="column"  style="width: 100%;">
+                                <mat-card style="width: 100%;padding: 0px;"> 
+                                    <mat-card-content  style="padding: 0px;padding-right: 18px;">
+                                        <mat-accordion>
+                                            <mat-expansion-panel>
+                                                <mat-expansion-panel-header>
+                                                    <mat-panel-title style="color: blue;">Parameters </mat-panel-title>
+        
+                                                      <ng-template matExpansionPanelContent>
+                                                        <div formArrayName='input' fxFlex="100%"  fxLayout.xs="column" fxLayout.sm="column" fxLayout="column" fxLayoutAlign="center center" style="width: 100%;">
+                                                            <div *ngFor="let subgroup of group.controls.input.controls; let idx = index;" [formGroupName]="idx" fxFlex="100%"  fxLayout.xs="column" fxLayout.sm="row" fxLayout="row" fxLayoutAlign="center center" style="width: 100%">
+                                                                <td fxFlex="33%"  fxLayout.xs="column" fxLayout="column" fxLayoutAlign="center center">
+                                                                    <mat-form-field appearance="outline" color=primary>
+                                                                        <mat-label>Parameter Id</mat-label>
+                                                                        <mat-select formControlName="parameterId" placeholder="Parameter Id">
+                                                                            <mat-option *ngFor="let param of paramsVsb" [value]="param">
+                                                                                {{param}}
+                                                                            </mat-option>
+                                                                        </mat-select>
+                                                                    </mat-form-field>  
+                                                                </td>
+                                                                <td fxFlex="33%"  fxLayout.xs="column" fxLayout="column" fxLayoutAlign="center center">
+                                                                    <mat-form-field appearance="outline" color=primary>
+                                                                        <mat-label>Min Value</mat-label>
+                                                                        <input matInput placeholder="Min Value"  formControlName="minValue" type="number">
+                                                                    </mat-form-field>
+                                                                </td>
+                                                                <td fxFlex="33%"  fxLayout.xs="column" fxLayout="column" fxLayoutAlign="center center">
+                                                                    <mat-form-field appearance="outline" color=primary>
+                                                                        <mat-label>Max Value</mat-label>
+                                                                        <input matInput placeholder="Max Value"  formControlName="maxValue" type="number">
+                                                                    </mat-form-field>
+                                                                </td>
+                                                            </div>
+                                                            <td class="margin-top"  fxFlex="100%"  fxLayout.xs="column" fxLayout="row" fxLayoutAlign="center center">
+                                                            <div style="margin-right: 1%;" >
+                                                                <button mat-raised-button (click)="addNstInput(i)" color="primary">Add Parameter</button>
+                                                            </div>
+                                                     
+                                                            <div >
+                                                                <button mat-raised-button (click)="removeNstInput(i)"  *ngIf="nstInptArr[i] > 0"  color="primary">remove Parameter</button>
+                                                            </div>
+                                                        </td>
+                                                        </div>
+                                                    </ng-template>
+                                                </mat-expansion-panel-header>
+            
+                                            </mat-expansion-panel>
+                                        </mat-accordion>
+                                    </mat-card-content>
+                                </mat-card>
+                            </td>
+                        </tr>
+                    </div>
+                  </div>
+                
+                  <tr fxFlex="100%" fxLayout.xs="column" fxLayout="column"  style="width: 100%">
+                    <td fxFlex="100%"  fxLayout.xs="row" fxLayout="row" fxLayoutAlign="center center">
+                            <div >
+                                <button mat-fab (click)="removeNst();" *ngIf="nstArray?.length > 1" color="primary"><mat-icon>remove</mat-icon></button>
+                            </div>
+                            <div >
+                                <button mat-fab (click)="addnst();" color="primary"><mat-icon>add</mat-icon></button>
+                            </div>
+                    </td>
+                </tr>
+                 
+
+            <tr>
+				<td>
+					<div class="margin-top"  fxFlex="100%"  fxLayout.xs="row" fxLayout="row" style="margin-top: 5%;">
+						<button mat-raised-button matStepperPrevious color="primary" class="margin-all" style="margin-right: 2px;">Back</button>
+						<button mat-raised-button (click)="stepper.reset()" color="warn" class="margin-all" style="margin-right: 2px;">Reset</button>
+						<button mat-raised-button color="accent" class="margin-all" (click)="createVsb();">Submit</button>
+					</div>
+				</td>
+			</tr>
+        </table>
+    </form>
+
+</mat-step>
+</mat-horizontal-stepper>

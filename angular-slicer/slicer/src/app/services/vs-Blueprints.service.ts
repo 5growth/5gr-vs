@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 import { Observable, } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { HttpClient,HttpHeaders,HttpParams } from '@angular/common/http';
-import {VsBlueprintInfo} from '../material-component/admin/vs-blueprint/vs-blueprint-info';
+import {VsBlueprintInfo} from '../material-component/vs-blueprint/vs-blueprint-info';
 import { AuthService } from './auth.service';
 
 @Injectable({
@@ -40,7 +40,8 @@ export class VsBlueprintsService {
 deleteVsBlueprintsData(vsBlueprintId: string): Observable<String> {
   return this.http.delete(environment.baseUrl+"portal/catalogue/vsblueprint/"+vsBlueprintId,{withCredentials: true})
   .pipe(
-    tap((result: String) => this.authService.log(`deleted VS Blueprint w/ id=${vsBlueprintId}`, 'SUCCESS', true)),
+   // tap((result: String) => this.authService.log(`deleted VS Blueprint w/ id=${vsBlueprintId}`, 'SUCCESS', true)),
+    tap((result: String) => console.log(`deleted VS Blueprint w/ id=${vsBlueprintId}`)),
     catchError(this.authService.handleError<String>('deleteVsBlueprintsData'))
   );
 }

@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 import { Observable, } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { HttpClient,HttpHeaders,HttpParams } from '@angular/common/http';
-import { NsliceInstancesInfo } from '../material-component/admin/n-slice-instances/n-slice-instances-info';
+import { NsliceInstancesInfo } from '../material-component/n-slice-instances/n-slice-instances-info';
 import { Router } from '@angular/router';
 import { AuthService } from './auth.service';
 

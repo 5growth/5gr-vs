@@ -1,0 +1,28 @@
+
+table {
+    width: 100%;
+  }
+  .dialog{
+    display: flex;
+    flex-direction: row;
+    justify-content: right;
+    margin-top: 40px;
+    }
+
+    @media (max-width: 375px) {
+      .rules-full-width {
+          width: 100%;
+      }
+      .margin-xs{
+        margin-top: 5px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .rules-full-width {
+          width: 100%;
+      }
+      .margin-xs{
+        margin-top: 5px;
+      }
+    }

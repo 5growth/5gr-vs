@@ -1,7 +1,7 @@
 
 
 //import { LoginComponent } from './login/login.component';
-import { SecondLoginComponent } from './material-component/second-login/second-login.component';
+import { LoginComponent } from './material-component/login/login.component';
 
 import { Routes } from '@angular/router';
 import {DashboardComponent} from './dashboard/dashboard.component'

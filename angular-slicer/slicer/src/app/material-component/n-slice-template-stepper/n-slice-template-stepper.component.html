@@ -1,0 +1,156 @@
+<mat-horizontal-stepper [linear]="isLinear" #stepper>
+    <mat-step [stepControl]="firstFormGroup" >
+        <form [formGroup]="firstFormGroup">
+			<ng-template matStepLabel>Upload Nst</ng-template>
+            <input #nstFile type="file" formControlName="firstCtrl" (change)="onUploadedNst(nstFile.files)" required/>
+            <div class="button-row" style="margin-top: 3%;" *ngIf="!vsmfMode">
+                <button mat-raised-button color="primary" matStepperPrevious>Back</button>
+                <button mat-raised-button color="primary" matStepperNext [disabled]="!firstFormGroup.valid" >Next</button>
+            </div>
+            <div class="margin-top" *ngIf="vsmfMode">
+                <button mat-raised-button color="primary" matStepperPrevious>Back</button>
+
+                <button mat-raised-button color="primary" matStepperNext [disabled]="!firstFormGroup.valid">Next</button>
+            </div>
+        </form>
+    </mat-step>
+    <mat-step *ngIf="showNsd" [stepControl]="secondFormGroup" >
+        <form [formGroup]="secondFormGroup">
+            <ng-template matStepLabel>Upload NSDs</ng-template>
+            <input #nsdFiles type="file" formControlName="nsd" multiple (change)="onUploadedNsds(nsdFiles.files)"  required/>
+            <div style="margin-top: 20px;" *ngIf="this.nsdInfoArr.length > 1">
+                <label *ngIf="this.nsdInfoArr.length > 1"><b>NSDs Name - ID :</b></label>
+                <mat-nav-list>
+                    <a mat-list-item  *ngFor="let nsdInf of this.nsdInfoArr"> {{ nsdInf.nsdName }} - {{ nsdInf.nsdId }} </a>
+                 </mat-nav-list>
+            </div>
+            <div style="margin-top: 20px;" *ngIf="this.nsdInfoArr.length == 1">
+                <label><b>NSD Name - ID :</b></label>
+                <mat-nav-list>
+                    <a mat-list-item *ngFor="let nsdInf of this.nsdInfoArr"> {{ nsdInf.nsdName }} - {{ nsdInf.nsdId }} </a>
+                 </mat-nav-list>
+            </div>
+            <div class="button-row" style="margin-top: 3%;" >
+            <button mat-raised-button color="primary" matStepperPrevious>Back</button>
+            <button mat-raised-button color="primary" matStepperNext [disabled]="!secondFormGroup.valid" >Next</button>
+        </div>
+        </form>
+    </mat-step>
+    <!--
+    <mat-step *ngIf="nsmfMode" [stepControl]="thirdFormGroup" >
+        <form [formGroup]="thirdFormGroup">
+			<ng-template matStepLabel>Upload Vnf Packages</ng-template>
+            <input #vnfFile type="file" formControlName="thirdCtrl" (change)="onUploadedVnfP($event,vnfFile.files)" required/>
+            <div class="margin-top">
+                <button mat-raised-button matStepperNext color="primary" class="margin-all" style="margin-top: 2%;" (click)="createOnBoardNstRequest();">submit</button>
+            </div>
+        </form>
+    </mat-step>
+    -->
+
+    <mat-step [stepControl]="thirdFormGroup">
+        <form [formGroup]="thirdFormGroup">
+            <ng-template matStepLabel>Vnf Packages</ng-template>
+            <table fxFlex="100%"  fxLayout.xs="column" fxLayout="column" >
+                    <div formArrayName="vnfItems" *ngFor="let item of thirdFormGroup.get('vnfItems')['controls']; let k=index" fxFlex="100%"  fxLayout.xs="column" fxLayout="column" fxLayoutAlign="center center" >
+
+                        <div [formGroupName]="k">                        
+                            <tr fxFlex="100%"   fxLayout.xs="column" fxLayout.sm="row"  fxLayout="row" fxLayoutAlign="left left" style="width: 100%;" >
+
+                            <td >
+                                <mat-form-field appearance="outline" color=primary >
+                                    <mat-label>Name</mat-label>									
+									<input matInput placeholder="Name" formControlName="name" style="width: 100%;">
+                                </mat-form-field>
+                            </td>
+                            <td>
+                                <mat-form-field appearance="outline" color=primary>
+                                    <mat-label>Provider</mat-label>									
+									<input matInput placeholder="Provider" formControlName="provider">
+                                </mat-form-field>
+                            </td>
+                            <td>
+                                <mat-form-field appearance="outline" color=primary >
+                                    <mat-label>Version</mat-label>									
+									<input matInput placeholder="Version" formControlName="version">
+                                </mat-form-field>
+                            </td>
+                            <td>
+                                <mat-form-field appearance="outline" color=primary >
+                                    <mat-label>Checksum</mat-label>									
+									<input matInput placeholder="Checksum" formControlName="checksum">
+                                </mat-form-field>
+                            </td>
+                            <td>
+                                <mat-form-field appearance="outline" color=primary >
+                                    <mat-label>Vnf Package Path</mat-label>									
+									<input matInput placeholder="Vnf Package Path" formControlName="vnfPackagePath">
+                                </mat-form-field>
+                            </td>
+                        </tr>
+                        </div>
+                
+                    </div>
+                <tr>
+                    <td class="margin-top"  fxFlex="100%"  fxLayout.xs="row" fxLayout="row" fxLayoutAlign="center center" style="margin-bottom: 2%;">
+                        <div >
+                           <button mat-fab (click)="removeVnfItem();" *ngIf="vnfItems?.length > 1" color="primary"><mat-icon>remove</mat-icon></button>
+						</div>
+						<div >
+                           <button mat-fab (click)="addVnfItem();" color="primary"><mat-icon>add</mat-icon></button>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+						<div class="button-row" style="margin-top: 3%;">
+                            <button mat-raised-button color="primary" matStepperPrevious>Back</button>
+                            <button mat-raised-button color="primary" matStepperNext [disabled]="!thirdFormGroup.valid" >Next</button>
+						</div>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    
+    </mat-step>
+    
+    <mat-step  [stepControl]="fourthFormGroup" >   
+        <form [formGroup]="fourthFormGroup">
+            <ng-template matStepLabel>Upload PNFDs</ng-template>
+        <input #pnfdFiles type="file" multiple formControlName="pnfd" (change)="onUploadedPnfds(pnfdFiles.files)"  required/>
+        <div style="margin-top: 20px;" *ngIf="this.pndfIds.length > 1">
+            <label *ngIf="this.pndfIds.length > 1"><b>PNFD IDs :</b></label>
+            <mat-nav-list>
+                <a mat-list-item  *ngFor="let pndfId of this.pndfIds"> {{ pndfId }} </a>
+             </mat-nav-list>
+        </div>
+        <div style="margin-top: 20px;" *ngIf="this.pndfIds.length == 1">
+            <label><b>PNFD ID :</b></label>
+            <mat-nav-list>
+                <a mat-list-item  *ngFor="let pndfId of this.pndfIds"> {{ pndfId }} </a>
+             </mat-nav-list>
+        </div>
+        <div class="button-row" style="margin-top: 3%;">
+            <button mat-raised-button color="primary" matStepperPrevious>Back</button>
+            <button mat-raised-button color="primary" matStepperNext [disabled]="!fourthFormGroup.valid">Next</button>
+       </div>
+        </form>
+    </mat-step>
+
+    
+
+    <mat-step  [stepControl]="fifthFormGroup" >   
+        <form [formGroup]="fifthFormGroup">
+            <ng-template matStepLabel>Upload NST Configuration Rules</ng-template>
+            <input #confRuleFiles type="file" multiple formControlName="configurationRules" (change)="onUploadeConfRules(confRuleFiles.files)"  required/>
+            <div class="button-row" style="margin-top: 3%;">
+                <button mat-raised-button color="primary" matStepperPrevious>Back</button>
+                <button mat-raised-button matStepperNext color="primary" class="margin-all" style="margin-top: 2%;" [disabled]="!fifthFormGroup.valid"  (click)="createOnBoardNstRequest();">submit</button>
+
+           </div>
+        </form>
+    </mat-step>
+
+
+</mat-horizontal-stepper>
+

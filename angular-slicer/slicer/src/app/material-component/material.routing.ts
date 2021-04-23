@@ -1,31 +1,30 @@
-import { SecondLoginComponent } from './second-login/second-login.component';
+import { LoginComponent } from './login/login.component';
 import { FullComponent } from './../layouts/full/full.component';
 import { DomainsDetailsComponent } from './domains-details/domains-details.component';
 import { DomainsComponent } from './domains/domains.component';
-import { VsBlueprintComponent } from './admin/vs-blueprint/vs-blueprint.component';
-import { NSlicesComponent } from './admin/n-slices/n-slices.component';
-import { VsInstanceComponent } from './admin/vs-instance/vs-instance.component';
-import { VsDescriptorComponent } from './admin/vs-descriptor/vs-descriptor.component';
-import { VsDescriptorStepperComponent } from './admin/vs-descriptor-stepper/vs-descriptor-stepper.component';
-import {VsBlueprintStepperComponent} from './admin/vs-blueprint-stepper/vs-blueprint-stepper.component'
-import { GroupComponent } from './admin/group/group.component';
+import { VsBlueprintComponent } from './vs-blueprint/vs-blueprint.component';
+import { NSliceTemplateComponent } from './n-slice-template/n-slice-template.component';
+import { VsInstanceComponent } from './vs-instance/vs-instance.component';
+import { VsDescriptorComponent } from './vs-descriptor/vs-descriptor.component';
+import { VsDescriptorStepperComponent } from './vs-descriptor-stepper/vs-descriptor-stepper.component';
+import {VsBlueprintStepperComponent} from './vs-blueprint-stepper/vs-blueprint-stepper.component'
+import { GroupComponent } from './group/group.component';
 import { Routes } from '@angular/router';
-import { AdminTenantComponent } from './admin/admintenant/admin-tenant.component';
-import {LoginComponent} from '../login/login.component';
+import { TenantComponent } from './tenant/tenant.component';
 import {DashboardComponent} from '../dashboard/dashboard.component';
-import { SlaComponent } from './admin/sla/sla.component';
-import { DomainsWizardComponent } from './admin/domains-wizard/domains-wizard.component';
-import { NSlicesStepperComponent } from './n-slices-stepper/n-slices-stepper.component';
+import { SlaComponent } from './sla/sla.component';
+import { DomainsStepperComponent } from './domains-stepper/domains-stepper.component';
+import { NSliceTemplateStepperComponent } from './n-slice-template-stepper/n-slice-template-stepper.component';
 import {VsInstanceDetailsComponent} from './vs-instance-details/vs-instance-details.component'
-import {VsInstanceStepperComponent} from './admin/vs-instance-stepper/vs-instance-stepper.component'
-import {VsBlueprintDetailsComponent} from './admin/vs-blueprint-details/vs-blueprint-details.component'
-import {NSliceInstancesComponent} from './admin/n-slice-instances/n-slice-instances.component'
-import {NSliceInstancesStepperComponent} from './admin/n-slice-instances-stepper/n-slice-instances-stepper.component'
+import {VsInstanceStepperComponent} from './vs-instance-stepper/vs-instance-stepper.component'
+import {VsBlueprintDetailsComponent} from './vs-blueprint-details/vs-blueprint-details.component'
+import {NSliceInstancesComponent} from './n-slice-instances/n-slice-instances.component'
+import {NSliceInstancesStepperComponent} from './n-slice-instances-stepper/n-slice-instances-stepper.component'
 
 export const MaterialRoutes: Routes = [
   {
     path: 'login',
-    component: SecondLoginComponent
+    component: LoginComponent
   },
   {
     path: 'dashboard',
@@ -33,7 +32,7 @@ export const MaterialRoutes: Routes = [
   },
   {
     path: 'tenant',
-    component: AdminTenantComponent
+    component: TenantComponent
   },
   {
     path: 'vsdescriptor',
@@ -52,15 +51,15 @@ export const MaterialRoutes: Routes = [
     component: VsInstanceStepperComponent
   },
   {
-    path: 'nslices',
-    component: NSlicesComponent
+    path: 'ns-template',
+    component: NSliceTemplateComponent
   }, 
   {
     path: 'vsblueprint',
     component: VsBlueprintComponent
   },
   {
-    path: 'onboarding',
+    path: 'vsblueprint-add',
     component: VsBlueprintStepperComponent
   },
   {
@@ -73,11 +72,11 @@ export const MaterialRoutes: Routes = [
   },
   {
     path: 'domains-add',
-    component: DomainsWizardComponent
+    component: DomainsStepperComponent
   },
   {
-    path: 'nslices-add',
-    component: NSlicesStepperComponent
+    path: 'ns-template-add',
+    component: NSliceTemplateStepperComponent
   },
   
  {
@@ -93,7 +92,7 @@ export const MaterialRoutes: Routes = [
   component: VsInstanceDetailsComponent
 },
 {
-  path: 'blueprints-vs-details',
+  path: 'vsblueprint-details',
   component: VsBlueprintDetailsComponent
 },
 {

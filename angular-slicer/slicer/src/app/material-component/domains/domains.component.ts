@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-domains',
   templateUrl: './domains.component.html',
-  styleUrls: ['./domains.component.css']
+  styleUrls: ['./domains.component.scss']
 })
 export class DomainsComponent implements OnInit {
   @ViewChild(MatPaginator, {static: false}) paginator: MatPaginator;
@@ -18,31 +18,34 @@ export class DomainsComponent implements OnInit {
   name: string;
   dataSource: DomainsDataSource;
   domainsInfos: DomainsInfo[] = [];
+  domainExist:boolean;
   displayedColumns = ['name','description','owner','admin','domainStatus','details','action'];
   constructor(private domainsService:DomainsService,private router: Router) { }
 
   ngOnInit(): void {
-    this.getDomains();
-  }
-  getDomains() {
     this.domainsService.getDomainsData().subscribe((domainsInfos : DomainsInfo[] )=> {
-    this.domainsInfos = domainsInfos;
-    this.dataSource = new DomainsDataSource(this.domainsInfos);
-    this.dataSource.sort = this.sort;
-    this.dataSource.paginator = this.paginator;
-    this.table.dataSource = this.dataSource;
- 
-  });
+    
+      if(domainsInfos.length!=0){
+        this.domainExist=true;
+        this.domainsInfos = domainsInfos;
+        this.dataSource = new DomainsDataSource(this.domainsInfos);
+        this.dataSource.sort = this.sort;
+        this.dataSource.paginator = this.paginator;
+        this.table.dataSource = this.dataSource;
+      }else{
+        this.domainExist=false;
+      }
+});
+  
 }
+
 viewDomainDetails(domainId){
   localStorage.setItem('domainId', domainId);
   this.router.navigate(["/domains-details"]);
 
 }
 
-
 deleteDomain(domainId){
-  console.log("domainId",domainId)
   this.domainsService.deleteDomain(domainId).subscribe();
   alert(domainId+" is deleted");
   window.location.reload();

@@ -14,8 +14,8 @@
     
                 </div>
             </div>
-
-                    <div>
+                  <div *ngIf="!this.domainExist" style="margin-top: 20px;">No domain available</div>
+                    <div *ngIf="this.domainExist">
                       <table mat-table  matSort aria-label="Elements" style="width: 100%;margin:0;" >
                         <ng-container matColumnDef="name">
                           <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>

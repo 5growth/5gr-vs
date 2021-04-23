@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 import { Observable, } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { HttpClient,HttpHeaders,HttpParams } from '@angular/common/http';
-import {VsInstanceInfo} from '../material-component/admin/vs-instance/vs-instance-info'
+import {VsInstanceInfo} from '../material-component/vs-instance/vs-instance-info'
 import { AuthService } from './auth.service';
 
 @Injectable({

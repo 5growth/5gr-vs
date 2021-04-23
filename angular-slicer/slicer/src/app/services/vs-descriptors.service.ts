@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 import { Observable, } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { HttpClient,HttpHeaders,HttpParams } from '@angular/common/http';
-import { VsDescriptorInfo } from '../material-component/admin/vs-descriptor/vs-descriptor-info';
+import { VsDescriptorInfo } from '../material-component/vs-descriptor/vs-descriptor-info';
 import { AuthService } from './auth.service';
 
 @Injectable({

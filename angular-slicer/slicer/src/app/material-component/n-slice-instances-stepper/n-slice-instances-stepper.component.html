@@ -1,0 +1,92 @@
+
+<mat-horizontal-stepper [linear]="isLinear" #stepper class="full-width-table blvss-container full-width-table-md ">
+	<mat-step id="step-1" [stepControl]="firstFormGroup">
+		<form [formGroup]="firstFormGroup" id="vnfdForm">
+          <ng-template matStepLabel>Create NSI</ng-template>
+		  <div fxFlex="100%"  fxLayout.xs="column" fxLayout="column" fxLayoutAlign="left left">
+
+		  <div fxFlex="100%"  fxLayout.xs="column" fxLayout="row" fxLayoutAlign="left left">
+
+		  <mat-form-field appearance="outline" class="padding-input" >
+			<mat-label>Nst Id</mat-label>									
+            <mat-select id="nstId" formControlName="nstId" style="height:23px" placeholder="Nst Id" >
+                <mat-option *ngFor="let info of nslicesInfos" [value]="info.nst.nstId" >
+                {{info.nst.nstName}}
+                </mat-option>
+                </mat-select>
+		   </mat-form-field>
+		   <mat-form-field appearance="outline" class="padding-input" >
+			<mat-label>Name</mat-label>									
+			<input matInput id="name" placeholder="Name" formControlName="name" >
+		   </mat-form-field>
+		   <mat-form-field appearance="outline" class="padding-input" >
+			<mat-label>Description</mat-label>									
+			<input matInput id="description" placeholder="Description" formControlName="description" >
+		   </mat-form-field>
+		</div>
+		  <div class="button-row" >
+			<button mat-raised-button color="primary" matStepperPrevious>Back</button>
+			<button mat-raised-button color="primary" (click)="createNsi()"  matStepperNext>Next</button>
+			</div>
+		  </div>
+		</form>
+	  </mat-step>
+
+	  <mat-step id="step-2" [stepControl]="secondFormGroup">
+		<form [formGroup]="secondFormGroup">
+		  <ng-template matStepLabel>Create Domain Interface </ng-template>
+		  <div fxFlex="100%"  fxLayout.xs="column" fxLayout="column" fxLayoutAlign="left left">
+			<div fxFlex="100%"  fxLayout.xs="column" fxLayout="row" fxLayoutAlign="left left" >
+			<mat-form-field appearance="outline" class="padding-input">
+				<div *ngIf="nsiId">
+					<input matInput id="nsiId" value={{nsiId}} disabled>
+				</div>
+				<div *ngIf="!nsiId">
+					<input matInput id="nsiId" value="No network slice instance exists" disabled>
+				</div>
+			</mat-form-field>
+			<mat-form-field appearance="outline" class="padding-input">
+				<mat-label>Df Id</mat-label>									
+				<input matInput id="dfId" placeholder="Df Id" formControlName="dfId" >
+			</mat-form-field>
+		</div>
+		<div fxFlex="100%"  fxLayout.xs="column" fxLayout="row" fxLayoutAlign="left left">
+			<mat-form-field appearance="outline" class="padding-input">
+				<mat-label>Instantiation Level Id</mat-label>									
+				<input matInput id="instantiationLevelId" placeholder="Instantiation Level Id" formControlName="instantiationLevelId" >
+			</mat-form-field>
+			<mat-form-field appearance="outline" class="padding-input">
+				<mat-label>Latitude</mat-label>									
+				<input matInput id="latitude" placeholder="Latitude" formControlName="latitude" >
+			</mat-form-field>
+		</div>
+		<div fxFlex="100%"  fxLayout.xs="column" fxLayout="row" fxLayoutAlign="left left">
+
+			<mat-form-field appearance="outline" class="padding-input">
+				<mat-label>Longitude</mat-label>									
+				<input matInput id="longitude" placeholder="Longitude" formControlName="longitude" >
+			</mat-form-field>
+			<mat-form-field appearance="outline" class="padding-input">
+				<mat-label>Altitude</mat-label>									
+				<input matInput id="altitude" placeholder="Altitude" formControlName="altitude" >
+			</mat-form-field>
+		</div>
+		<div fxFlex="100%"  fxLayout.xs="column" fxLayout="row" fxLayoutAlign="left left">
+			<mat-form-field appearance="outline" class="padding-input">
+				<mat-label>Range</mat-label>									
+				<input matInput id="range" placeholder="Range" formControlName="range" >
+			</mat-form-field>
+			<mat-form-field appearance="outline" class="padding-input">
+				<mat-label>Ran EndPoint Id</mat-label>									
+				<input matInput id="ranEndPointId" placeholder="Ran EndPoint Id" formControlName="ranEndPointId" >
+			</mat-form-field>
+		</div>
+			<div class="button-row">
+				<button mat-raised-button matStepperPrevious color="primary" class="margin-all" style="margin-right: 2px;">Back</button>
+				<button mat-raised-button (click)="stepper.reset()" color="warn" class="margin-all" style="margin-right: 2px;">Reset</button>
+				<button mat-raised-button color="accent" class="margin-all" (click)="createNsiWithDetails();" >Submit</button>
+				</div>
+		</div>
+		</form>
+	  </mat-step>
+</mat-horizontal-stepper>

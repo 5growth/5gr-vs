@@ -3,12 +3,6 @@
         <img src="assets/images/logo_nextworks_white_150.png" alt="nextworks">
     </a> 
 </div>
-<button [matMenuTriggerFor]="profile" mat-icon-button class="m-r-5"> 
-    <img src="assets/images/user_icon.png" alt="user" class="profile-pic"> 
+<button (click)="signOut()" mat-icon-button> 
+    <img src="assets/images/exit.png" alt="user"  class="profile-pic"> 
 </button>
-<mat-menu #profile="matMenu" class="mymegamenu">
-    <button mat-menu-item (click)="signOut()">
-        <mat-icon>exit_to_app</mat-icon> Sign Out 
-    </button>
-</mat-menu>
-

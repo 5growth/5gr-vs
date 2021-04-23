@@ -15,19 +15,5 @@ export class AppHeaderComponent {
 
   signOut() {
     this.authService.logout()
-    /*.subscribe(
-      (res: HttpResponse<any>) => {
-        console.log('response from server:', res);
-        console.log('response headers',res.headers.keys());
-        console.log('JWT:', res.headers.get('Set-Cookie'));
-        this.router.navigate(['dashboard']).then(() => {
-          window.location.reload();
-        }).catch(console.error);
-      }
-    );
-    */
-  
-  
-  
   }
 }

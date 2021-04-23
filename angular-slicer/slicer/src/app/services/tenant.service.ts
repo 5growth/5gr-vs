@@ -2,10 +2,10 @@ import { environment } from '../environments/environments';
 import { Injectable } from '@angular/core';
 import { Observable, } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-import { SlaInfo } from '../material-component/admin/sla/sla-info';
+import { SlaInfo } from '../material-component/sla/sla-info';
 import { HttpClient, HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 import { AuthService } from './auth.service';
-import { AdminTenantInfo } from '../material-component/admin/admintenant/admin-tenant-info';
+import { TenantInfo } from '../material-component/tenant/tenant-info';
 
 @Injectable({
   providedIn: 'root'
@@ -24,11 +24,11 @@ postTenantData(tenantRequest: Object,groupId): Observable<String> {
   }
   
 
-getTenantData(groupId): Observable<AdminTenantInfo[]> {
-  return this.http.get<AdminTenantInfo[]>(environment.baseUrl+"vs/admin/group/"+groupId, {withCredentials: true})
+getTenantData(groupId): Observable<TenantInfo[]> {
+  return this.http.get<TenantInfo[]>(environment.baseUrl+"vs/admin/group/"+groupId, {withCredentials: true})
   .pipe(
     tap(_ => console.log('fetched tenant - SUCCESS')),
-    catchError(this.authService.handleError<AdminTenantInfo[]>('getTenantData', []))
+    catchError(this.authService.handleError<TenantInfo[]>('getTenantData', []))
     );
 }
 postSlaData(slatRequest: Object,groupId,userId): Observable<String> {
