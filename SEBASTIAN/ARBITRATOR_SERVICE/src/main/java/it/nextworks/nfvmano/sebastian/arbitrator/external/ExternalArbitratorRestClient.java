@@ -4,17 +4,20 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.FailedOperationException;
 import it.nextworks.nfvmano.sebastian.arbitrator.messages.ArbitratorRequest;
+import it.nextworks.nfvmano.sebastian.arbitrator.messages.ArbitratorTrainedAlgorithmUpdateRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.LinkedMultiValueMap;
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
-
+import org.springframework.core.io.FileSystemResource;
 public class ExternalArbitratorRestClient {
 
     private static final Logger log = LoggerFactory.getLogger(ExternalArbitratorRestClient.class);
@@ -46,6 +49,8 @@ public class ExternalArbitratorRestClient {
             return httpResponse;
 
     }
+
+
 
 
     private Map<String,String> manageHTTPResponse(ResponseEntity<Map<String,String>>  httpResponse, String errMsg, String okCodeMsg, HttpStatus httpStatusExpected) {
@@ -82,6 +87,33 @@ public class ExternalArbitratorRestClient {
             throw new FailedOperationException("failed to send arbitration request", e);
         }
 
+    }
+
+    public void updateTrainedFile(String fileId, String filePath) throws FailedOperationException{
+        log.debug("Received request to update trained file");
+        String url = arbitratorBaseUrl + "/arbitrator/updateArbitratorModel";
+        try{
+            ObjectMapper objectMapper = new ObjectMapper();
+
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+            MultiValueMap<String, Object> body
+                    = new LinkedMultiValueMap<>();
+            body.add("file", new FileSystemResource(new File(filePath)));
+
+            HttpEntity<MultiValueMap<String, Object>> requestEntity
+                    = new HttpEntity<>(body, headers);
+
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<String> response = restTemplate
+                    .postForEntity(url, requestEntity, String.class);
+
+            //return manageHTTPResponse(response, "Error while updating trained algorithm", "trained model updated correctly", HttpStatus.CREATED);
+        }catch(RestClientException e){
+            throw new FailedOperationException("failed to send arbitration request", e);
+
+        }
     }
 
 }

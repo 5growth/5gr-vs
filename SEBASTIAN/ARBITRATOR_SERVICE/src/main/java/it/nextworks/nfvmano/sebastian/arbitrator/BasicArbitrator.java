@@ -173,16 +173,17 @@ public class BasicArbitrator extends AbstractArbitrator {
 			log.debug("The total amount of required resources for the service is the following: " + requiredRes.toString());
 			
 			log.debug("Reading info about active SLA and used resources for the given tenant.");
+			
 			Tenant tenant = adminService.getTenant(tenantId);
 			Sla tenantSla = tenant.getActiveSla();
 			//TODO: At the moment we are considering only the SLA about global resource usage. MEC versus cloud still to be managed.
 			SlaVirtualResourceConstraint sc = tenantSla.getGlobalConstraint();
 			VirtualResourceUsage maxRes = sc.getMaxResourceLimit();
 			log.debug("The maximum amount of global virtual resources allowed for the tenant is the following: " + maxRes.toString());
-
+			
 			VirtualResourceUsage usedRes = tenant.getAllocatedResources();
 			log.debug("The current resource usage for the tenant is the following: " + usedRes.toString());
-
+			
 			boolean acceptableRequest = true;
 			if ((requiredRes.getDiskStorage() + usedRes.getDiskStorage()) > maxRes.getDiskStorage()) acceptableRequest = false;
 			if ((requiredRes.getMemoryRAM() + usedRes.getMemoryRAM()) > maxRes.getMemoryRAM()) acceptableRequest = false;
@@ -276,24 +277,24 @@ public class BasicArbitrator extends AbstractArbitrator {
 
 	
 	private NetworkSliceInstance readNetworkSliceInstanceInformation (String nsiId, String tenantId) 
-			throws FailedOperationException, NotExistingEntityException{
-		log.debug("Interacting with NSMF service to get information about network slice with ID " + nsiId);
-		Map<String, String> parameters = new HashMap<String, String>();
-		parameters.put("NSI_ID", nsiId);
-		Filter filter = new Filter(parameters);
-		GeneralizedQueryRequest request = new GeneralizedQueryRequest(filter, new ArrayList<String>());
-		try {
-			List<NetworkSliceInstance> nsis = nsmfLcmProvider.queryNetworkSliceInstance(request, null, tenantId);
-			if (nsis.isEmpty()) {
-				log.error("Network Slice " + nsiId + " not found in NSMF service");
-				throw new NotExistingEntityException("Network Slice " + nsiId + " not found in NSMF service");
-			}
-			return nsis.get(0);
-		} catch (Exception e) {
+    		throws FailedOperationException, NotExistingEntityException{
+    	log.debug("Interacting with NSMF service to get information about network slice with ID " + nsiId);
+    	Map<String, String> parameters = new HashMap<String, String>();
+    	parameters.put("NSI_ID", nsiId);
+    	Filter filter = new Filter(parameters);
+    	GeneralizedQueryRequest request = new GeneralizedQueryRequest(filter, new ArrayList<String>());
+    	try {
+    		List<NetworkSliceInstance> nsis = nsmfLcmProvider.queryNetworkSliceInstance(request, null, tenantId);
+    		if (nsis.isEmpty()) {
+    			log.error("Network Slice " + nsiId + " not found in NSMF service");
+    			throw new NotExistingEntityException("Network Slice " + nsiId + " not found in NSMF service");
+    		}
+    		return nsis.get(0);
+    	} catch (Exception e) {
 			log.error("Error while getting network slice instance " + nsiId + ": " + e.getMessage());
 			throw new FailedOperationException("Error while getting network slice instance " + nsiId + ": " + e.getMessage());
 		}
-	}
+    }
 
 	private List<NetworkSliceInstance> getUsableSlices(String tenantId, String nestedNsdId, 
 			String nsdVersion, String deploymentFlavourID, String instantiationLevelId) {

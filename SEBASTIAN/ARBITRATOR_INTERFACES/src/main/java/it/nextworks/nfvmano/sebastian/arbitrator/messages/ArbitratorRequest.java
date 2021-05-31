@@ -38,6 +38,7 @@ public class ArbitratorRequest   implements InterfaceMessage {
     private String tenantId;
     private VsDescriptor vsd;
     private Map<String, NfvNsInstantiationInfo> instantiationNsd = new HashMap<>();
+    private String fileId;
 
     public ArbitratorRequest(){}
 
@@ -47,15 +48,32 @@ public class ArbitratorRequest   implements InterfaceMessage {
     * @param vsd
     * @param instantiationNsd
     */
+	public ArbitratorRequest(String requestId, String tenantId, VsDescriptor vsd, Map<String, NfvNsInstantiationInfo> instantiationNsd, String fileId) {
+		this.requestId = requestId;
+		this.tenantId = tenantId;
+		this.vsd = vsd;
+		if (instantiationNsd != null) this.instantiationNsd = instantiationNsd;
+		this.fileId=fileId;
+	}
+
+	/**
+	 * @param tenantId
+	 *
+	 * @param vsd
+	 * @param instantiationNsd
+	 */
 	public ArbitratorRequest(String requestId, String tenantId, VsDescriptor vsd, Map<String, NfvNsInstantiationInfo> instantiationNsd) {
 		this.requestId = requestId;
 		this.tenantId = tenantId;
 		this.vsd = vsd;
 		if (instantiationNsd != null) this.instantiationNsd = instantiationNsd;
+
 	}
 
-	
-	
+	public String getFileId() {
+		return fileId;
+	}
+
 	/**
 	 * @return the requestId
 	 */

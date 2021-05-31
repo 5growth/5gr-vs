@@ -18,6 +18,7 @@ package it.nextworks.nfvmano.sebastian.arbitrator;
 public enum ArbitratorType {
 
     BASIC_ARBITRATOR,
-    MULTI_DOMAIN_BASIC_ARBITRATOR
+    MULTI_DOMAIN_BASIC_ARBITRATOR,
+    EXERNAL
 
 }

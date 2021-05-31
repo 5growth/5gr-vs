@@ -1,27 +1,23 @@
 package it.nextworks.nfvmano.sebastian.arbitrator;
 
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.Example;
-import io.swagger.annotations.ExampleProperty;
+import io.swagger.annotations.*;
+
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsDescriptor;
 import it.nextworks.nfvmano.sebastian.arbitrator.messages.ArbitratorRequest;
+import it.nextworks.nfvmano.sebastian.arbitrator.messages.ArbitratorTrainedAlgorithmUpdateRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.FailedOperationException;
 
 
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +63,16 @@ public class ArbitratorAlgorithmRestController {
 			log.error("Error. Generic exception. "+ e.getMessage());
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+
+	@RequestMapping(value = "/updateArbitratorModel", method = RequestMethod.PUT)
+
+	public  ResponseEntity<?> updateArbitratorModel(@ApiParam(value = "", required = true) @RequestParam("file") MultipartFile body,
+													@RequestBody ArbitratorTrainedAlgorithmUpdateRequest request){
+
+		log.debug("Recieved request to update Model Policy", request);
+		return null;
+
 	}
 
 }

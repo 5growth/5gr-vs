@@ -18,7 +18,8 @@ package it.nextworks.nfvmano.sebastian.arbitrator;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
-
+import it.nextworks.nfvmano.sebastian.arbitrator.aiml.AimlPlatformService;
+import it.nextworks.nfvmano.catalogue.arbitrator.services.ArbitratorPolicyService;
 import it.nextworks.nfvmano.catalogue.blueprint.services.VsDescriptorCatalogueService;
 import it.nextworks.nfvmano.catalogues.template.services.NsTemplateCatalogueService;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MethodNotImplementedException;
@@ -76,6 +77,12 @@ public class ArbitratorService implements ArbitratorInterface {
 	private VsRecordService vsRecordService;
 
 	@Autowired
+	private AimlPlatformService aimlPlatformService;
+
+
+	@Autowired
+	private ArbitratorPolicyService arbitratorPolicyService;
+	@Autowired
 	private VsDescriptorCatalogueService vsDescriptorCatalogueService;
 	
 	//Check with Pietro. 
@@ -119,7 +126,7 @@ public class ArbitratorService implements ArbitratorInterface {
 			 );
 		 } else if(arbitratorType.equals("EXTERNAL")){
 			 log.debug("The Vertical Slicer is configured to operate with an EXTERNAL arbitrator.");
-			 arbitrator = new ExternalArbitrator(externalArbitratorService, externalArbitratorBaseUrl);
+			 arbitrator = new ExternalArbitrator(externalArbitratorService, externalArbitratorBaseUrl, arbitratorPolicyService, aimlPlatformService);
 		 }	else {
 			 log.error("Arbitrator not configured!");
 		 }
