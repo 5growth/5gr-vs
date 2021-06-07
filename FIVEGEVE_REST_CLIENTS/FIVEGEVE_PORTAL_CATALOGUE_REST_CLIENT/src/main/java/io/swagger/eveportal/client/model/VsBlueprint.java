@@ -46,6 +46,9 @@ public class VsBlueprint {
   @SerializedName("compatibleContextBlueprint")
   private List<String> compatibleContextBlueprint = null;
 
+  @SerializedName("sliceServiceType")
+  private SliceServiceType sliceServiceType =null ;
+
   /**
    * Gets or Sets compatibleSites
    */
@@ -61,7 +64,11 @@ public class VsBlueprint {
     
     FRANCE_RENNES("FRANCE_RENNES"),
     
-    GREECE_ATHENS("GREECE_ATHENS");
+    GREECE_ATHENS("GREECE_ATHENS"),
+    ITALY_5GROWTH_COMAU("ITALY_5GROWTH_COMAU"),
+
+    SPAIN_5GROWTH_INNOVALIA("SPAIN_5GROWTH_INNOVALIA");
+
 
     private String value;
 
@@ -289,7 +296,17 @@ public class VsBlueprint {
     return this;
   }
 
-   /**
+
+  @ApiModelProperty(value = "")
+  public SliceServiceType getSliceServiceType() {
+    return sliceServiceType;
+  }
+
+  public void setSliceServiceType(SliceServiceType sliceServiceType) {
+    this.sliceServiceType = sliceServiceType;
+  }
+
+  /**
    * Get connectivityServices
    * @return connectivityServices
   **/

@@ -5,9 +5,7 @@ import io.swagger.elcm.client.model.ExecuteExperimentRequest;
 import io.swagger.elcm.client.model.ExperimentExecution;
 import io.swagger.elcm.client.model.ExperimentExecutionTimeslot;
 import io.swagger.elcm.client.model.ExperimentSchedulingRequest;
-import io.swagger.eveportal.client.model.BlueprintUserInformation;
-import io.swagger.eveportal.client.model.KpiThreshold;
-import io.swagger.eveportal.client.model.OnboardExpDescriptorRequest;
+import io.swagger.eveportal.client.model.*;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.ServiceConstraints;
 import it.nextworks.nfvmano.catalogue.blueprint.elements.VsDescriptor;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
@@ -25,10 +23,11 @@ public class EveTranslator {
                                                                VsDescriptor originalDescriptor,
                                                                String vsBlueprintId,
                                                                List<String> vsbParams,
-                                                               Map<String, List<String>> tcbParams) throws MalformattedElementException {
+                                                               Map<String, List<String>> tcbParams,
+                                                               VsBlueprintInfo vsBlueprintInfo) throws MalformattedElementException {
         Map<String, String> params = instantiateVsRequest.getUserData();
         String name = originalDescriptor.getName()+"_expd";
-        String version = originalDescriptor.getVersion();
+        String version = originalDescriptor.getVersion()+"-"+instantiateVsRequest.getName();
         String blueprintId = params.get("blueprintId");
 
         List<String> kpiList = params.keySet().stream()
@@ -61,6 +60,7 @@ public class EveTranslator {
         vsDescriptor.setName(originalDescriptor.getName());
         vsDescriptor.setVersion(originalDescriptor.getVersion());
         vsDescriptor.setVsBlueprintId(vsBlueprintId);
+
         //vsDescriptor.setSst(io.swagger.eveportal.client.model.VsDescriptor.SstEnum.fromValue(originalDescriptor.get.toString()));
         vsDescriptor.setManagementType(io.swagger.eveportal.client.model.VsDescriptor.ManagementTypeEnum.valueOf(originalDescriptor.getManagementType().toString()));
         Map<String, String > qosParams = new HashMap<>();
@@ -90,6 +90,53 @@ public class EveTranslator {
             serviceConstraints.add(currentSc);
         }
         vsDescriptor.setServiceConstraints(serviceConstraints);
+        Map<String, SliceProfile>  sliceProfiles = new HashMap<>();
+        for(VsbEndpoint endpoint :vsBlueprintInfo.getVsBlueprint().getEndPoints()){
+            if(endpoint.isRanConnection()){
+                //     "5GEVE_VSS.endpoint.<endpoint_id>.params.<param_type>"
+                String ratParamId = "endpoint."+endpoint.getEndPointId()+".params.RAT";
+                RadioAccessTechnology rat = null;
+                String latency = null;
+                String uplinkDr = null;
+                String downlinkDr = null;
+                if(params.containsKey(ratParamId)){
+                    rat = RadioAccessTechnology.valueOf(params.get(ratParamId));
+                }
+                if(vsBlueprintInfo.getVsBlueprint().getSliceServiceType().equals(SliceServiceType.EMBB)){
+                    String ulParamId = "endpoint."+endpoint.getEndPointId()+".params.UplinkThroughtput";
+                    String dlParamId = "endpoint."+endpoint.getEndPointId()+".params.DownlinkThroughtput";
+                    if(params.containsKey(ulParamId)){
+                        uplinkDr = params.get(ulParamId);
+
+                    }
+
+                    if(params.containsKey(dlParamId)){
+                        downlinkDr = params.get(dlParamId);
+
+                    }
+                }
+
+                if(vsBlueprintInfo.getVsBlueprint().getSliceServiceType().equals(SliceServiceType.URLLC)){
+                    String latencyParamId = "endpoint."+endpoint.getEndPointId()+".params.latency";
+
+                    if(params.containsKey(latencyParamId)){
+                        latency = params.get(latencyParamId);
+
+                    }
+                }
+
+
+                if(rat!=null||latency!=null || uplinkDr!=null || downlinkDr!=null){
+                    SliceProfile sp = new SliceProfile(rat, latency, uplinkDr, downlinkDr);
+                    sliceProfiles.put(endpoint.getEndPointId(), sp);
+                }
+
+
+            }
+        }
+
+
+        vsDescriptor.setSliceProfiles(sliceProfiles);
         io.swagger.eveportal.client.model.VsdSla.AvailabilityCoverageEnum coverage = null;
         io.swagger.eveportal.client.model.VsdSla.ServiceCreationTimeEnum creation = null;
         if(originalDescriptor.getSla()!=null && originalDescriptor.getSla().getAvailabilityCoverage()!=null){

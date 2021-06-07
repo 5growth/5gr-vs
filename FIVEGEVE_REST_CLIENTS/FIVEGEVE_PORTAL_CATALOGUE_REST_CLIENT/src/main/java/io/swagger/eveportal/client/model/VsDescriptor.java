@@ -98,6 +98,9 @@ public class VsDescriptor {
   @SerializedName("sla")
   private VsdSla sla = null;
 
+  @SerializedName("sliceProfiles")
+  private Map<String, SliceProfile> sliceProfiles = new HashMap<String, SliceProfile>();
+
   /**
    * Gets or Sets sst
    */
@@ -240,7 +243,15 @@ public class VsDescriptor {
     return this;
   }
 
-   /**
+  public Map<String, SliceProfile> getSliceProfiles() {
+    return sliceProfiles;
+  }
+
+  public void setSliceProfiles(Map<String, SliceProfile> sliceProfiles) {
+    this.sliceProfiles = sliceProfiles;
+  }
+
+  /**
    * Get serviceConstraints
    * @return serviceConstraints
   **/

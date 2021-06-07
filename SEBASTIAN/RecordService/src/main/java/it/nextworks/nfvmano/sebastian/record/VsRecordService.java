@@ -353,10 +353,16 @@ public class VsRecordService {
 
 	public VerticalServiceInstance getVsInstanceFromMappedInstanceId(String vsiId, String domain) {
 		log.debug("Retrieving VsInstances by mapped instance id and domain");
+
 		return vsInstanceRepository.findByMappedInstanceIdAndDomainId(vsiId, domain).get(0);
 
 	}
 
+	/**
+	 * This method returns all the VS instances owned by a given tenant stored in DB.
+	 *
+	 * @return all the VS instances owned by the given tenant, as stored in DB.
+	 */
 	public List<VerticalServiceInstance> getAllVsInstances(String tenantId) {
 		log.debug("Get vs instances for tenant:"+tenantId);
 		return vsInstanceRepository.findByTenantId(tenantId);

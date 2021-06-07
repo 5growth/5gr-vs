@@ -14,14 +14,27 @@ public class ExperimentRegister {
     private Experiment.StatusEnum experimentStatus;
     private RemoteTenantInfo remoteTenantInfo;
     private Map<String, String> userData= new HashMap<>();
+    private long requestTimestamp;
+    private long instantiatedTimestamp;
 
-    public ExperimentRegister(String name, String expdId, String expId, Experiment.StatusEnum experimentStatus, RemoteTenantInfo remoteTenantInfo, Map<String, String> userData) {
+    public long getAcceptedTimestamp() {
+        return acceptedTimestamp;
+    }
+
+    public void setAcceptedTimestamp(long acceptedTimestamp) {
+        this.acceptedTimestamp = acceptedTimestamp;
+    }
+
+    private long acceptedTimestamp;
+
+    public ExperimentRegister(String name, String expdId, String expId, Experiment.StatusEnum experimentStatus, RemoteTenantInfo remoteTenantInfo, Map<String, String> userData, long requestTimestamp) {
         this.name = name;
         this.expdId = expdId;
         this.expId = expId;
         this.experimentStatus = experimentStatus;
         this.remoteTenantInfo = remoteTenantInfo;
         if(userData!=null) this.userData=userData;
+        this.requestTimestamp= requestTimestamp;
     }
 
     public String getName() {
@@ -44,7 +57,13 @@ public class ExperimentRegister {
         return expId;
     }
 
+    public long getInstantiatedTimestamp() {
+        return instantiatedTimestamp;
+    }
 
+    public void setInstantiatedTimestamp(long instantiatedTimestamp) {
+        this.instantiatedTimestamp = instantiatedTimestamp;
+    }
 
     public Experiment.StatusEnum getExperimentStatus() {
         return experimentStatus;
@@ -52,5 +71,9 @@ public class ExperimentRegister {
 
     public void setExperimentStatus(Experiment.StatusEnum experimentStatus) {
         this.experimentStatus = experimentStatus;
+    }
+
+    public long getRequestTimestamp() {
+        return requestTimestamp;
     }
 }

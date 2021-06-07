@@ -83,6 +83,7 @@ public class EveVsmfDriver extends AbstractVsmfDriver {
             String expbId = userData.get("blueprintId");
             ExpBlueprintInfo blueprintInfo = getExpBlueprintApiClient().getExpBlueprintUsingGET(expbId, true, "");
             String vsbId = blueprintInfo.getExpBlueprint().getVsBlueprintId();
+
             List<String> expbTcbIds = blueprintInfo.getExpBlueprint().getTcBlueprintIds();
 
             TestCaseBlueprintCatalogueApiApi tcbApi = getTestCaseBlueprintApiClient();
@@ -111,7 +112,7 @@ public class EveVsmfDriver extends AbstractVsmfDriver {
                     username,
                     this.getVsDescriptor(request.getVsdId()),
                     vsbId,
-                    vsbParams, tcbParams);
+                    vsbParams, tcbParams, vsBlueprintInfo);
             log.debug("Finished translating EXPD/VSD");
             log.info("PROFILING\tFINISHED_TRANSLATING\t"+request.getName()+"\t"+System.currentTimeMillis());
             log.debug("Onboarding EXPD/VSD");
@@ -125,7 +126,7 @@ public class EveVsmfDriver extends AbstractVsmfDriver {
             ExperimentSchedulingRequest expRequest = EveTranslator.translateExperimentRequest(request, expdId, username);
             String expId =  elmRestControllerApi.createExperimentUsingPOST(expRequest, true, "");
             log.debug("Created experiment");
-            ExperimentRegister register = new ExperimentRegister(expRequest.getExperimentName(), expdId, expId, Experiment.StatusEnum.SCHEDULING, null, request.getUserData());
+            ExperimentRegister register = new ExperimentRegister(expRequest.getExperimentName(), expdId, expId, Experiment.StatusEnum.SCHEDULING, null, request.getUserData(), System.currentTimeMillis());
             experimentRegisterMap.put(expId, register);
             this.getPollingManager().addOperation(expId, OperationStatus.SUCCESSFULLY_DONE, expId, "VSI_CREATION", domainId);
             log.info("PROFILING\tWAITING_EXPERIMENT_ACCEPTED\t"+expId+"\t"+System.currentTimeMillis());
@@ -194,14 +195,30 @@ public class EveVsmfDriver extends AbstractVsmfDriver {
                 mappedStatus=VerticalServiceStatus.INSTANTIATING;
             }else if(experiment.getStatus()== Experiment.StatusEnum.INSTANTIATED) {
                 register.setExperimentStatus(Experiment.StatusEnum.INSTANTIATED);
-                log.debug("Experiment is instantiated, triggering experiment execution");
-                ExecuteExperimentRequest executeRequest = EveTranslator.translateExperimentExecution(register.getUserData(), expId);
-                elmRestControllerApi.requestExperimentActionUsingPOST("execute", expId, true, "", executeRequest);
-                mappedStatus = VerticalServiceStatus.INSTANTIATING;
-                log.info("PROFILING\tWAITING_EXPERIMENT_EXECUTION\t"+expId+"\t"+System.currentTimeMillis());
+                List<ExperimentExecution> executions = experiment.getExecutions();
+                if(executions==null || executions.isEmpty()){
+                    log.debug("Experiment is instantiated, triggering experiment execution");
+                    ExecuteExperimentRequest executeRequest = EveTranslator.translateExperimentExecution(register.getUserData(), expId);
+                    elmRestControllerApi.requestExperimentActionUsingPOST("execute", expId, true, "", executeRequest);
+                    mappedStatus = VerticalServiceStatus.INSTANTIATING;
+                    log.info("PROFILING\tWAITING_EXPERIMENT_EXECUTION\t"+expId+"\t"+System.currentTimeMillis());
+                }else{
+                    log.debug("Experiment is instantiated, and already executed");
+                    ExperimentExecution ee = executions.get(0);
+                    //TODO: improve status mapping
+                    long realInstantiationTime = System.currentTimeMillis()-(register.getAcceptedTimestamp()-register.getRequestTimestamp());
+                    log.info("PROFILING\tPROFILING VS_INSTANTIATED_TRUE\t"+register.getName()+"\t"+realInstantiationTime);
+                    mappedStatus= VerticalServiceStatus.INSTANTIATED;
+                    if(ee.getState().equals(ExperimentExecution.StateEnum.COMPLETED)){
+                        log.debug("Execution completed!!");
+                        mappedStatus= VerticalServiceStatus.INSTANTIATED;
+                    }
+                }
+
             }else if(experiment.getStatus()== Experiment.StatusEnum.RUNNING_EXECUTION) {
                 log.debug("Experiment is running!!");
                 mappedStatus= VerticalServiceStatus.INSTANTIATED;
+
                 log.info("PROFILING\tVS_INSTANTIATED\t"+expId+"\t"+System.currentTimeMillis());
             }else if(experiment.getStatus()== Experiment.StatusEnum.TERMINATING) {
                 log.debug("Experiment is terminating");
@@ -274,8 +291,11 @@ public class EveVsmfDriver extends AbstractVsmfDriver {
         log.info("PROFILING\tVS_TERMINATE_REQ\t"+request.getVsiId()+"\t"+System.currentTimeMillis());
 
         String expId = request.getVsiId();
+
         if(!experimentRegisterMap.containsKey(expId))
             throw  new MalformattedElementException("Unknown experiment id");
+
+
 
         ExperimentRegister register = experimentRegisterMap.get(expId);
 
