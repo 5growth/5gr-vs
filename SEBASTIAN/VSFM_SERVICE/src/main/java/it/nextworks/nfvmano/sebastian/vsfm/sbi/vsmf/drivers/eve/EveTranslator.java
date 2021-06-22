@@ -102,7 +102,8 @@ public class EveTranslator {
                 if(params.containsKey(ratParamId)){
                     rat = RadioAccessTechnology.valueOf(params.get(ratParamId));
                 }
-                if(vsBlueprintInfo.getVsBlueprint().getSliceServiceType().equals(SliceServiceType.EMBB)){
+               if(vsBlueprintInfo.getVsBlueprint().getSliceServiceType()!=null &&
+                        vsBlueprintInfo.getVsBlueprint().getSliceServiceType().equals(SliceServiceType.EMBB)){
                     String ulParamId = "endpoint."+endpoint.getEndPointId()+".params.UplinkThroughtput";
                     String dlParamId = "endpoint."+endpoint.getEndPointId()+".params.DownlinkThroughtput";
                     if(params.containsKey(ulParamId)){
