@@ -117,7 +117,8 @@ public class EveTranslator {
                     }
                 }
 
-                if(vsBlueprintInfo.getVsBlueprint().getSliceServiceType().equals(SliceServiceType.URLLC)){
+                if(vsBlueprintInfo.getVsBlueprint().getSliceServiceType()!=null &&
+			vsBlueprintInfo.getVsBlueprint().getSliceServiceType().equals(SliceServiceType.URLLC)){
                     String latencyParamId = "endpoint."+endpoint.getEndPointId()+".params.latency";
 
                     if(params.containsKey(latencyParamId)){
