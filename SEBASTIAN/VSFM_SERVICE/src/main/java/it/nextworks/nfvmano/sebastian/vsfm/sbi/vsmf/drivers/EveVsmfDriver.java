@@ -66,7 +66,7 @@ public class EveVsmfDriver extends AbstractVsmfDriver {
     @Override
     public String instantiateVs(InstantiateVsRequest request, String domainId) throws MethodNotImplementedException, NotExistingEntityException, FailedOperationException, MalformattedElementException, NotPermittedOperationException {
         log.debug("instantiateVs");
-        log.info("PROFILING\tINSTANTIATE_VS_REQ\t"+request.getName()+"\t"+System.currentTimeMillis());
+        //PROFILING INSTANTIATE_VS_REQ <instance_name> <timestamp in ms> <VSSI_ID> <VSI_ID>
         //RemoteTenantInfo remoteTenantInfo = super.getRemoteTenantInfoTest(request.getTenantId(), elcmBaseUrl);
         AuthenticationApi authenticationApi = getRbacApiClient();
         UserLogin userLogin = new UserLogin();
@@ -125,6 +125,10 @@ public class EveVsmfDriver extends AbstractVsmfDriver {
             log.debug("Creating experiment request");
             ExperimentSchedulingRequest expRequest = EveTranslator.translateExperimentRequest(request, expdId, username);
             String expId =  elmRestControllerApi.createExperimentUsingPOST(expRequest, true, "");
+            log.info("PROFILING\tINSTANTIATE_VS_REQ\t"+request.getName()
+                    +"\t"+System.currentTimeMillis()
+                    +"\t"+ expId
+                    +"\t"+request.getUserData().get("VSI_PARENT_ID"));
             log.debug("Created experiment");
             ExperimentRegister register = new ExperimentRegister(expRequest.getExperimentName(), expdId, expId, Experiment.StatusEnum.SCHEDULING, null, request.getUserData(), System.currentTimeMillis());
             experimentRegisterMap.put(expId, register);

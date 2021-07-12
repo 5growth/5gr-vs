@@ -357,20 +357,22 @@ public class VsLcmManager {
                 this.internalProcessMultisiteVss(msg,vsd, vsBlueprintResponse.getVsBlueprintInfo().get(0).getVsBlueprint());
                 return;
             }
-
-
-
+            String vsbName = vsBlueprintResponse.getVsBlueprintInfo().get(0).getName();
+            log.debug(MetricsLogger.getLogMessage(vsiId,MetricsLogger.VSI_INSTANTIATION_START,vsbName));
             List<String> vsdIds = new ArrayList<>();
             vsdIds.add(vsdId);
-
+            log.debug(MetricsLogger.getLogMessage(vsiId,MetricsLogger.VSI_TRANSLATION_START,vsbName));
             Map<String, NfvNsInstantiationInfo> nsInfo = translatorService.translateVsd(vsdIds);
+            log.debug(MetricsLogger.getLogMessage(vsiId,MetricsLogger.VSI_TRANSLATION_END));
             log.debug("The VSD has been translated in the required network slice characteristics.");
 
             List<ArbitratorRequest> arbitratorRequests = new ArrayList<>();
             //only a single request is supported at the moment
             ArbitratorRequest arbitratorRequest = new ArbitratorRequest("requestId", tenantId, vsd, nsInfo);
             arbitratorRequests.add(arbitratorRequest);
+            log.debug(MetricsLogger.getLogMessage(vsiId,MetricsLogger.VSI_ARBITRATION_START,vsbName));
             ArbitratorResponse arbitratorResponse = arbitratorService.computeArbitratorSolution(arbitratorRequests).get(0);
+            log.debug(MetricsLogger.getLogMessage(vsiId,MetricsLogger.VSI_ARBITRATION_END));
             this.storedArbitratorResponse = arbitratorResponse;
             this.storedNfvNsInstantiationInfo =  nsInfo.get(vsdId);
 
@@ -456,7 +458,8 @@ public class VsLcmManager {
 		            }
 		        }
 
-                tUserData.put("blueprintId",currentComponent.getAssociatedVsbId() );
+                tUserData.put("blueprintId", currentComponent.getAssociatedVsbId());
+                tUserData.put("VSI_PARENT_ID",vsiId);
                 //if(oReq.getRequest().getVssData()!=null && oReq.getRequest().getVssData().containsKey(currentComponent.getComponentId())){
                 //    Map<String, String> vssData = oReq.getRequest().getVssData().get(currentComponent.getComponentId()).getUserData();
                 //   if(vssData!=null){
@@ -507,6 +510,7 @@ public class VsLcmManager {
 		                tUserData.put(key.replace(currentComponent.getComponentId()+".", ""), userData.get(key));
 		            }
 		        }
+			tUserData.put("VSI_PARENT_ID",vsiId);
 		        InstantiateVsRequest request = new InstantiateVsRequest(oReq.getRequest().getName()+"_"+currentComponent.getComponentId(),
 		                oReq.getRequest().getDescription(),
 		                vsdId,
@@ -526,6 +530,7 @@ public class VsLcmManager {
 		}else{
 		    log.debug("No local VSS to requests, setting the service as instantiated");
 		    internalStatus= VerticalServiceStatus.INSTANTIATED;
+		    log.debug(MetricsLogger.getLogMessage(vsiId,MetricsLogger.VSI_INSTANTIATION_END));
 		    vsRecordService.setVsStatus(this.vsiId, internalStatus);
 		}
 
@@ -588,6 +593,7 @@ public class VsLcmManager {
 				            storedInstantiateVsiRequestMessage.getRanEndpointId(), sliceParameters
 				    );
 				    log.debug("Sending request to instantiate network slice ");
+                    log.debug(MetricsLogger.getLogMessage(vsiId,MetricsLogger.VSI_NSI_INSTANTIATION_START,vsBlueprint.getName(),nssiId));
 				    nsmfLcmProvider.instantiateNetworkSlice(instantiateNssiReq, nsstDomain, tenantId);
 				}
 			} else {
@@ -629,6 +635,7 @@ public class VsLcmManager {
 				        storedInstantiateVsiRequestMessage.getRanEndpointId(),
 				        sliceParameters);
 				log.debug("Sending request to instantiate network slice ");
+                log.debug(MetricsLogger.getLogMessage(vsiId,MetricsLogger.VSI_NSI_INSTANTIATION_START,vsBlueprint.getName(),nsiId));
 				nsmfLcmProvider.instantiateNetworkSlice(instantiateNsiReq, null, tenantId);
 
 
@@ -771,6 +778,7 @@ public class VsLcmManager {
         }
 
         log.debug("Terminating Vertical Service " + vsiId);
+        log.debug(MetricsLogger.getLogMessage(vsiId,MetricsLogger.VSI_TERMINATION_START));
         this.internalStatus = VerticalServiceStatus.TERMINATING;
         try {
             vsRecordService.setVsStatus(this.vsiId, internalStatus);
@@ -796,7 +804,7 @@ public class VsLcmManager {
 
                 VerticalServiceInstance verticalServiceInstance = vsRecordService.getVsInstance(vsiId);
                 Map<String, NetworkSliceSubnetInstance> nssis = verticalServiceInstance.getNssis();
-
+                log.debug(MetricsLogger.getLogMessage(vsiId,MetricsLogger.VSI_NSI_TERMINATION_START));
                 for (Map.Entry<String, NetworkSliceSubnetInstance> nssi : nssis.entrySet()) {
                     log.debug("Network slice subnet " + nssi.getValue().getNssiId() + " must be terminated.");
                     nsmfLcmProvider.terminateNetworkSliceInstance(new TerminateNsiRequest(nssi.getValue().getNssiId()), nssi.getValue().getDomainId(), tenantId);
@@ -804,8 +812,10 @@ public class VsLcmManager {
             } else {
                 vsRecordService.setVsStatus(vsiId, VerticalServiceStatus.TERMINATING);
                 List<VerticalServiceInstance> vsis = vsRecordService.getVsInstancesFromNetworkSlice(networkSliceId);
+                log.debug(MetricsLogger.getLogMessage(vsiId,MetricsLogger.VSI_NSI_TERMINATION_START));
                 // Shared NSI support: if vsis > 1 nsi is shared.
                 if (vsis.size() > 1) {
+                    log.debug(MetricsLogger.getLogMessage(vsiId,MetricsLogger.VSI_NSI_TERMINATION_END));
                     nsStatusChangeOperations(VerticalServiceStatus.TERMINATED, null);
                 } else {
                     log.debug("Network slice " + networkSliceId + " must be terminated.");
@@ -847,6 +857,7 @@ public class VsLcmManager {
                     }else{
                         log.debug("Finished instantiating VSs");
                         this.internalStatus=VerticalServiceStatus.INSTANTIATED;
+                        log.debug(MetricsLogger.getLogMessage(this.vsiId,MetricsLogger.VSI_INSTANTIATION_END));
                         vsRecordService.setVsStatus(this.vsiId, internalStatus);
                     }
 
@@ -859,6 +870,7 @@ public class VsLcmManager {
                 if(vsRecordService.allVssiStatusInVsi(this.vsiId, VerticalServiceStatus.TERMINATED)){
                     log.debug("All vertical subservices terminated");
                     this.internalStatus=VerticalServiceStatus.TERMINATED;
+                    log.debug(MetricsLogger.getLogMessage(vsiId,MetricsLogger.VSI_TERMINATION_END));
                     vsRecordService.setVsStatus(this.vsiId,internalStatus );
 
 
@@ -908,6 +920,7 @@ public class VsLcmManager {
 
                         if (vsRecordService.allNssiStatusInVsi(vsiId, NetworkSliceStatus.INSTANTIATED) ) {
                             internalStatus = status;
+                            log.debug(MetricsLogger.getLogMessage(vsiId,MetricsLogger.VSI_INSTANTIATION_END));
                             vsRecordService.setVsStatus(vsiId, status);
                             log.debug("Updated resource usage for tenant " + tenantId + ". Instantiation procedure completed");
                             vsLcmConsumerInterface.notifyVerticalServiceStatusChange(new VerticalServiceStatusChangeNotification(this.vsiId,
@@ -923,6 +936,7 @@ public class VsLcmManager {
                             log.debug("Updated resource usage for tenant " + tenantId + ". Termination procedure completed. - Notifying the engine");
                             vsLcmService.notifyVsiTermination(vsiId);
                             internalStatus = status;
+                            log.debug(MetricsLogger.getLogMessage(vsiId,MetricsLogger.VSI_TERMINATION_END));
                             vsRecordService.setVsStatus(vsiId, status);
                             vsLcmConsumerInterface.notifyVerticalServiceStatusChange(new VerticalServiceStatusChangeNotification(this.vsiId,
                                     VerticalServiceStatusChange.VSI_TERMINATED, true), null);
@@ -957,6 +971,7 @@ public class VsLcmManager {
                     log.error("Invalid VSi to NSI mapping. This should not happen");
                     manageVsError("Invalid VSi to NSI mapping. This should not happen");
                 }
+                log.debug(MetricsLogger.getLogMessage(vsiId,MetricsLogger.VSI_INSTANTIATION_END));
                 adminService.addUsedResourcesInTenant(tenantId, resourceUsage);
                 vsLcmConsumerInterface.notifyVerticalServiceStatusChange(new VerticalServiceStatusChangeNotification(this.vsiId,
                         VerticalServiceStatusChange.VSI_CREATED, true), null);
@@ -970,7 +985,7 @@ public class VsLcmManager {
                     log.error("Invalid VSi to NSI mapping. This should not happen");
                     manageVsError("Invalid VSi to NSI mapping. This should not happen");
                 }
-
+                log.debug(MetricsLogger.getLogMessage(vsiId,MetricsLogger.VSI_TERMINATION_END));
                 adminService.removeUsedResourcesInTenant(tenantId, resourceUsage);
                 vsLcmConsumerInterface.notifyVerticalServiceStatusChange(new VerticalServiceStatusChangeNotification(this.vsiId,
                         VerticalServiceStatusChange.VSI_TERMINATED, true), null);
@@ -1010,7 +1025,7 @@ public class VsLcmManager {
         try {
             switch (nsStatusChange) {
                 case NSI_CREATED: {
-
+                    log.debug(MetricsLogger.getLogMessage(vsiId,MetricsLogger.VSI_NSI_INSTANTIATION_END));
                     nsStatusChangeOperations(VerticalServiceStatus.INSTANTIATED, nsiId);
                     break;
                 }
@@ -1019,6 +1034,7 @@ public class VsLcmManager {
                     break;
                 }
                 case NSI_TERMINATED: {
+                    log.debug(MetricsLogger.getLogMessage(vsiId,MetricsLogger.VSI_NSI_TERMINATION_END));
                     nsStatusChangeOperations(VerticalServiceStatus.TERMINATED, nsiId);
                     break;
                 }
