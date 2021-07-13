@@ -354,6 +354,7 @@ public class VsLcmManager {
             this.tenantId = msg.getRequest().getTenantId();
             QueryVsBlueprintResponse vsBlueprintResponse = vsBlueprintCatalogueService.queryVsBlueprint(new GeneralizedQueryRequest(BlueprintCatalogueUtilities.buildVsBlueprintFilter(vsd.getVsBlueprintId(), tenantId), null));
             if(vsBlueprintResponse.getVsBlueprintInfo().get(0).getVsBlueprint().isInterSite()){
+                log.debug(MetricsLogger.getLogMessage(vsiId,MetricsLogger.VSI_INSTANTIATION_START,vsBlueprintResponse.getVsBlueprintInfo().get(0).getName()));
                 this.internalProcessMultisiteVss(msg,vsd, vsBlueprintResponse.getVsBlueprintInfo().get(0).getVsBlueprint());
                 return;
             }
