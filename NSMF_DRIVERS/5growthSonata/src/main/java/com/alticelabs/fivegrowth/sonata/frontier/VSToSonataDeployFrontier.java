@@ -22,10 +22,7 @@ import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotPermittedOperationExce
 import it.nextworks.nfvmano.libs.ifa.common.messages.GeneralizedQueryRequest;
 
 import it.nextworks.nfvmano.sebastian.nsmf.interfaces.NsmfLcmProviderInterface;
-import it.nextworks.nfvmano.sebastian.nsmf.messages.CreateNsiIdRequest;
-import it.nextworks.nfvmano.sebastian.nsmf.messages.InstantiateNsiRequest;
-import it.nextworks.nfvmano.sebastian.nsmf.messages.ModifyNsiRequest;
-import it.nextworks.nfvmano.sebastian.nsmf.messages.TerminateNsiRequest;
+import it.nextworks.nfvmano.sebastian.nsmf.messages.*;
 import it.nextworks.nfvmano.sebastian.record.elements.NetworkSliceInstance;
 
 public class VSToSonataDeployFrontier implements NsmfLcmProviderInterface {
@@ -194,6 +191,9 @@ public class VSToSonataDeployFrontier implements NsmfLcmProviderInterface {
 	}
 
 	
-	
+	@Override
+    public void configureNetworkSliceInstance(ConfigureNsiRequest request, String domainId, String tenantId) throws MethodNotImplementedException, FailedOperationException, MalformattedElementException{
+        log.debug("configureNetworkSliceInstance");
+    }
 			
 }

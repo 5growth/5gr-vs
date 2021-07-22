@@ -17,9 +17,12 @@ package it.nextworks.nfvmano.sebastian.vsfm;
 import java.util.*;
 
 import it.nextworks.nfvmano.catalogue.blueprint.BlueprintCatalogueUtilities;
+import it.nextworks.nfvmano.catalogue.blueprint.repo.TranslationRuleRepository;
 import it.nextworks.nfvmano.catalogue.blueprint.services.VsBlueprintCatalogueService;
 import it.nextworks.nfvmano.catalogue.blueprint.services.VsDescriptorCatalogueService;
 import it.nextworks.nfvmano.catalogue.translator.TranslatorService;
+
+import it.nextworks.nfvmano.catalogues.template.repo.ConfigurationRuleRepository;
 import it.nextworks.nfvmano.libs.ifa.catalogues.interfaces.NsdManagementProviderInterface;
 //import it.nextworks.nfvmano.nfvodriver.NfvoLcmService;
 import it.nextworks.nfvmano.sebastian.common.*;
@@ -152,35 +155,41 @@ public class VsLcmService implements VsLcmProviderInterface, NsmfLcmConsumerInte
     //internal map of VS Coordinators
     //each VS Coordinator is created on demand, as soon as a VSI asks for resources for being instantiated
     private Map<String, VsCoordinator> vsCoordinators = new HashMap<>();
-	
-	@Override
-	public String instantiateVs(InstantiateVsRequest request, String domain) throws MethodNotImplementedException,
-			NotExistingEntityException, FailedOperationException, MalformattedElementException, NotPermittedOperationException {
-		log.debug("Received request to instantiate a new Vertical Service instance.");
-		request.isValid();
-		
-		String tenantId = request.getTenantId();
-		String vsdId = request.getVsdId();
-		
-		VsDescriptor vsd = vsDescriptorCatalogueService.getVsd(vsdId);
-		if ((!(vsd.getTenantId().equals(tenantId))) && (!(tenantId.equals(adminTenant)))) {
-			log.debug("Tenant " + tenantId + " is not allowed to create VS instance with VSD " + vsdId);
-			throw new NotPermittedOperationException("Tenant " + tenantId + " is not allowed to create VS instance with VSD " + vsdId);
-		}
-		if(domain==null){
-		    return internalProcessInstantiateVs(vsd, request);
-        }else{
-		    log.debug("Triggering VSS instantiation on remote site");
 
-		    InstantiateVsRequest rRequest = new InstantiateVsRequest(request.getName(),
-					request.getDescription(),
-					vsd.getVsDescriptorId(),
-					request.getTenantId(),
-					request.getNotificationUrl(),
-					request.getUserData(),
-					request.getLocationConstraints());
+    @Autowired
+    private TranslationRuleRepository translationRuleRepository;
+
+    @Autowired
+    private ConfigurationRuleRepository configurationRuleRepository;
+
+    @Override
+    public String instantiateVs(InstantiateVsRequest request, String domain) throws MethodNotImplementedException,
+            NotExistingEntityException, FailedOperationException, MalformattedElementException, NotPermittedOperationException {
+        log.debug("Received request to instantiate a new Vertical Service instance.");
+        request.isValid();
+
+        String tenantId = request.getTenantId();
+        String vsdId = request.getVsdId();
+
+        VsDescriptor vsd = vsDescriptorCatalogueService.getVsd(vsdId);
+        if ((!(vsd.getTenantId().equals(tenantId))) && (!(tenantId.equals(adminTenant)))) {
+            log.debug("Tenant " + tenantId + " is not allowed to create VS instance with VSD " + vsdId);
+            throw new NotPermittedOperationException("Tenant " + tenantId + " is not allowed to create VS instance with VSD " + vsdId);
+        }
+        if (domain == null) {
+            return internalProcessInstantiateVs(vsd, request);
+        } else {
+            log.debug("Triggering VSS instantiation on remote site");
+
+            InstantiateVsRequest rRequest = new InstantiateVsRequest(request.getName(),
+                    request.getDescription(),
+                    vsd.getVsDescriptorId(),
+                    request.getTenantId(),
+                    request.getNotificationUrl(),
+                    request.getUserData(),
+                    request.getLocationConstraints());
             String remoteId = vsmfInteractionHandler.instantiateVs(rRequest, domain);
-		    String vsiId = vsRecordService.createVsInstance(request.getName(), request.getDescription(),
+            String vsiId = vsRecordService.createVsInstance(request.getName(), request.getDescription(),
                     vsdId,
                     tenantId,
                     request.getUserData(),
@@ -438,36 +447,36 @@ public class VsLcmService implements VsLcmProviderInterface, NsmfLcmConsumerInte
 		}
 	}
 
-	@Override
-	public List<VerticalServiceInstance> queryAllVsInstances(GeneralizedQueryRequest request, String domainId)
-			throws MethodNotImplementedException, NotExistingEntityException, FailedOperationException, MalformattedElementException {
-		log.debug("Received request about all the IDs of Vertical Service instances.");
-		request.isValid();
-		Filter filter = request.getFilter();
-		List<String> attributeSelector = request.getAttributeSelector();
-		if ((attributeSelector == null) || (attributeSelector.isEmpty())) {
-			Map<String, String> fp = filter.getParameters();
-			if (fp.size() == 1 && fp.containsKey("TENANT_ID")) {
-				List<String> vsIds = new ArrayList<>();
-				String tenantId = fp.get("TENANT_ID");
-				List<VerticalServiceInstance> vsInstances = new ArrayList<>();
-				if (tenantId.equals(adminTenant)) {
-					log.debug("VSI ID query for admin: returning all the VSIs");
-					vsInstances = vsRecordService.getAllVsInstances();
-				} else {
-					log.debug("VSI ID query for tenant " + tenantId);
-					vsInstances = vsRecordService.getAllVsInstances(tenantId);
-				}
-				return vsInstances;
-			} else {
-				log.error("Received all VSI ID query with not supported filter.");
-				throw new MalformattedElementException("Received VSI query with not supported filter.");
-			}
-		} else {
-			log.error("Received VSI query with attribute selector. Not supported at the moment.");
-			throw new MethodNotImplementedException("Received VSI query with attribute selector. Not supported at the moment.");
-		}
-	}
+    @Override
+    public List<VerticalServiceInstance> queryAllVsInstances(GeneralizedQueryRequest request, String domainId)
+            throws MethodNotImplementedException, NotExistingEntityException, FailedOperationException, MalformattedElementException {
+        log.debug("Received request about all the IDs of Vertical Service instances.");
+        request.isValid();
+        Filter filter = request.getFilter();
+        List<String> attributeSelector = request.getAttributeSelector();
+        if ((attributeSelector == null) || (attributeSelector.isEmpty())) {
+            Map<String, String> fp = filter.getParameters();
+            if (fp.size() == 1 && fp.containsKey("TENANT_ID")) {
+                List<String> vsIds = new ArrayList<>();
+                String tenantId = fp.get("TENANT_ID");
+                List<VerticalServiceInstance> vsInstances = new ArrayList<>();
+                if (tenantId.equals(adminTenant)) {
+                    log.debug("VSI ID query for admin: returning all the VSIs");
+                    vsInstances = vsRecordService.getAllVsInstances();
+                } else {
+                    log.debug("VSI ID query for tenant " + tenantId);
+                    vsInstances = vsRecordService.getAllVsInstances(tenantId);
+                }
+                return vsInstances;
+            } else {
+                log.error("Received all VSI ID query with not supported filter.");
+                throw new MalformattedElementException("Received VSI query with not supported filter.");
+            }
+        } else {
+            log.error("Received VSI query with attribute selector. Not supported at the moment.");
+            throw new MethodNotImplementedException("Received VSI query with attribute selector. Not supported at the moment.");
+        }
+    }
 
 	@Override
 	public void terminateVs(TerminateVsRequest request, String domainId) throws MethodNotImplementedException,
@@ -495,7 +504,7 @@ public class VsLcmService implements VsLcmProviderInterface, NsmfLcmConsumerInte
 			throw new NotPermittedOperationException("Tenant " + tenantId + " is not allowed to terminate VS instance " + vsiId);
 		}
 	}
-	
+
 	@Override
 	public void purgeVs(PurgeVsRequest request, String domainId)
 			throws MethodNotImplementedException, NotExistingEntityException, FailedOperationException, MalformattedElementException, NotPermittedOperationException {
@@ -661,40 +670,40 @@ public class VsLcmService implements VsLcmProviderInterface, NsmfLcmConsumerInte
         }
     }
 
-    public void notifyVsNssiCoordinationEnd(String nsiId, String domain, boolean successful){
-		log.debug("Processing end of Vs Nsi Coordination notification for slice:" + nsiId+ " domain: "+domain);
-		List<VerticalServiceInstance> vsis = vsRecordService.getVsInstancesFromNetworkSliceSubnet(nsiId);
-		for (VerticalServiceInstance vsi : vsis) {
-			String vsiId = vsi.getVsiId();
-			log.debug("Network Slice " + nsiId + " is associated to vertical service " + vsiId);
-			if (vsLcmManagers.containsKey(vsiId)) {
-				log.debug("Notifying coordination end to affected service:"+vsiId);
-				String topic = "lifecycle.notifynscoordinationend." + vsiId;
-				NotifyVsiNssiCoordinationEnd internalMessage = new NotifyVsiNssiCoordinationEnd(nsiId, domain, successful);
-				try {
-					sendMessageToQueue(internalMessage, topic);
-				} catch (Exception e) {
-					log.error("General exception while sending message to queue.");
-				}
-			} else {
-				log.error("Unable to find Vertical Service LCM Manager for VSI ID " + vsiId + ". Unable to notify associated NS status change.");
-			}
-		}
+    public void notifyVsNssiCoordinationEnd(String nsiId, String domain, boolean successful) {
+        log.debug("Processing end of Vs Nsi Coordination notification for slice:" + nsiId + " domain: " + domain);
+        List<VerticalServiceInstance> vsis = vsRecordService.getVsInstancesFromNetworkSliceSubnet(nsiId);
+        for (VerticalServiceInstance vsi : vsis) {
+            String vsiId = vsi.getVsiId();
+            log.debug("Network Slice " + nsiId + " is associated to vertical service " + vsiId);
+            if (vsLcmManagers.containsKey(vsiId)) {
+                log.debug("Notifying coordination end to affected service:" + vsiId);
+                String topic = "lifecycle.notifynscoordinationend." + vsiId;
+                NotifyVsiNssiCoordinationEnd internalMessage = new NotifyVsiNssiCoordinationEnd(nsiId, domain, successful);
+                try {
+                    sendMessageToQueue(internalMessage, topic);
+                } catch (Exception e) {
+                    log.error("General exception while sending message to queue.");
+                }
+            } else {
+                log.error("Unable to find Vertical Service LCM Manager for VSI ID " + vsiId + ". Unable to notify associated NS status change.");
+            }
+        }
 
-		for(Map.Entry<String, VsLcmManager> managerEntry: vsLcmManagers.entrySet()){
-			if(managerEntry.getValue().getPendingNsiModificationIds().contains(nsiId)){
-				NotifyVsiNssiCoordinationEnd internalMessage = new NotifyVsiNssiCoordinationEnd(nsiId, domain, successful);
-				try {
-					log.debug("Notifying coordination end to requester:"+managerEntry.getKey());
-					String topic = "lifecycle.notifynscoordinationend." + managerEntry.getKey();
-					sendMessageToQueue(internalMessage, topic);
-				} catch (Exception e) {
-					log.error("General exception while sending message to queue.");
-				}
-			}
-		}
+        for (Map.Entry<String, VsLcmManager> managerEntry : vsLcmManagers.entrySet()) {
+            if (managerEntry.getValue().getPendingNsiModificationIds().contains(nsiId)) {
+                NotifyVsiNssiCoordinationEnd internalMessage = new NotifyVsiNssiCoordinationEnd(nsiId, domain, successful);
+                try {
+                    log.debug("Notifying coordination end to requester:" + managerEntry.getKey());
+                    String topic = "lifecycle.notifynscoordinationend." + managerEntry.getKey();
+                    sendMessageToQueue(internalMessage, topic);
+                } catch (Exception e) {
+                    log.error("General exception while sending message to queue.");
+                }
+            }
+        }
 
-	}
+    }
 
     /**
      * This methd is invoked by VsLcmManager as soon as its own termination process succeeded
@@ -720,9 +729,9 @@ public class VsLcmService implements VsLcmProviderInterface, NsmfLcmConsumerInte
                 }
             }
 
-        }else{
-                log.error("Unable to find VS LCM Manager for VSI ID " + vsiId + ". Invalid Termination notification.");
-                throw new NotExistingEntityException("Unable to find VS LCM Manager for VSI ID " + vsiId + ". Invalid Termination notification.");
+        } else {
+            log.error("Unable to find VS LCM Manager for VSI ID " + vsiId + ". Invalid Termination notification.");
+            throw new NotExistingEntityException("Unable to find VS LCM Manager for VSI ID " + vsiId + ". Invalid Termination notification.");
 
 
         }
@@ -739,25 +748,26 @@ public class VsLcmService implements VsLcmProviderInterface, NsmfLcmConsumerInte
         log.debug("VS LCM manager removed from engine.");
     }
 
-	@Override
-	public void notifyNetworkSliceStatusChange(NetworkSliceStatusChangeNotification notification) {
-		String networkSliceId = notification.getNsiId();
-		log.debug("Processing notification about status change for network slice " + networkSliceId);
+    @Override
+    public void notifyNetworkSliceStatusChange(NetworkSliceStatusChangeNotification notification) {
+        String networkSliceId = notification.getNsiId();
+        log.debug("Processing notification about status change for network slice " + networkSliceId);
         //TODO: why is the domain not included in the notification?
-		if(this.vsNsiCoordinators.containsKey(networkSliceId)){
-        	log.debug("notifying VSINSI coordinator");
-			NotifyNsiStatusChange internalMessage = new NotifyNsiStatusChange(networkSliceId, notification.getStatusChange());
-			String topic = "coordnsilifecycle.nsstatuschange."+networkSliceId;
-			try {
-				sendMessageToQueue(internalMessage, topic);
-			} catch (Exception e) {
-				log.error("General exception while sending message to queue.",e);
-			}
-		}
-		List<VerticalServiceInstance> vsis = vsRecordService.getVsInstancesFromNetworkSlice(networkSliceId);
+        if (this.vsNsiCoordinators.containsKey(networkSliceId)) {
+            log.debug("notifying VSINSI coordinator");
+            NotifyNsiStatusChange internalMessage = new NotifyNsiStatusChange(networkSliceId, notification.getStatusChange());
+            String topic = "coordnsilifecycle.nsstatuschange." + networkSliceId;
+            try {
+                sendMessageToQueue(internalMessage, topic);
+            } catch (Exception e) {
+                log.error("General exception while sending message to queue.", e);
+            }
+        }
+        //List<VerticalServiceInstance> vsis = vsRecordService.getVsInstancesFromNetworkSlice(networkSliceId);
+        List<VerticalServiceInstance> vsis = vsRecordService.getAllVsInstances();
         String vsiId = null;
-		for (VerticalServiceInstance vsi : vsis) {
-            if(!vsi.getStatus().equals(VerticalServiceStatus.TERMINATED)) {
+        for (VerticalServiceInstance vsi : vsis) {
+            if (!vsi.getStatus().equals(VerticalServiceStatus.TERMINATED)) {
                 if (vsi.getNetworkSliceId() != null && vsi.getNetworkSliceId().equals(networkSliceId)) {
                     vsiId = vsi.getVsiId();
                 } else {
@@ -780,14 +790,13 @@ public class VsLcmService implements VsLcmProviderInterface, NsmfLcmConsumerInte
                 }
             }
         }
-		
-	}
-	
-	@Override
-	public void notifyNetworkSliceFailure(NetworkSliceFailureNotification notification) {
-		//TODO:
-		log.debug("Received network slice failure messages, but not able to process it at the moment. Skipped.");
-	}
+    }
+
+    @Override
+    public void notifyNetworkSliceFailure(NetworkSliceFailureNotification notification) {
+        //TODO:
+        log.debug("Received network slice failure messages, but not able to process it at the moment. Skipped.");
+    }
 
 	/*@Override
 	public void notifyVerticalServiceStatusChange(VerticalServiceStatusChangeNotification notification, String domain) {
@@ -895,17 +904,20 @@ public class VsLcmService implements VsLcmProviderInterface, NsmfLcmConsumerInte
     private void initNewVsLcmManager(String vsiId, String vsiName) {
         log.debug("Initializing new VS LCM manager for VSI ID " + vsiId);
         VsLcmManager vsLcmManager = new VsLcmManager(vsiId,
-        		vsiName,
-        		vsRecordService, 
-        		vsDescriptorCatalogueService,
-        		vsBlueprintCatalogueService,
-        		translatorService, 
-        		arbitratorService, 
-        		adminService, 
-        		this, 
-        		virtualResourceCalculatorService, 
-        		nsmfLcmProvider,
-        		vsmfUtils, this);
+                vsiName,
+                vsRecordService,
+                vsDescriptorCatalogueService,
+                vsBlueprintCatalogueService,
+                translatorService,
+                arbitratorService,
+                adminService,
+                this,
+                virtualResourceCalculatorService,
+                nsmfLcmProvider,
+                vsmfUtils,
+                this,
+                translationRuleRepository,
+                configurationRuleRepository);
         createQueue(vsiId, vsLcmManager);
         vsLcmManagers.put(vsiId, vsLcmManager);
         log.debug("VS LCM manager for VSI ID " + vsiId + " initialized and added to the engine.");

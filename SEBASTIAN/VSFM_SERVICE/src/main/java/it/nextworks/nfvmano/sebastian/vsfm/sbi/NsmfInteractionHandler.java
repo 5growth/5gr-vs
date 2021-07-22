@@ -24,6 +24,7 @@ import it.nextworks.nfvmano.catalogue.domainLayer.customDomainLayer.OsmNspDomain
 import it.nextworks.nfvmano.catalogue.domainLayer.customDomainLayer.SonataNspDomainLayer;
 import it.nextworks.nfvmano.catalogues.domainLayer.services.DomainCatalogueService;
 import it.nextworks.nfvmano.catalogues.domainLayer.services.DomainCatalogueSubscriptionService;
+import it.nextworks.nfvmano.catalogues.template.repo.ConfigurationRuleRepository;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.*;
 import it.nextworks.nfvmano.sebastian.admin.AdminService;
 //import it.nextworks.nfvmano.sebastian.nsmf.NsLcmService;
@@ -45,10 +46,7 @@ import org.springframework.stereotype.Service;
 
 import it.nextworks.nfvmano.libs.ifa.common.messages.GeneralizedQueryRequest;
 import it.nextworks.nfvmano.sebastian.nsmf.interfaces.NsmfLcmProviderInterface;
-import it.nextworks.nfvmano.sebastian.nsmf.messages.CreateNsiIdRequest;
-import it.nextworks.nfvmano.sebastian.nsmf.messages.InstantiateNsiRequest;
-import it.nextworks.nfvmano.sebastian.nsmf.messages.ModifyNsiRequest;
-import it.nextworks.nfvmano.sebastian.nsmf.messages.TerminateNsiRequest;
+import it.nextworks.nfvmano.sebastian.nsmf.messages.*;
 import it.nextworks.nfvmano.sebastian.record.elements.NetworkSliceInstance;
 import it.nextworks.nfvmano.sebastian.vsfm.sbi.nsmf.NsmfRestClient;
 
@@ -65,10 +63,7 @@ public class NsmfInteractionHandler implements NsmfLcmProviderInterface {
     // domainId -> Interface
     private Map<String, NsmfLcmProviderInterface> drivers = new HashMap<String, NsmfLcmProviderInterface>();
 
-    //this is used for single domain scenarios
-    private String defaultDriver;
-
-    //private NsmfRestClient nsmfRestClient;
+    private NsmfRestClient nsmfRestClient;
 
     @Autowired
     private AdminService adminService;
@@ -95,6 +90,9 @@ public class NsmfInteractionHandler implements NsmfLcmProviderInterface {
     private DummyTranslationInformationRepository dummyTranslationInformationRepository;
 
     @Autowired
+    private ConfigurationRuleRepository configurationRuleRepository;
+
+    @Autowired
     private NsmfLcmOperationPollingManager nsmfLcmOperationPollingManager;
 
     @Autowired
@@ -102,6 +100,9 @@ public class NsmfInteractionHandler implements NsmfLcmProviderInterface {
 
     @Value("${dummy.multidomain.enabled:false}")
     private boolean dummyMultidomainMode;
+
+    @Value("${vsm.sbi.nsmf.defaultDomain:defaultDomain}")
+    private String defaultDomain;
 
     @Value("${vsmf.notifications.url}")
     private String notificationCallbackUri;
@@ -145,30 +146,32 @@ public class NsmfInteractionHandler implements NsmfLcmProviderInterface {
                             NHNspDomainLayer nhNspDomainLayer = (NHNspDomainLayer) domainLayer;
                             OsmNfvoDomainLayer osmNfvoDomainLayer = getOsmDomainLayer(domain);
                             if (!dummyMultidomainMode) {
-                                restClient = new NeutralHostingRestClient(domainId, completeUrl, nhNspDomainLayer.getUserId(), nhNspDomainLayer.getTenantId(), osmNfvoDomainLayer, nhTranslationInformationRepository, utils, nsmfLcmOperationPollingManager);
+                                restClient = new NeutralHostingRestClient(domainId, completeUrl, nhNspDomainLayer.getUserId(), nhNspDomainLayer.getTenantId(), osmNfvoDomainLayer, nhTranslationInformationRepository, configurationRuleRepository, utils, nsmfLcmOperationPollingManager);
                             } else {
-                                restClient = new DummyRestClient(domainId, utils, vsLcmService, dummyTranslationInformationRepository);
+                                restClient = new DummyRestClient(domainId, utils, vsLcmService, dummyTranslationInformationRepository, configurationRuleRepository);
                             }
                             log.info("Rest Client for NEUTRAL_HOSTING NSP instantiated");
                         } else if (nspDomainLayer.getNspNbiType().equals(NspNbiType.SONATA)) {
                             SonataNspDomainLayer sonataNspDomainLayer = (SonataNspDomainLayer) domainLayer;
                             if (!dummyMultidomainMode) {
-                                //restClient = new SonataRestClient(domainId, completeUrl, sonataNspDomainLayer.getUsername(), sonataNspDomainLayer.getPassword(), sonataTranslationInformationRepository, utils, nsmfLcmOperationPollingManager);
-								restClient = new DummyRestClient(domainId, utils, vsLcmService, dummyTranslationInformationRepository);
+                                restClient = new SonataRestClient(domainId, completeUrl, sonataNspDomainLayer.getUsername(), sonataNspDomainLayer.getPassword(), sonataTranslationInformationRepository, configurationRuleRepository, utils, nsmfLcmOperationPollingManager);
                             } else {
-                                restClient = new DummyRestClient(domainId, utils, vsLcmService, dummyTranslationInformationRepository);
+                                restClient = new DummyRestClient(domainId, utils, vsLcmService, dummyTranslationInformationRepository, configurationRuleRepository);
                             }
                             log.info("Rest Client for SONATA NSP instantiated");
                         } else if (nspDomainLayer.getNspNbiType().equals(NspNbiType.THREE_GPP)) {
-                            restClient = new NsmfRestClient(domainId, completeUrl, adminService);
+                            if (!dummyMultidomainMode) {
+                                restClient = new NsmfRestClient(domainId, completeUrl, adminService);
+                            }else {
+                                restClient = new DummyRestClient(domainId, utils, vsLcmService, dummyTranslationInformationRepository, configurationRuleRepository);
+                            }
                             log.info("Rest Client for 3GPP like NSP instantiated");
                         } else if (nspDomainLayer.getNspNbiType().equals(NspNbiType.OSM)){
                             OsmNspDomainLayer osmNspDomainLayer = (OsmNspDomainLayer) domainLayer;
                             if (!dummyMultidomainMode) {
-                                //restClient = new OsmRestClient(domainId, completeUrl, osmNspDomainLayer.getUsername(), osmNspDomainLayer.getPassword(), osmNspDomainLayer.getProject(), osmNspDomainLayer.getVimAccount(), osmTranslationInformationRepository, utils, nsmfLcmOperationPollingManager);
-	                            restClient = new DummyRestClient(domainId, utils, vsLcmService, dummyTranslationInformationRepository);
-							} else {
-                                restClient = new DummyRestClient(domainId, utils, vsLcmService, dummyTranslationInformationRepository);
+                                restClient = new OsmRestClient(domainId, completeUrl, osmNspDomainLayer.getUsername(), osmNspDomainLayer.getPassword(), osmNspDomainLayer.getProject(), osmNspDomainLayer.getVimAccount(), osmTranslationInformationRepository, configurationRuleRepository, utils, nsmfLcmOperationPollingManager);
+                            } else {
+                                restClient = new DummyRestClient(domainId, utils, vsLcmService, dummyTranslationInformationRepository, configurationRuleRepository);
                             }
                             log.info("Rest Client for OSM NSP instantiated");
                         }
@@ -213,15 +216,14 @@ public class NsmfInteractionHandler implements NsmfLcmProviderInterface {
                 nsmfRestClient = new NsmfRestClient("defaultDomain", nsmfRestServerUrl, adminService);
                 break;
             case OSM:
-                nsmfRestClient = new OsmRestClient("defaultDomain", nsmfRestServerUrl, username, password, project, vimAccount, osmTranslationInformationRepository, utils, nsmfLcmOperationPollingManager);
-		
+                nsmfRestClient = new OsmRestClient("defaultDomain", nsmfRestServerUrl, username, password, project, vimAccount, osmTranslationInformationRepository, configurationRuleRepository, utils, nsmfLcmOperationPollingManager);
                 break;
             default:
                 throw new IllegalArgumentException("NsmfType " + nsmfType.toString() + " not supported as default domain");
 
         }
-        this.defaultDriver = "defaultDomain";
-        this.drivers.put("defaultDomain", nsmfRestClient);
+        
+        this.drivers.put(defaultDomain, nsmfRestClient);
         log.info("Default rest client instantiated for {} NSP", nsmfType.toString());
     }
 
@@ -229,48 +231,81 @@ public class NsmfInteractionHandler implements NsmfLcmProviderInterface {
     public String createNetworkSliceIdentifier(CreateNsiIdRequest request, String domainId, String tenantId)
             throws NotExistingEntityException, MethodNotImplementedException, FailedOperationException,
             MalformattedElementException, NotPermittedOperationException {
-        if (domainId == null) domainId = defaultDriver;
-        return drivers.get(domainId).createNetworkSliceIdentifier(request, domainId, tenantId);
+		NsmfLcmProviderInterface domainDriver = null;
+		        
+		if (domainId == null){
+		 	domainId = defaultDomain;
+		}
+		domainDriver= drivers.get(domainId);
+		
+        return domainDriver.createNetworkSliceIdentifier(request, domainId, tenantId);
     }
 
     @Override
     public void instantiateNetworkSlice(InstantiateNsiRequest request, String domainId, String tenantId)
             throws NotExistingEntityException, MethodNotImplementedException, FailedOperationException,
             MalformattedElementException, NotPermittedOperationException {
-        if (domainId == null) domainId = defaultDriver;
-        drivers.get(domainId).instantiateNetworkSlice(request, domainId, tenantId);
+        
+		NsmfLcmProviderInterface domainDriver = null;
+			
+		if (domainId == null){
+		 	domainId = defaultDomain;
+		}
+		domainDriver= drivers.get(domainId);
+		domainDriver.instantiateNetworkSlice(request, domainId, tenantId);
+    }
+
+    @Override
+    public void configureNetworkSliceInstance(ConfigureNsiRequest request, String domainId, String tenantId) throws MethodNotImplementedException, FailedOperationException, MalformattedElementException{
+        if (domainId == null) domainId = defaultDomain;
+        drivers.get(domainId).configureNetworkSliceInstance(request, domainId, tenantId);
     }
 
     @Override
     public void modifyNetworkSlice(ModifyNsiRequest request, String domainId, String tenantId)
             throws NotExistingEntityException, MethodNotImplementedException, FailedOperationException,
             MalformattedElementException, NotPermittedOperationException {
-        if (domainId == null) domainId = defaultDriver;
-        drivers.get(domainId).modifyNetworkSlice(request, domainId, tenantId);
+          
+		NsmfLcmProviderInterface domainDriver = null;
+		        
+		if (domainId == null){
+		 	domainId = defaultDomain;
+		}
+		domainDriver= drivers.get(domainId);
+         	domainDriver.modifyNetworkSlice(request, domainId, tenantId);
     }
 
     @Override
     public void terminateNetworkSliceInstance(TerminateNsiRequest request, String domainId, String tenantId)
             throws NotExistingEntityException, MethodNotImplementedException, FailedOperationException,
             MalformattedElementException, NotPermittedOperationException {
-        if (domainId == null) domainId = defaultDriver;
-        drivers.get(domainId).terminateNetworkSliceInstance(request, domainId, tenantId);
+           
+		NsmfLcmProviderInterface domainDriver = null;
+		        
+		if (domainId == null){
+		 	domainId = defaultDomain;
+		}
+		domainDriver= drivers.get(domainId);
+         domainDriver.terminateNetworkSliceInstance(request, domainId, tenantId);
     }
 
     @Override
     public List<NetworkSliceInstance> queryNetworkSliceInstance(GeneralizedQueryRequest request, String domainId, String tenantId)
             throws MethodNotImplementedException, FailedOperationException, MalformattedElementException {
-        if (domainId == null) domainId = defaultDriver;
-        return drivers.get(domainId).queryNetworkSliceInstance(request, domainId, tenantId);
+         
+		NsmfLcmProviderInterface domainDriver = null;
+		        
+		if (domainId == null){
+		 	domainId = defaultDomain;
+		}
+		domainDriver= drivers.get(domainId);
+        return domainDriver.queryNetworkSliceInstance(request, domainId, tenantId);
     }
 
-	public void addDriver(String id, NsmfLcmProviderInterface driver){
-		this.drivers.put(id,driver);
-	}
+	
 
-
-	public void setDefaultDriver(String defaultDriver){
-		this.defaultDriver = defaultDriver;
+	public void setDefaultDriver(NsmfLcmProviderInterface defaultDriver){
+		this.drivers.put(defaultDomain, defaultDriver);
 	}
 
 }

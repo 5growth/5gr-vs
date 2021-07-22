@@ -8,12 +8,12 @@ import it.nextworks.nfvmano.libs.ifa.common.enums.OperationStatus;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.*;
 import it.nextworks.nfvmano.libs.ifa.common.messages.GeneralizedQueryRequest;
 import it.nextworks.nfvmano.libs.ifa.templates.NST;
-import it.nextworks.nfvmano.sebastian.nsmf.messages.CreateNsiIdRequest;
-import it.nextworks.nfvmano.sebastian.nsmf.messages.InstantiateNsiRequest;
-import it.nextworks.nfvmano.sebastian.nsmf.messages.ModifyNsiRequest;
+import it.nextworks.nfvmano.sebastian.nsmf.messages.*;
 import it.nextworks.nfvmano.sebastian.nsmf.messages.TerminateNsiRequest;
 import it.nextworks.nfvmano.sebastian.record.elements.NetworkSliceInstance;
 import it.nextworks.nfvmano.sebastian.record.elements.NetworkSliceStatus;
+import it.nextworks.nfvmano.catalogue.template.elements.*;
+import it.nextworks.nfvmano.catalogues.template.repo.ConfigurationRuleRepository;
 import it.nextworks.nfvmano.sebastian.vsfm.sbi.AbstractNsmfDriver;
 import it.nextworks.nfvmano.sebastian.vsfm.sbi.NsmfLcmOperationPollingManager;
 import it.nextworks.nfvmano.sebastian.vsfm.sbi.NsmfType;
@@ -46,10 +46,11 @@ public class OsmRestClient extends AbstractNsmfDriver {
     private NsmfLcmOperationPollingManager pollingManager;
 
     private OsmTranslationInformationRepository translationInformationRepository;
+    private ConfigurationRuleRepository configurationRuleRepository;
 
     private ObjectMapper mapper;
 
-    public OsmRestClient(String domainId, String url, String username, String password, String project, String vimAccount, OsmTranslationInformationRepository repo, CommonUtils utils, NsmfLcmOperationPollingManager nsmfLcmOperationPollingManager) {
+    public OsmRestClient(String domainId, String url, String username, String password, String project, String vimAccount, OsmTranslationInformationRepository repo, ConfigurationRuleRepository configurationRuleRepository, CommonUtils utils, NsmfLcmOperationPollingManager nsmfLcmOperationPollingManager) {
         super(NsmfType.OSM, domainId);
         this.baseUrl = url + "/osm";
         this.username = username;
@@ -60,12 +61,13 @@ public class OsmRestClient extends AbstractNsmfDriver {
         this.mapper = new ObjectMapper();
         this.translationInformationRepository = repo;
         this.pollingManager = nsmfLcmOperationPollingManager;
+        this.configurationRuleRepository = configurationRuleRepository;
     }
 
     public OsmTokenSimplified getAuthenticationToken() {
         OsmTokenRequest tokenReq = new OsmTokenRequest(username, password, project);
         String url = baseUrl + "/admin/v1/tokens";
-        ResponseEntity<String> httpResponse = utils.performHTTPRequest(tokenReq, url, HttpMethod.POST, null);
+        ResponseEntity<String> httpResponse = utils.performHTTPRequest(tokenReq, url, HttpMethod.POST, null,null);
         String tokenResp = utils.manageHTTPResponse(httpResponse, "Cannot obtain OSM authentication token", "OSM authentication token correctly obtained", HttpStatus.OK);
         OsmTokenSimplified token = null;
         try {
@@ -98,7 +100,7 @@ public class OsmRestClient extends AbstractNsmfDriver {
         NST nsTemplate = nstInfo.getNST();
         verifyToken();
         String url = String.format("%s/nst/v1/netslice_templates?id=%s", baseUrl, nsTemplate.getNstId());
-        ResponseEntity<String> httpResponse = utils.performHTTPRequest(null, url, HttpMethod.GET, osmToken.getId());
+        ResponseEntity<String> httpResponse = utils.performHTTPRequest(null, url, HttpMethod.GET, null, osmToken.getId());
         String nsTemplateResponse = utils.manageHTTPResponse(httpResponse, "Cannot obtain OSM NST", "OSM NST correctly obtained", HttpStatus.OK);
         if (nsTemplateResponse == null)
             throw new FailedOperationException("Cannot create Network Slice Template Identifier");
@@ -127,7 +129,7 @@ public class OsmRestClient extends AbstractNsmfDriver {
         OsmNSInstantiationRequest instantiationRequest = new OsmNSInstantiationRequest(translationInformation.getNstName(), translationInformation.getOsmInfoId(), vimAccount);
         verifyToken();
         String url = String.format("%s/nsilcm/v1/netslice_instances_content", baseUrl);
-        ResponseEntity<String> httpResponse = utils.performHTTPRequest(instantiationRequest, url, HttpMethod.POST, osmToken.getId());
+        ResponseEntity<String> httpResponse = utils.performHTTPRequest(instantiationRequest, url, HttpMethod.POST, null, osmToken.getId());
         String nsInstanceResponse = utils.manageHTTPResponse(httpResponse, "Cannot instantiate NS", "NS instantiation request correctly sent", HttpStatus.CREATED);
         if (nsInstanceResponse == null)
             throw new FailedOperationException("Cannot instantiate Network Slice");
@@ -162,7 +164,7 @@ public class OsmRestClient extends AbstractNsmfDriver {
         OsmTranslationInformation translationInformation = getTranslationInformation(request.getNsiId());
         verifyToken();
         String url = String.format("%s/nsilcm/v1/netslice_instances/%s/terminate", baseUrl, translationInformation.getOsmInstanceId());
-        ResponseEntity<String> httpResponse = utils.performHTTPRequest(null, url, HttpMethod.POST, osmToken.getId());
+        ResponseEntity<String> httpResponse = utils.performHTTPRequest(null, url, HttpMethod.POST, null, osmToken.getId());
         String nsDeleteResponse = utils.manageHTTPResponse(httpResponse, "Cannot terminate NS", "NS termination request correctly sent", HttpStatus.ACCEPTED);
         if (nsDeleteResponse == null)
             throw new FailedOperationException("Cannot terminate Network Slice");
@@ -206,7 +208,7 @@ public class OsmRestClient extends AbstractNsmfDriver {
             url = String.format("%s/nsilcm/v1/netslice_instances/%s", baseUrl, osmInstanceId);
         } else
             url = String.format("%s/nsilcm/v1/netslice_instances", baseUrl);
-        ResponseEntity<String> httpResponse = utils.performHTTPRequest(null, url, HttpMethod.GET, osmToken.getId());
+        ResponseEntity<String> httpResponse = utils.performHTTPRequest(null, url, HttpMethod.GET, null, osmToken.getId());
         String queryNSResponse = utils.manageHTTPResponse(httpResponse, "Cannot obtain Network Slice Instance information", "Network Slice Instance information correctly obtained", HttpStatus.OK);
         if (queryNSResponse == null)
             throw new FailedOperationException("Cannot obtain Network Slice Instance information");
@@ -232,7 +234,7 @@ public class OsmRestClient extends AbstractNsmfDriver {
             else
                 operationId = translationInformation.getTerminationOperationId();
             url = String.format("%s/nsilcm/v1/nsi_lcm_op_occs/%s", baseUrl, operationId);
-            httpResponse = utils.performHTTPRequest(null, url, HttpMethod.GET, osmToken.getId());
+            httpResponse = utils.performHTTPRequest(null, url, HttpMethod.GET, null, osmToken.getId());
             queryNSResponse = utils.manageHTTPResponse(httpResponse, "Cannot obtain Network Slice Instance information", "Network Slice Instance information correctly obtained", HttpStatus.OK);
             if (queryNSResponse == null)
                 throw new FailedOperationException("Cannot obtain Network Slice Instance information");
@@ -246,6 +248,11 @@ public class OsmRestClient extends AbstractNsmfDriver {
             status = operationObject.getOperationState();
         }
         return translateOsmNsInstances(nsInstances, status, operationType);
+    }
+    
+    @Override
+    public void configureNetworkSliceInstance(ConfigureNsiRequest request, String domainId, String tenantId) throws MethodNotImplementedException, FailedOperationException, MalformattedElementException{
+        log.debug("Day1 not yet implemented.");
     }
 
     private List<NetworkSliceInstance> translateOsmNsInstances(List<OsmNSInstanceSimplified> osmNsInstances, String status, String operationType) throws FailedOperationException {
@@ -272,7 +279,7 @@ public class OsmRestClient extends AbstractNsmfDriver {
             if(nsInstance.getStatus().equals(NetworkSliceStatus.TERMINATED) && operationType != null){
                 verifyToken();
                 String url = String.format("%s/nsilcm/v1/netslice_instances/%s", baseUrl, osmNSInstance.getId());
-                ResponseEntity<String>  httpResponse = utils.performHTTPRequest(null, url, HttpMethod.DELETE, osmToken.getId());
+                ResponseEntity<String>  httpResponse = utils.performHTTPRequest(null, url, HttpMethod.DELETE, null, osmToken.getId());
                 String queryNSResponse = utils.manageHTTPResponse(httpResponse, "Cannot delete Network Slice Instance", "Network Slice Instance deleted", HttpStatus.NO_CONTENT);
                 if (queryNSResponse == null)
                     throw new FailedOperationException("Cannot delete Network Slice Instance");

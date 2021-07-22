@@ -24,7 +24,7 @@ public class PolledNsmfLcmOperation {
     OperationStatus expectedStatus;
     String nsiId;
 
-    //acceptable values for operation: NSI_CREATION, NSI_TERMINATION
+    //acceptable values for operation: NSI_CREATION, NSI_TERMINATION, NSI_CONFIGURATION
     String operationType;
 
     String domainId;

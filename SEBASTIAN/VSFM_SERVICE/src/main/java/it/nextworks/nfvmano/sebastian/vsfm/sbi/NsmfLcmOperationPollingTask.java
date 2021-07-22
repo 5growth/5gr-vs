@@ -153,6 +153,23 @@ public class NsmfLcmOperationPollingTask implements Runnable {
                         return true;
                     }
                 }
+            }else if (operation.getOperationType().equals("NSI_CONFIGURATION")) {
+                parameters.put("NSI_ID", operation.getNsiId());
+                parameters.put("REQUEST_TYPE",  "NSI_CONFIGURATION");
+                filter = new Filter(parameters);
+                request = new GeneralizedQueryRequest(filter, new ArrayList<>());
+                nsiInstances = nsmfLcmProvider.queryNetworkSliceInstance(request, operation.getDomainId(), null);
+                if (nsiInstances.size() == 1 && nsiInstances.get(0).getStatus().equals(NetworkSliceStatus.CONFIGURED)) {
+                    log.debug("Network slice instance {} successfully configured", operation.getNsiId());
+                    notification = new NetworkSliceStatusChangeNotification(operation.getNsiId(), NetworkSliceStatusChange.NSI_CONFIGURED, true);
+                    vsLcmService.notifyNetworkSliceStatusChange(notification);
+                    return true;
+                } else if (nsiInstances.size() == 1 && nsiInstances.get(0).getStatus().equals(NetworkSliceStatus.FAILED)) {
+                    log.debug("Network slice instance {} configuration failed", operation.getNsiId());
+                    notification = new NetworkSliceStatusChangeNotification(operation.getNsiId(), NetworkSliceStatusChange.NSI_FAILED, false);
+                    vsLcmService.notifyNetworkSliceStatusChange(notification);
+                    return true;
+                }
             }
         } catch (MethodNotImplementedException | FailedOperationException | MalformattedElementException e) {
             log.error(e.getMessage());

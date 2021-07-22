@@ -49,21 +49,15 @@ import it.nextworks.nfvmano.libs.ifa.common.exceptions.MethodNotImplementedExcep
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.sebastian.common.ConfigurationParameters;
 import it.nextworks.nfvmano.sebastian.common.Utilities;
-import it.nextworks.nfvmano.sebastian.nsmf.engine.messages.InstantiateNsiRequestMessage;
-import it.nextworks.nfvmano.sebastian.nsmf.engine.messages.ModifyNsiRequestMessage;
-import it.nextworks.nfvmano.sebastian.nsmf.engine.messages.NotifyNfvNsiStatusChange;
-import it.nextworks.nfvmano.sebastian.nsmf.engine.messages.NsmfEngineMessage;
-import it.nextworks.nfvmano.sebastian.nsmf.engine.messages.TerminateNsiRequestMessage;
+import it.nextworks.nfvmano.sebastian.nsmf.engine.messages.*;
 import it.nextworks.nfvmano.sebastian.nsmf.interfaces.NsmfLcmConsumerInterface;
 import it.nextworks.nfvmano.sebastian.nsmf.interfaces.NsmfLcmProviderInterface;
-import it.nextworks.nfvmano.sebastian.nsmf.messages.CreateNsiIdRequest;
-import it.nextworks.nfvmano.sebastian.nsmf.messages.InstantiateNsiRequest;
-import it.nextworks.nfvmano.sebastian.nsmf.messages.ModifyNsiRequest;
-import it.nextworks.nfvmano.sebastian.nsmf.messages.TerminateNsiRequest;
+import it.nextworks.nfvmano.sebastian.nsmf.messages.*;
 import it.nextworks.nfvmano.sebastian.nsmf.nsmanagement.NsLcmManager;
 import it.nextworks.nfvmano.sebastian.record.NsRecordService;
 import it.nextworks.nfvmano.sebastian.record.elements.NetworkSliceInstance;
 import it.nextworks.nfvmano.sebastian.record.elements.NetworkSliceStatus;
+import it.nextworks.nfvmano.catalogues.template.repo.ConfigurationRuleRepository;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -248,6 +242,11 @@ public class NsLcmService implements NsmfLcmProviderInterface, NfvoLcmNotificati
     		throw new MalformattedElementException("Query filter not supported.");
     	}
     	return nsis;
+    }
+
+    @Override
+    public void configureNetworkSliceInstance(ConfigureNsiRequest request, String domainId, String tenantId) throws MethodNotImplementedException, FailedOperationException, MalformattedElementException{
+        log.debug("Day1 not yet implemented.");
     }
 
     /**

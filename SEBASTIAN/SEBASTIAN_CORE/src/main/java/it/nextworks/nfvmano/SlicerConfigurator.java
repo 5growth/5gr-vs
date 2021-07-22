@@ -92,20 +92,20 @@ public class SlicerConfigurator {
 		nsLcmService.setNotificationDispatcher(vsLcmService);
 		//vsLcmService.setNsmfLcmProvider(nsLcmService);
 		vsmfUtils.setNsmfLcmProvider(nsLcmService);
-		vsBlueprintCatalogueService.setNsTemplateCatalogueService(nsTemplateCatalogueService);
+
+		//vsmfInteractionHandler.addDriver("test", new VsmfLevelLoggingDriver("5GEVE", CsmfType.LOGGING, vsmfLcmOperationPollingManager));
 		nsmfInteractionHandler.init();
 		vsmfInteractionHandler.init();
+		vsBlueprintCatalogueService.setNsTemplateCatalogueService(nsTemplateCatalogueService);
+		//vsDescriptorCatalogueInteractionHandler.addVsdCatalogueDriver("5GEVE", new VsdCatalogueLoggingDriver());
 		virtualResourceCalculatorService.setNfvoCatalogueService(nfvoCatalogueService);
 		virtualResourceCalculatorService.setVnfPackageManagementProviderInterface(nfvoCatalogueService);
 		log.debug("Adding local Sebastian NSP domain");
 		//HERE we should configure the available domains. For the moment only the local domain is configures
 		
 		
-			
-
-			nsmfInteractionHandler.addDriver("LOCAL", nsLcmService );
-			nsmfInteractionHandler.setDefaultDriver("LOCAL");
-			vsLcmService.setNsmfLcmProvider(nsmfInteractionHandler);
+		nsmfInteractionHandler.setDefaultDriver(nsLcmService);
+		vsLcmService.setNsmfLcmProvider(nsmfInteractionHandler);
 		
 	}
 
