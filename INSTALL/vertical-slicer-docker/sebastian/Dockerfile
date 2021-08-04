@@ -36,15 +36,16 @@ USER ubuntu
 
 
 #RUN git -c http.sslVerify=false clone --branch feat-librefactor git@10.30.7.30:kd_nextworks/nfv-ifa-libs /home/ubuntu/nfv-ifa-libs
-RUN /home/ubuntu/git_cmd.sh nfv-ifa-libs /home/ubuntu/nfv-ifa-libs
-RUN /home/ubuntu/git_cmd.sh slicer-identity-mgmt /home/ubuntu/identity-management
+# <repo_name> <dest_folder_name> <branch_name>
+RUN /home/ubuntu/git_cmd.sh nfv-ifa-libs /home/ubuntu/nfv-ifa-libs master
+RUN /home/ubuntu/git_cmd.sh slicer-identity-mgmt /home/ubuntu/identity-management master
 RUN echo prueb
-RUN /home/ubuntu/git_cmd.sh slicer-catalogue /home/ubuntu/blueprint-catalogue
-RUN /home/ubuntu/git_cmd.sh nfv-sol-libs /home/ubuntu/nfv-sol-libs
+RUN /home/ubuntu/git_cmd.sh slicer-catalogue /home/ubuntu/blueprint-catalogue 5growth-devel
+RUN /home/ubuntu/git_cmd.sh nfv-sol-libs /home/ubuntu/nfv-sol-libs master
 
 RUN /home/ubuntu/git_cmd_5gr.sh 5gr-vs /home/ubuntu/slicer
-RUN /home/ubuntu/git_cmd.sh 5g-catalogue /home/ubuntu/5g-catalogue
-RUN /home/ubuntu/git_cmd.sh config-manager-client /home/ubuntu/config-manager-client
+RUN /home/ubuntu/git_cmd.sh 5g-catalogue /home/ubuntu/5g-catalogue master
+RUN /home/ubuntu/git_cmd.sh config-manager-client /home/ubuntu/config-manager-client master
 #COPY ./sebastian/sebastian_application.properties /home/ubuntu/slicer/sebastian_application.properties
 COPY ./environment/environments.ts /home/ubuntu/slicer/angular-slicer/slicer/src/app/environments/environments.ts
 
@@ -66,8 +67,6 @@ RUN cd /home/ubuntu/slicer/SEBASTIAN/NSFM_INTERFACES && mvn clean install -Dskip
 RUN cd /home/ubuntu/slicer/SEBASTIAN/RecordService && mvn clean install -DskipTests
 RUN cd /home/ubuntu/slicer/SEBASTIAN/ARBITRATOR_SERVICE && mvn clean install -DskipTests
 
-
-
 RUN cd /home/ubuntu/slicer/SEBASTIAN/VSFM_INTERFACES && mvn clean install -DskipTests
 
 RUN cd /home/ubuntu/slicer/NSMF_DRIVERS/5growthSonata && mvn clean install
@@ -75,5 +74,6 @@ RUN cd /home/ubuntu/slicer/SEBASTIAN/NSFM_SERVICE && mvn clean install -DskipTes
 RUN cd /home/ubuntu/slicer/SEBASTIAN/VSFM_SERVICE && mvn clean install -DskipTests
 RUN cd /home/ubuntu/slicer/SEBASTIAN/SEBASTIAN_CORE && mvn clean install -DskipTests
 
+RUN mkdir -p /tmp/vnfd /tmp/nsd /tmp/aimlp
 RUN rm -rf /var/log/sebastian && mkdir /var/log/sebastian
 RUN chown -R ubuntu /var/log/sebastian/

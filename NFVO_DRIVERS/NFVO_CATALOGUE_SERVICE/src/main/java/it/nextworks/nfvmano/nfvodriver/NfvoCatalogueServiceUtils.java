@@ -17,6 +17,9 @@ package it.nextworks.nfvmano.nfvodriver;
 
 
 
+import it.nextworks.nfvmano.nfvodriver.file.DummyFileNfvoCatalogueDriver;
+import it.nextworks.nfvmano.nfvodriver.file.NsdFileRegistryService;
+import it.nextworks.nfvmano.nfvodriver.file.VnfdFileRegistryService;
 import it.nextworks.nfvmano.nfvodriver.logging.NfvoCatalogueLoggingDriver;
 import it.nextworks.nfvmano.nfvodriver.sm.SMCatalogueDriver;
 
@@ -33,7 +36,7 @@ import javax.annotation.PostConstruct;
 @Component
 public class NfvoCatalogueServiceUtils {
 
-    private static final Logger log = LoggerFactory.getLogger(NfvoCatalogueService.class);
+    private static final Logger log = LoggerFactory.getLogger(NfvoCatalogueServiceUtils.class);
 
     @Value("${nfvo.catalogue.type}")
     private String nfvoCatalogueType;
@@ -57,8 +60,18 @@ public class NfvoCatalogueServiceUtils {
     @Value("${sebastian.localTmpDir:/tmp}")
     private String tmpDir;
 
+    @Value("${nfvo.catalogue.nsdStorage.enabled:false}")
+    private boolean nsdFileStorageEnabled;
+
+
     @Autowired
     NfvoCatalogueService nfvoCatalogueService;
+
+    @Autowired
+    NsdFileRegistryService nsdFileRegistryService;
+
+    @Autowired
+    VnfdFileRegistryService vnfdFileRegistryService;
 
     @PostConstruct
     public void initNfvoCatalogueDriver() {
@@ -78,6 +91,9 @@ public class NfvoCatalogueServiceUtils {
             log.debug("Configured for type:" + nfvoCatalogueType);
             nfvoCatalogueService.setNfvoCatalogueDriver(new DummyNfvoCatalogueDriver(nfvoCatalogueAddress, tmpDir));
 
+        } else if(nfvoCatalogueType.equals("DUMMY_FILE")){
+            log.debug("Configured for type:" + nfvoCatalogueType);
+            nfvoCatalogueService.setNfvoCatalogueDriver(new DummyFileNfvoCatalogueDriver(nsdFileRegistryService, vnfdFileRegistryService, tmpDir));
         } else {
             log.error("NFVO not configured!");
         }

@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.web.util.UriComponentsBuilder;
+
 public class ExternalArbitratorRestClient {
 
     private static final Logger log = LoggerFactory.getLogger(ExternalArbitratorRestClient.class);
@@ -106,8 +108,10 @@ public class ExternalArbitratorRestClient {
                     = new HttpEntity<>(body, headers);
 
             RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<String> response = restTemplate
-                    .postForEntity(url, requestEntity, String.class);
+            ResponseEntity<String> response = restTemplate.exchange(url+"/"+fileId,HttpMethod.PUT, requestEntity, String.class);
+            //ResponseEntity<String> response = restTemplate.exchange(builder.build().toString(),HttpMethod.PUT, requestEntity, String.class);
+            //ResponseEntity<String> response = restTemplate
+            //        .postForEntity(url, requestEntity, String.class);
 
             //return manageHTTPResponse(response, "Error while updating trained algorithm", "trained model updated correctly", HttpStatus.CREATED);
         }catch(RestClientException e){

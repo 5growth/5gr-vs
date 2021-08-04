@@ -59,9 +59,8 @@ public class ExternalArbitrator extends AbstractArbitrator {
                 arbitratorPolicyService.updateArbitratorPolicyInfoFile(arbitratorPolicyInfo.getArbitratorPolicyInfoId(), new File(filePath));
                 externalArbitratorRestClient.updateTrainedFile(new File(filePath).getName(), filePath);
             }
-            uRequests.add(new ArbitratorRequest(req.getRequestId(),req.getTenantId(),req.getVsd(), req.getInstantiationNsd(), arbitratorPolicyInfo.getTrainedModelFilePath() ));
-
-
+            else arbitratorPolicyService.updateArbitratorPolicyUsage(arbitratorPolicyInfo.getArbitratorPolicyInfoId());
+            uRequests.add(new ArbitratorRequest(req.getRequestId(),req.getTenantId(),req.getVsd(), req.getInstantiationNsd(), arbitratorPolicyService.getArbitratorPolicyInfoFile(arbitratorPolicyInfo.getArbitratorPolicyInfoId()) ));
         }
 
         //Key request id, value operation id

@@ -23,6 +23,7 @@ public enum NfvoLcmDriverType {
     SOL_5,
     DUMMY,
     LOGGING,
-    SM
+    SM,
+    AIML
 
 }
