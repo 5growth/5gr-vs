@@ -36,7 +36,7 @@ USER ubuntu
 RUN /home/ubuntu/git_cmd.sh nfv-ifa-libs /home/ubuntu/nfv-ifa-libs master
 RUN /home/ubuntu/git_cmd.sh slicer-identity-mgmt /home/ubuntu/identity-management master
 RUN echo prueb
-RUN /home/ubuntu/git_cmd.sh slicer-catalogue /home/ubuntu/blueprint-catalogue 5growth-devel
+RUN /home/ubuntu/git_cmd.sh slicer-catalogue /home/ubuntu/blueprint-catalogue 5growth-release
 RUN /home/ubuntu/git_cmd.sh nfv-sol-libs /home/ubuntu/nfv-sol-libs master
 
 RUN /home/ubuntu/git_cmd_5gr.sh 5gr-vs /home/ubuntu/slicer

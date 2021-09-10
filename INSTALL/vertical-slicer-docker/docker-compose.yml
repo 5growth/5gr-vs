@@ -24,6 +24,16 @@ services:
         - 5672:5672
         - 15672:15672
   
+  vnf-repo:
+    container_name: vnf-repo
+    hostname: vnf-repo
+    image: httpd:latest
+    ports:
+      - 8080:80
+    volumes:
+      # NOTE: Selecet a valid path on your file system
+      - /home/ubuntu/Desktop/repo:/usr/local/apache2/htdocs
+
   sebastian:
     container_name: sebastian
     build:
