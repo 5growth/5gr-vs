@@ -68,6 +68,7 @@ RUN cd /home/ubuntu/slicer/SEBASTIAN/VSFM_INTERFACES && mvn clean install -Dskip
 RUN cd /home/ubuntu/slicer/NSMF_DRIVERS/5growthSonata && mvn clean install
 RUN cd /home/ubuntu/slicer/SEBASTIAN/NSFM_SERVICE && mvn clean install -DskipTests
 RUN cd /home/ubuntu/slicer/SEBASTIAN/VSFM_SERVICE && mvn clean install -DskipTests
+RUN cd /home/ubuntu/slicer/SEBASTIAN/NFVO_CATALOGUE_REST && mvn clean install -DskipTests
 RUN cd /home/ubuntu/slicer/SEBASTIAN/SEBASTIAN_CORE && mvn clean install -DskipTests
 RUN mkdir -p /tmp/vnfd /tmp/nsd /tmp/aimlp
 USER root
