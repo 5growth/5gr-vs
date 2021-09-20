@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
+import java.util.HashMap;
 import it.nextworks.nfvmano.libs.ifa.common.enums.NsScaleType;
 import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.libs.ifa.osmanfvo.nslcm.interfaces.messages.*;
@@ -27,6 +27,10 @@ import it.nextworks.nfvmano.libs.ifa.templates.NST;
 import it.nextworks.nfvmano.catalogue.blueprint.BlueprintCatalogueUtilities;
 import it.nextworks.nfvmano.nfvodriver.NfvoCatalogueService;
 import it.nextworks.nfvmano.nfvodriver.NfvoLcmService;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.FailedOperationException;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.MalformattedElementException;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.MethodNotImplementedException;
+import it.nextworks.nfvmano.libs.ifa.common.exceptions.NotExistingEntityException;
 import it.nextworks.nfvmano.sebastian.nsmf.NsLcmService;
 import it.nextworks.nfvmano.sebastian.nsmf.NsmfUtils;
 import it.nextworks.nfvmano.sebastian.nsmf.engine.messages.InstantiateNsiRequestMessage;
@@ -35,6 +39,7 @@ import it.nextworks.nfvmano.sebastian.nsmf.engine.messages.NotifyNfvNsiStatusCha
 import it.nextworks.nfvmano.sebastian.nsmf.engine.messages.NsmfEngineMessage;
 import it.nextworks.nfvmano.sebastian.nsmf.engine.messages.NsmfEngineMessageType;
 import it.nextworks.nfvmano.sebastian.nsmf.engine.messages.TerminateNsiRequestMessage;
+import it.nextworks.nfvmano.sebastian.record.elements.NetworkSliceVnfPlacement;
 import it.nextworks.nfvmano.sebastian.nsmf.interfaces.NsmfLcmConsumerInterface;
 import it.nextworks.nfvmano.sebastian.nsmf.messages.*;
 import it.nextworks.nfvmano.sebastian.record.elements.NetworkSliceInstance;
@@ -90,7 +95,7 @@ public class NsLcmManager {
 	private NST networkSliceTemplate;
 	
 	private NsmfUtils nsmfUtils;
-	
+
 	public NsLcmManager(String networkSliceInstanceId,
 						String name,
 						String description,
@@ -100,8 +105,11 @@ public class NsLcmManager {
 						NsRecordService nsRecordService,
 						NsmfLcmConsumerInterface notificationDispatcher,
 						NsLcmService nsLcmService,
-						NST networkSliceTemplate, 
-						NsmfUtils nsmfUtils) {
+						NST networkSliceTemplate,
+						NsmfUtils nsmfUtils,
+						NetworkSliceStatus networkSliceStatus,
+						String nfvNsiInstanceId
+	) {
 		this.networkSliceInstanceId = networkSliceInstanceId;
 		this.name = name;
 		this.description = description;
@@ -109,14 +117,14 @@ public class NsLcmManager {
 		this.nfvoCatalogueService = nfvoCatalogueService;
 		this.nfvoLcmService = nfvoLcmService;
 		this.nsRecordService = nsRecordService;
-		this.internalStatus = NetworkSliceStatus.NOT_INSTANTIATED;
+		this.internalStatus = networkSliceStatus;
 		this.notificationDispatcher = notificationDispatcher;
 		this.nsLcmService = nsLcmService;
 		this.networkSliceTemplate = networkSliceTemplate;
 		this.nsmfUtils = nsmfUtils;
+		this.nfvNsiInstanceId=nfvNsiInstanceId;
+
 	}
-	
-	
 	
 	public NetworkSliceStatus getInternalStatus() {
 		return internalStatus;
@@ -279,12 +287,12 @@ public class NsLcmManager {
 					null,					//startTime
 					ilId,					//nsInstantiationLevelId
 					null,
-					sliceType);
+					sliceType));
 
-			String operationId = nfvoLcmService.instantiateNs(newNsRequest);					//additionalAffinityOrAntiAffinityRule
+								//additionalAffinityOrAntiAffinityRule
 			
 			log.debug("Sent request to NFVO service for instantiating NFV NS " + nfvNsId + ": operation ID " + operationId);
-			log.debug(new ObjectMapper().writeValueAsString(newNsRequest));
+
 		} catch (Exception e) {
 			log.error("An exception has occurred!", e);
 			manageNsError(e.getMessage());

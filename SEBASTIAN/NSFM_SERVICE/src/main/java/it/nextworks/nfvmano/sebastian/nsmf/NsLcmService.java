@@ -280,7 +280,27 @@ public class NsLcmService implements NsmfLcmProviderInterface, NfvoLcmNotificati
     	this.nsLcmManagers.remove(nsiId);
         log.debug("NS LCM removed from engine.");
     }
-    
+
+    public void registerNsLcmManagerForInstantiatedSlice(String nsiId, String tenantId, String sliceName, String sliceDescription, NST networkSliceTemplate, String nfvNsInstanceId){
+        log.debug("received request to register a NS LCM for:"+nsiId+ " nstId:"+networkSliceTemplate.getNstId()+ " tenant:"+ tenantId);
+        if(!nsLcmManagers.containsKey(nsiId)){
+            NsLcmManager nsLcmManager = new NsLcmManager(nsiId, sliceName, sliceDescription, tenantId,
+                    nfvoCatalogueService,
+                    nfvoLcmService,
+                    nsRecordService,
+                    notificationDispatcher,
+                    this,
+                    networkSliceTemplate,
+                    nsmfUtils,
+                    NetworkSliceStatus.INSTANTIATED,
+                    nfvNsInstanceId);
+            createQueue(nsiId, nsLcmManager);
+            nsLcmManagers.put(nsiId, nsLcmManager);
+            log.debug("NS LCM manager for Network Slice Instance ID " + nsiId + " initialized and added to the engine.");
+        }else log.debug("Already registered, IGNORING");
+    }
+
+
     /**
      * This method initializes a new NS LCM manager that will be in charge
      * of processing all the requests and events for that NSI.
@@ -289,7 +309,16 @@ public class NsLcmService implements NsmfLcmProviderInterface, NfvoLcmNotificati
      */
     private void initNewNsLcmManager(String nsiId, String tenantId, String sliceName, String sliceDescription, NST networkSliceTemplate) {
         log.debug("Initializing new NSMF for NSI ID " + nsiId);
-        NsLcmManager nsLcmManager = new NsLcmManager(nsiId, sliceName, sliceDescription, tenantId, nfvoCatalogueService, nfvoLcmService, nsRecordService, notificationDispatcher, this, networkSliceTemplate, nsmfUtils);
+        NsLcmManager nsLcmManager = new NsLcmManager(nsiId, sliceName, sliceDescription, tenantId,
+                nfvoCatalogueService,
+                nfvoLcmService,
+                nsRecordService,
+                notificationDispatcher,
+                this,
+                networkSliceTemplate,
+                nsmfUtils,
+                NetworkSliceStatus.NOT_INSTANTIATED,
+                null);
         createQueue(nsiId, nsLcmManager);
         nsLcmManagers.put(nsiId, nsLcmManager);
         log.debug("NS LCM manager for Network Slice Instance ID " + nsiId + " initialized and added to the engine.");
