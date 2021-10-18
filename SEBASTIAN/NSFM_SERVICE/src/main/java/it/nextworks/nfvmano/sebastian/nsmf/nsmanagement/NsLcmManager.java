@@ -235,7 +235,13 @@ public class NsLcmManager {
 			if (sliceParameters!=null && sliceParameters.containsKey("TYPE")){
 				sliceType=sliceParameters.get("TYPE").toString();
 				sliceParameters.remove("TYPE");
+			} else if(networkSliceTemplate.getNstServiceProfile()!=null){
+					log.debug("Retrieving SLICE_TYPE from NST service profile");
+					sliceType = networkSliceTemplate.getNstServiceProfile().getsST().toString();
+
+
 			}
+
 
 
 			for (Sapd sap : saps) {
