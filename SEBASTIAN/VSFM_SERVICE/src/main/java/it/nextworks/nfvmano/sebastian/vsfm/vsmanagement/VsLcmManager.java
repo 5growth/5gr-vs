@@ -125,6 +125,8 @@ public class VsLcmManager {
 
     ObjectMapper mapper = new ObjectMapper();
 
+    private boolean nssiUnderModification = false;
+
     /**
      * Constructor
      *
@@ -262,6 +264,7 @@ public class VsLcmManager {
             log.debug("updating network slice subnet instance status");
             try {
                 vsRecordService.updateNssiStatusInVsi(this.vsiId, notifyVsiNssiCoordinationStart.getNetworkSliceInstanceId(), NetworkSliceStatus.UNDER_MODIFICATION);
+                this.nssiUnderModification = true;
             } catch (NotExistingEntityException e) {
                 log.error("Error updating network slice subnet status:", e);
             }
@@ -288,7 +291,7 @@ public class VsLcmManager {
                 } else {
                     vsRecordService.updateNssiStatusInVsi(this.vsiId, notifyVsiNssiCoordinationEnd.getNetworkSliceInstanceId(), NetworkSliceStatus.FAILED);
                 }
-
+                this.nssiUnderModification=false;
             } catch (NotExistingEntityException e) {
                 log.error("Error updating network slice subnet status:", e);
             } catch (MethodNotImplementedException e) {
@@ -1056,7 +1059,8 @@ public class VsLcmManager {
                     log.error("Invalid VSi to NSI mapping. This should not happen");
                     manageVsError("Invalid VSi to NSI mapping. This should not happen");
                 }
-            } else if (status == NetworkSliceStatus.CONFIGURED && internalStatus == VerticalServiceStatus.INSTANTIATING) {
+            }
+            else if (status == NetworkSliceStatus.CONFIGURED && internalStatus == VerticalServiceStatus.INSTANTIATING) {
                 log.debug("Updating Vertical service instance internal network slice subnet");
                 //In the single domain case, a NetworkSliceSubnet was added to store the information about
                 //the VNF placement
@@ -1077,7 +1081,8 @@ public class VsLcmManager {
                         VerticalServiceStatusChange.VSI_CREATED, true), null);
                 log.debug("Updated resource usage for tenant " + tenantId + ". Instantiation procedure completed.");
 
-            } else if (status == NetworkSliceStatus.TERMINATED && internalStatus == VerticalServiceStatus.TERMINATING) {
+            }
+            else if (status == NetworkSliceStatus.TERMINATED && internalStatus == VerticalServiceStatus.TERMINATING) {
                 Map<String, NetworkSliceSubnetInstance> nsis = vsi.getNssis();
                 if (nsis != null && nsis.containsKey(nsiId) && nsis.size() == 1) {
                     vsRecordService.updateNssiStatusInVsi(vsiId, nsiId, NetworkSliceStatus.TERMINATED);
@@ -1095,7 +1100,8 @@ public class VsLcmManager {
                 //vsLocalEngine.notifyVsiTermination(vsiId);
                 vsLcmService.notifyVsiTermination(vsiId);
 
-            } else if (status == NetworkSliceStatus.MODIFIED && internalStatus == VerticalServiceStatus.UNDER_MODIFICATION) {
+            }
+            else if (status == NetworkSliceStatus.MODIFIED && internalStatus == VerticalServiceStatus.UNDER_MODIFICATION) {
                 VirtualResourceUsage oldResourceUsage = virtualResourceCalculatorService.computeVirtualResourceUsage(nsi, false);
                 adminService.removeUsedResourcesInTenant(tenantId, oldResourceUsage);
                 adminService.addUsedResourcesInTenant(tenantId, resourceUsage);
@@ -1117,7 +1123,8 @@ public class VsLcmManager {
     }
 
     void processNsiStatusChangeNotification(NotifyNsiStatusChange msg) {
-        if (!((internalStatus == VerticalServiceStatus.INSTANTIATING) || (internalStatus == VerticalServiceStatus.TERMINATING) || (internalStatus == VerticalServiceStatus.UNDER_MODIFICATION))) {
+        if (!((internalStatus == VerticalServiceStatus.INSTANTIATING) || (internalStatus == VerticalServiceStatus.TERMINATING)
+                || (internalStatus == VerticalServiceStatus.UNDER_MODIFICATION)|| nssiUnderModification)) {
             manageVsError("Received NSI status change notification in wrong status. Skipping message.");
             return;
         }
