@@ -58,7 +58,7 @@ public class EveTranslator {
         expDescriptorReq.setExperimentBlueprintId(blueprintId);
         io.swagger.eveportal.client.model.VsDescriptor vsDescriptor = new io.swagger.eveportal.client.model.VsDescriptor();
         vsDescriptor.setName(originalDescriptor.getName());
-        vsDescriptor.setVersion(originalDescriptor.getVersion());
+        vsDescriptor.setVersion(version);
         vsDescriptor.setVsBlueprintId(vsBlueprintId);
 
         //vsDescriptor.setSst(io.swagger.eveportal.client.model.VsDescriptor.SstEnum.fromValue(originalDescriptor.get.toString()));
